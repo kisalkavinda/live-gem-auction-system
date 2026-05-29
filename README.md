@@ -93,7 +93,7 @@ git push origin feature/your-feature-name
 | Member | Role |
 |--------|------|
 | Kisal Kavinda | Project Lead / Full Stack |
-| Avishka Hashara | Backend Developer |
+| Avishka Hashara | Full Stack Developer |
 | Wandana Gunasekara | Backend Developer |
 | Chamindu Shenal | Frontend Developer |
 | Isuri Pathirana | Frontend Developer |
