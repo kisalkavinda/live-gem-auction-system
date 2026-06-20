@@ -27,14 +27,27 @@ export default function TunnelScrollHero() {
     window.matchMedia('(prefers-reduced-motion: reduce)').matches
   ).current
 
-  // Draw frame onto canvas — object-fit: cover scaling
+  // Draw frame onto canvas — object-fit: cover scaling.
+  // Falls back to nearest ready frame so fast scroll never shows blank/stale.
   const drawFrame = useCallback((index) => {
     const canvas = canvasRef.current
-    const safeIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, index))
-    const img = imagesRef.current[safeIdx]
-    if (!canvas || !img || !img.complete || !img.naturalWidth) return
+    if (!canvas) return
     const ctx = canvas.getContext('2d')
     const { width: cw, height: ch } = canvas
+
+    const isReady = (img) => img && img.complete && img.naturalWidth
+
+    let safeIdx = Math.max(0, Math.min(TOTAL_FRAMES - 1, index))
+    let img = imagesRef.current[safeIdx]
+
+    if (!isReady(img)) {
+      // walk backward to nearest loaded frame
+      for (let i = safeIdx - 1; i >= 0; i--) {
+        if (isReady(imagesRef.current[i])) { img = imagesRef.current[i]; break }
+      }
+      if (!isReady(img)) return
+    }
+
     const { naturalWidth: iw, naturalHeight: ih } = img
     const scale = Math.max(cw / iw, ch / ih)
     const dx = (cw - iw * scale) / 2
@@ -43,12 +56,15 @@ export default function TunnelScrollHero() {
     ctx.drawImage(img, dx, dy, iw * scale, ih * scale)
   }, [])
 
-  // Resize canvas intrinsic size to match viewport
+  // Resize canvas intrinsic size to match viewport (DPR-corrected for sharp output on HiDPI)
   const resizeCanvas = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    canvas.width = window.innerWidth
-    canvas.height = window.innerHeight
+    const dpr = Math.min(window.devicePixelRatio || 1, 2)
+    canvas.width = window.innerWidth * dpr
+    canvas.height = window.innerHeight * dpr
+    canvas.style.width = window.innerWidth + 'px'
+    canvas.style.height = window.innerHeight + 'px'
     if (currentFrameRef.current >= 0) drawFrame(currentFrameRef.current)
   }, [drawFrame])
 
@@ -61,12 +77,17 @@ export default function TunnelScrollHero() {
       const img = new Image()
       img.src = `/tunnel-frames/frame_${String(i + 1).padStart(4, '0')}.jpg`
       return new Promise((resolve) => {
-        img.onload = img.onerror = () => {
+        const finish = () => {
           images[i] = img
           count++
           setLoadedCount(count)
           if (count === INITIAL_BATCH) setLoadedInitial(true)
           resolve()
+        }
+        img.onerror = finish
+        img.onload = () => {
+          // decode() forces GPU-ready decode off the scroll path — eliminates hitch on first drawImage
+          img.decode?.().catch(() => {}).finally(finish) ?? finish()
         }
       })
     }
