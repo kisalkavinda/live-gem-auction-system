@@ -18,6 +18,7 @@ export default function TunnelScrollHero() {
   const ctaRef = useRef(null)
   const overlayRef = useRef(null)
   const scrollHintRef = useRef(null)
+  const bridgeTextRef = useRef(null)
 
   const [loadedCount, setLoadedCount] = useState(0)
   const [loadedInitial, setLoadedInitial] = useState(false)
@@ -190,6 +191,9 @@ export default function TunnelScrollHero() {
       )
       tl.to(overlayRef.current, { opacity: 0.9, duration: 0.15 }, 0.85)
 
+      tl.fromTo(bridgeTextRef.current, { opacity: 0 }, { opacity: 1, duration: 0.08 }, 0.30)
+      tl.to(bridgeTextRef.current, { opacity: 0, duration: 0.08 }, 0.64)
+
       ScrollTrigger.create({
         trigger: pin,
         start: 'top+=5% top',
@@ -237,6 +241,37 @@ export default function TunnelScrollHero() {
           ref={overlayRef}
           style={{ position: 'absolute', inset: 0, background: '#050508', opacity: 0, pointerEvents: 'none' }}
         />
+
+        {/* Mid-tunnel narrative bridge — fades in at ~30% scroll, out at ~64% */}
+        <div
+          ref={bridgeTextRef}
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: 0,
+            pointerEvents: 'none',
+          }}
+        >
+          <p style={{
+            fontFamily: "'Cormorant Garamond', serif",
+            fontSize: 'clamp(1.6rem, 3.5vw, 2.8rem)',
+            fontWeight: 300,
+            color: 'rgba(255,255,255,0.82)',
+            letterSpacing: '0.04em',
+            textAlign: 'center',
+            textShadow: '0 2px 32px rgba(0,0,0,0.8)',
+            margin: 0,
+            maxWidth: '640px',
+            padding: '0 2rem',
+            lineHeight: 1.4,
+          }}>
+            Every gem begins in darkness.
+          </p>
+        </div>
 
         {/* Loading indicator — shown until first batch of frames is ready */}
         {!loadedInitial && (
