@@ -192,6 +192,10 @@ export default function GemHero() {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
+      /* navbar is 18px top + ~52px height = 70px; add clearance */
+      paddingTop: '80px',
+      paddingBottom: '72px',
+      boxSizing: 'border-box',
     }}>
       <canvas ref={particleRef} aria-hidden="true" style={{
         position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none',
@@ -199,81 +203,89 @@ export default function GemHero() {
 
       <div aria-hidden="true" style={{
         position: 'absolute',
-        top: '50%', left: '50%',
-        transform: 'translate(-50%, -58%)',
-        width: 720, height: 720,
+        top: '45%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: 640, height: 640,
         background: 'radial-gradient(circle, rgba(201,168,76,0.1) 0%, rgba(201,168,76,0.03) 48%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
+      {/* All content in one centred column — sized to fit inside padded 100vh */}
       <div style={{
         position: 'relative', zIndex: 2,
         display: 'flex', flexDirection: 'column', alignItems: 'center',
-        textAlign: 'center', padding: '0 2rem', maxWidth: 880, width: '100%',
+        textAlign: 'center', padding: '0 2rem', maxWidth: 820, width: '100%',
+        gap: '1.1rem',
       }}>
-        <div ref={eyebrowRef} style={{ opacity: 0, marginBottom: '1.75rem' }}>
+        {/* Eyebrow */}
+        <div ref={eyebrowRef} style={{ opacity: 0 }}>
           <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '0.75rem',
-            fontSize: '0.62rem', letterSpacing: '0.32em', textTransform: 'uppercase', color: '#C9A84C',
+            display: 'inline-flex', alignItems: 'center', gap: '0.65rem',
+            fontSize: '0.6rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#C9A84C',
           }}>
-            <span style={{ width: 22, height: 1, background: '#C9A84C', display: 'inline-block' }} />
+            <span style={{ width: 20, height: 1, background: '#C9A84C', display: 'inline-block' }} />
             Live Gem Auctions
-            <span style={{ width: 22, height: 1, background: '#C9A84C', display: 'inline-block' }} />
+            <span style={{ width: 20, height: 1, background: '#C9A84C', display: 'inline-block' }} />
           </span>
         </div>
 
-        <div ref={gemRef} style={{ opacity: 0, marginBottom: '2rem' }}>
-          <GemShape size={240} />
+        {/* Gem */}
+        <div ref={gemRef} style={{ opacity: 0 }}>
+          <GemShape size={178} />
         </div>
 
-        <div ref={titleRef} style={{ marginBottom: '1.2rem', perspective: '600px' }}>
+        {/* Title */}
+        <div ref={titleRef} style={{ perspective: '600px', lineHeight: 1 }}>
           {['Where Rare Gems', 'Find Their Value'].map((line, i) => (
             <div key={i} className="gh-word" style={{
               display: 'block', opacity: 0,
               fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(2.4rem, 6vw, 5rem)',
-              fontWeight: 300, lineHeight: 1.08,
+              fontSize: 'clamp(2rem, 5.2vw, 4.2rem)',
+              fontWeight: 300, lineHeight: 1.1,
               color: i === 0 ? '#fff' : '#C9A84C',
               letterSpacing: '-0.02em',
             }}>{line}</div>
           ))}
         </div>
 
+        {/* Subtitle */}
         <p ref={subtitleRef} style={{
-          opacity: 0,
-          fontSize: 'clamp(0.82rem, 1.3vw, 0.97rem)',
-          color: 'rgba(255,255,255,0.44)',
-          maxWidth: 420, lineHeight: 1.75, fontWeight: 300, margin: '0 0 2.25rem',
+          opacity: 0, margin: 0,
+          fontSize: 'clamp(0.78rem, 1.2vw, 0.92rem)',
+          color: 'rgba(255,255,255,0.42)',
+          maxWidth: 400, lineHeight: 1.72, fontWeight: 300,
         }}>
           Real-time auctions on conflict-free certified stones.
           Full geological data. No reserve surprises.
         </p>
 
+        {/* Stats */}
         <div ref={statsRef} style={{
-          display: 'flex', gap: '2.5rem', marginBottom: '2.25rem', flexWrap: 'wrap', justifyContent: 'center',
+          display: 'flex', gap: '2rem', flexWrap: 'wrap', justifyContent: 'center',
         }}>
           {STATS.map(({ num, label }) => (
             <div key={label} className="gh-stat" style={{ opacity: 0 }}>
               <div style={{
-                fontSize: 'clamp(1.1rem, 1.8vw, 1.45rem)',
+                fontSize: 'clamp(1rem, 1.6vw, 1.3rem)',
                 fontFamily: "'Cormorant Garamond', serif",
                 color: '#fff', fontWeight: 600, letterSpacing: '-0.01em',
               }}>{num}</div>
               <div style={{
-                fontSize: '0.58rem', letterSpacing: '0.15em', textTransform: 'uppercase',
-                color: 'rgba(255,255,255,0.3)', marginTop: '0.2rem',
+                fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase',
+                color: 'rgba(255,255,255,0.28)', marginTop: '0.15rem',
               }}>{label}</div>
             </div>
           ))}
         </div>
 
-        <div ref={ctaRef} style={{ opacity: 0, display: 'flex', gap: '0.875rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+        {/* CTAs */}
+        <div ref={ctaRef} style={{ opacity: 0, display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             style={{
-              padding: '0.875rem 2.25rem',
+              padding: '0.75rem 2rem',
               background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
               color: '#0A0A0D', border: 'none', borderRadius: '2px',
-              fontSize: '0.68rem', letterSpacing: '0.16em', textTransform: 'uppercase',
+              fontSize: '0.65rem', letterSpacing: '0.16em', textTransform: 'uppercase',
               fontWeight: 700, cursor: 'pointer', transition: 'opacity 0.25s, transform 0.25s',
             }}
             onMouseEnter={e => { e.currentTarget.style.opacity = '0.84'; e.currentTarget.style.transform = 'translateY(-2px)' }}
@@ -283,32 +295,33 @@ export default function GemHero() {
           </button>
           <button
             style={{
-              padding: '0.875rem 1.875rem',
-              background: 'transparent', color: 'rgba(255,255,255,0.58)',
+              padding: '0.75rem 1.625rem',
+              background: 'transparent', color: 'rgba(255,255,255,0.56)',
               border: '1px solid rgba(255,255,255,0.18)', borderRadius: '2px',
-              fontSize: '0.68rem', letterSpacing: '0.16em', textTransform: 'uppercase',
+              fontSize: '0.65rem', letterSpacing: '0.16em', textTransform: 'uppercase',
               cursor: 'pointer', transition: 'border-color 0.25s, color 0.25s',
             }}
             onMouseEnter={e => { e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#C9A84C' }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.color = 'rgba(255,255,255,0.58)' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)'; e.currentTarget.style.color = 'rgba(255,255,255,0.56)' }}
           >
             How It Works
           </button>
         </div>
       </div>
 
+      {/* Scroll cue — absolutely pinned to section bottom, never in content flow */}
       <div ref={scrollCueRef} aria-hidden="true" style={{
-        position: 'absolute', bottom: '2.25rem', left: '50%',
+        position: 'absolute', bottom: '1.75rem', left: '50%',
         transform: 'translateX(-50%)', opacity: 0,
-        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.4rem',
         pointerEvents: 'none',
       }}>
-        <span style={{ fontSize: '0.52rem', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.32)' }}>
+        <span style={{ fontSize: '0.48rem', letterSpacing: '0.28em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)' }}>
           Enter the mine
         </span>
         <div style={{
-          width: 1, height: 38,
-          background: 'linear-gradient(to bottom, rgba(201,168,76,0.55), transparent)',
+          width: 1, height: 34,
+          background: 'linear-gradient(to bottom, rgba(201,168,76,0.5), transparent)',
           animation: 'scrollPulse 1.6s ease-in-out infinite',
         }} />
       </div>
