@@ -255,9 +255,14 @@ export default function TunnelScrollHero() {
         duration: CURTAIN_END,
       }, CURTAIN_END * 0.08)
 
-      // TUNNEL: bridge text mid-journey
-      tl.fromTo(bridgeTextRef.current, { opacity: 0 }, { opacity: 1, duration: 0.08 }, 0.30)
-      tl.to(bridgeTextRef.current, { opacity: 0, duration: 0.08 }, 0.64)
+      // TUNNEL: welcome text rises from tunnel depths (parallax)
+      tl.fromTo(bridgeTextRef.current,
+        { opacity: 0, y: 130 },
+        { opacity: 1, y: 0, duration: 0.14, ease: 'power2.out' },
+        0.28)
+      tl.to(bridgeTextRef.current,
+        { opacity: 0, y: -50, duration: 0.10, ease: 'power2.in' },
+        0.62)
 
       // Exit fade to black
       tl.to(overlayRef.current, { opacity: 0.9, duration: 0.15 }, 0.85)
@@ -332,23 +337,52 @@ export default function TunnelScrollHero() {
           pointerEvents: 'none', zIndex: 8,
         }} />
 
-        {/* Bridge text */}
-        <div ref={bridgeTextRef} aria-hidden="true" style={{
+        {/* Bridge text — Welcome reveal */}
+        <div ref={bridgeTextRef} style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           opacity: 0, pointerEvents: 'none', zIndex: 7,
+          willChange: 'transform, opacity',
         }}>
-          <p style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(1.5rem, 3.5vw, 2.7rem)',
-            fontWeight: 300, lineHeight: 1.45,
-            color: 'rgba(255,255,255,0.80)',
-            letterSpacing: '0.05em', textAlign: 'center',
-            textShadow: '0 2px 32px rgba(0,0,0,0.85)',
-            margin: 0, maxWidth: '600px', padding: '0 2rem',
-          }}>
-            Every gem begins in darkness.
-          </p>
+          <div style={{ textAlign: 'center', padding: '0 2rem' }}>
+            {/* top ornament */}
+            <div style={{
+              width: 72, height: 1, margin: '0 auto 1.6rem',
+              background: 'linear-gradient(to right, transparent, #C9A84C 50%, transparent)',
+            }} />
+
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(0.75rem, 1.8vw, 1.1rem)',
+              fontWeight: 400,
+              color: 'rgba(255,255,255,0.60)',
+              letterSpacing: '0.42em',
+              textTransform: 'uppercase',
+              margin: '0 0 0.75rem',
+              textShadow: '0 1px 20px rgba(0,0,0,0.9)',
+            }}>
+              Welcome to
+            </p>
+
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(2.8rem, 7vw, 5.6rem)',
+              fontWeight: 300,
+              lineHeight: 1.0,
+              color: '#C9A84C',
+              letterSpacing: '0.06em',
+              margin: 0,
+              textShadow: '0 0 100px rgba(201,168,76,0.50), 0 0 40px rgba(201,168,76,0.25), 0 2px 40px rgba(0,0,0,0.95)',
+            }}>
+              Thennakoon Gems
+            </p>
+
+            {/* bottom ornament */}
+            <div style={{
+              width: 72, height: 1, margin: '1.6rem auto 0',
+              background: 'linear-gradient(to right, transparent, #C9A84C 50%, transparent)',
+            }} />
+          </div>
         </div>
 
         {/* ── HERO TEXT LAYER ── */}
