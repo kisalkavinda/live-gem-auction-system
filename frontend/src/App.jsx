@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react'
 import { useLenis } from './hooks/useLenis'
 import Preloader from './components/Preloader'
 import Navbar from './components/Navbar'
-import GemHero from './components/GemHero'
 import TunnelScrollHero from './components/TunnelScrollHero'
 import GemHistory from './components/GemHistory'
 import FeaturesSection from './components/FeaturesSection'
@@ -26,7 +25,6 @@ export default function App() {
 
       <div style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.5s' }}>
         <Navbar visible={ready} />
-        <GemHero />
         <TunnelScrollHero />
         <GemHistory />
         <FeaturesSection />
