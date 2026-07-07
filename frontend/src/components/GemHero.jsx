@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
 function octPointsArray(cx, cy, r) {
@@ -114,6 +115,7 @@ const STATS = [
 ]
 
 export default function GemHero() {
+  const navigate = useNavigate()
   const particleRef  = useRef(null)
   const eyebrowRef   = useRef(null)
   const gemRef       = useRef(null)
@@ -281,6 +283,7 @@ export default function GemHero() {
         {/* CTAs */}
         <div ref={ctaRef} style={{ opacity: 0, display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
+            onClick={() => navigate('/shop')}
             style={{
               padding: '0.75rem 2rem',
               background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',

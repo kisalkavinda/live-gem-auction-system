@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useLenis } from './hooks/useLenis'
 import Preloader from './components/Preloader'
 import Navbar from './components/Navbar'
@@ -9,10 +10,12 @@ import AuctionsSection from './components/AuctionsSection'
 import HowItWorks from './components/HowItWorks'
 import CTABand from './components/CTABand'
 import Footer from './components/Footer'
+import ShopPage from './pages/ShopPage'
+import GemDetailPage from './pages/GemDetailPage'
 
-export default function App() {
+// Landing page keeps its own Preloader + Lenis scroll setup
+function LandingPage() {
   const [ready, setReady] = useState(false)
-
   useLenis()
 
   const handlePreloaderDone = useCallback(() => {
@@ -21,8 +24,7 @@ export default function App() {
 
   return (
     <>
-      <Preloader onComplete={handlePreloaderDone} />
-
+      {!ready && <Preloader onComplete={handlePreloaderDone} />}
       <div style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.5s' }}>
         <Navbar visible={ready} />
         <TunnelScrollHero />
@@ -36,3 +38,16 @@ export default function App() {
     </>
   )
 }
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/shop" element={<ShopPage />} />
+        <Route path="/shop/:id" element={<GemDetailPage />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
