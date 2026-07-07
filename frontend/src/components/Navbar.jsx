@@ -1,8 +1,16 @@
 import { useEffect, useRef } from 'react'
+import { Link, useLocation } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
+
+const NAV_LINKS = [
+  { label: 'Shop', to: '/shop' },
+  { label: 'Auctions', to: '/#auctions' },
+  { label: 'How It Works', to: '/#how-it-works' },
+]
 
 export default function Navbar({ visible }) {
   const navRef = useRef(null)
+  const location = useLocation()
 
   useEffect(() => {
     if (!navRef.current) return
@@ -11,7 +19,7 @@ export default function Navbar({ visible }) {
       y: visible ? 0 : -24,
       duration: 0.7,
       ease: 'power3.out',
-      pointerEvents: visible ? 'all' : 'none',
+      pointerEvents: visible ? 'auto' : 'none',
     })
   }, [visible])
 
@@ -42,7 +50,7 @@ export default function Navbar({ visible }) {
         boxShadow: '0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+        <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, textDecoration: 'none' }}>
           <span style={{ fontSize: '1.1rem', color: '#C9A84C', lineHeight: 1 }}>◆</span>
           <span style={{
             fontFamily: "'Cormorant Garamond', serif",
@@ -51,29 +59,36 @@ export default function Navbar({ visible }) {
             color: '#fff',
             fontWeight: 300,
           }}>GEMHAVEN</span>
-        </div>
+        </Link>
 
         {/* Nav links */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          {['Auctions', 'How It Works', 'About'].map((label) => (
-            <a
-              key={label}
-              href={`#${label.toLowerCase().replace(/\s+/g, '-')}`}
-              style={{
-                color: 'rgba(255,255,255,0.65)',
-                textDecoration: 'none',
-                fontSize: '0.72rem',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                transition: 'color 0.25s',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={e => { e.target.style.color = '#C9A84C' }}
-              onMouseLeave={e => { e.target.style.color = 'rgba(255,255,255,0.65)' }}
-            >
-              {label}
-            </a>
-          ))}
+        <div style={{ display: 'flex', gap: '2rem' }}>
+          {[
+            { label: 'Auctions', path: '/#auctions' },
+            { label: 'Shop', path: '/shop' },
+            { label: 'Education', path: '/#education' },
+            { label: 'About', path: '/#about' }
+          ].map((item) => {
+            return (
+              <Link
+                key={item.label}
+                to={item.path}
+                style={{
+                  color: 'rgba(255,255,255,0.6)',
+                  textDecoration: 'none',
+                  fontWeight: 500,
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.05em',
+                  textTransform: 'uppercase',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+                onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              >
+                {item.label}
+              </Link>
+            )
+          })}
         </div>
 
         {/* Actions */}

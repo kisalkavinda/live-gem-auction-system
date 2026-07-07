@@ -7,6 +7,7 @@ import com.gemhaven.repository.AuctionRepository;
 import com.gemhaven.repository.BidRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import org.springframework.lang.NonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,7 +27,7 @@ public class BiddingService {
      * @Transactional ensures that bid placement and auction price updates happen as a single atomic unit.
      */
     @Transactional
-    public Bid placeNewBid(User user, Long auctionId, BigDecimal bidAmount) {
+    public Bid placeNewBid(User user, @NonNull Long auctionId, BigDecimal bidAmount) {
         Auction auction = auctionRepository.findById(auctionId)
             .orElseThrow(() -> new IllegalArgumentException("Auction not found"));
 

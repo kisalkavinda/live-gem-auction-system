@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
 const gems = [
@@ -54,6 +55,7 @@ const gems = [
 
 function GemCard({ gem, index }) {
   const cardRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const card = cardRef.current
@@ -259,7 +261,12 @@ function GemCard({ gem, index }) {
           <div style={{ height: '2.5rem' }} />
         )}
 
-        <button style={{
+        <button 
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate('/shop');
+        }}
+        style={{
           width: '100%',
           padding: '0.7rem',
           background: isLive ? `linear-gradient(135deg, ${gem.color}CC, ${gem.color}88)` : 'rgba(255,255,255,0.05)',
@@ -285,6 +292,7 @@ function GemCard({ gem, index }) {
 
 export default function AuctionsSection() {
   const headingRef = useRef(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
     gsap.fromTo(
@@ -333,7 +341,9 @@ export default function AuctionsSection() {
               letterSpacing: '-0.02em',
             }}>Featured Auctions</h2>
           </div>
-          <button style={{
+          <button
+          onClick={() => navigate('/shop')}
+          style={{
             padding: '0.6rem 1.5rem',
             background: 'transparent',
             border: '1px solid rgba(201,168,76,0.3)',

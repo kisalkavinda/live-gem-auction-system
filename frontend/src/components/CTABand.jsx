@@ -1,7 +1,9 @@
 import { useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
 export default function CTABand() {
+  const navigate = useNavigate()
   const sectionRef = useRef(null)
   const btnRef = useRef(null)
   const titleRef = useRef(null)
@@ -123,6 +125,7 @@ export default function CTABand() {
         >
           <button
             ref={magnetRef}
+            onClick={() => navigate('/shop')}
             style={{
               padding: '1.1rem 3.5rem',
               background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',

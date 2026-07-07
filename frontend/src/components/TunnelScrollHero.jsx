@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { gsap, ScrollTrigger } from '../utils/gsap'
 
 const TOTAL_FRAMES = 120
@@ -13,6 +14,7 @@ const STATS = [
 ]
 
 export default function TunnelScrollHero() {
+  const navigate = useNavigate()
   const containerRef  = useRef(null)
   const canvasRef     = useRef(null)
   const particleRef   = useRef(null)
@@ -539,6 +541,7 @@ export default function TunnelScrollHero() {
             alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center',
           }}>
             <button
+              onClick={() => navigate('/shop')}
               style={{
                 padding: '0.82rem 2.2rem',
                 background: 'linear-gradient(135deg, #C9A84C 0%, #E8D5A3 100%)',
