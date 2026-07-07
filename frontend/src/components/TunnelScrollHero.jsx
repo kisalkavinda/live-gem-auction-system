@@ -255,9 +255,16 @@ export default function TunnelScrollHero() {
         duration: CURTAIN_END,
       }, CURTAIN_END * 0.08)
 
-      // TUNNEL: bridge text mid-journey
-      tl.fromTo(bridgeTextRef.current, { opacity: 0 }, { opacity: 1, duration: 0.08 }, 0.30)
-      tl.to(bridgeTextRef.current, { opacity: 0, duration: 0.08 }, 0.64)
+      // TUNNEL: welcome text — emerges from tunnel depth (z-approach, no y shift)
+      gsap.set(bridgeTextRef.current, { transformOrigin: '50% 50%' })
+      tl.fromTo(bridgeTextRef.current,
+        { opacity: 0, scale: 0.06, filter: 'blur(12px)' },
+        { opacity: 1, scale: 1,    filter: 'blur(0px)',  duration: 0.22, ease: 'power2.out' },
+        0.24)
+      // exit: user walks past — text blooms huge and fades (passed through it)
+      tl.to(bridgeTextRef.current,
+        { opacity: 0, scale: 2.4, filter: 'blur(10px)', duration: 0.14, ease: 'power2.in' },
+        0.58)
 
       // Exit fade to black
       tl.to(overlayRef.current, { opacity: 0.9, duration: 0.15 }, 0.85)
@@ -332,23 +339,100 @@ export default function TunnelScrollHero() {
           pointerEvents: 'none', zIndex: 8,
         }} />
 
-        {/* Bridge text */}
-        <div ref={bridgeTextRef} aria-hidden="true" style={{
+        {/* Bridge text — Welcome reveal */}
+        <div ref={bridgeTextRef} style={{
           position: 'absolute', inset: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           opacity: 0, pointerEvents: 'none', zIndex: 7,
+          willChange: 'transform, opacity, filter',
         }}>
-          <p style={{
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(1.5rem, 3.5vw, 2.7rem)',
-            fontWeight: 300, lineHeight: 1.45,
-            color: 'rgba(255,255,255,0.80)',
-            letterSpacing: '0.05em', textAlign: 'center',
-            textShadow: '0 2px 32px rgba(0,0,0,0.85)',
-            margin: 0, maxWidth: '600px', padding: '0 2rem',
-          }}>
-            Every gem begins in darkness.
-          </p>
+          {/* dark radial vignette backdrop */}
+          <div style={{
+            position: 'absolute',
+            width: '90vw', maxWidth: 900,
+            height: '60vh',
+            background: 'radial-gradient(ellipse 80% 90% at 50% 50%, rgba(2,0,8,0.82) 20%, transparent 100%)',
+            pointerEvents: 'none',
+          }} />
+
+          <div style={{ textAlign: 'center', padding: '0 2rem', position: 'relative' }}>
+            {/* top ornament with diamond */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '1rem', marginBottom: '2rem',
+            }}>
+              <div style={{
+                flex: 1, maxWidth: 140, height: 1,
+                background: 'linear-gradient(to right, transparent, #E8C97A)',
+              }} />
+              <div style={{
+                width: 7, height: 7,
+                background: '#E8C97A',
+                transform: 'rotate(45deg)',
+                boxShadow: '0 0 12px rgba(232,201,122,0.9)',
+              }} />
+              <div style={{
+                flex: 1, maxWidth: 140, height: 1,
+                background: 'linear-gradient(to left, transparent, #E8C97A)',
+              }} />
+            </div>
+
+            {/* "WELCOME TO" */}
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(0.9rem, 2.2vw, 1.4rem)',
+              fontWeight: 600,
+              color: '#FFFFFF',
+              letterSpacing: '0.55em',
+              textTransform: 'uppercase',
+              margin: '0 0 1.2rem',
+              textShadow: '0 0 40px rgba(0,0,0,1), 0 2px 12px rgba(0,0,0,1), 0 0 80px rgba(0,0,0,0.9)',
+            }}>
+              Welcome to
+            </p>
+
+            {/* "THENNAKOON GEMS" */}
+            <p style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: 'clamp(3.8rem, 9.5vw, 8rem)',
+              fontWeight: 500,
+              lineHeight: 0.92,
+              color: '#F2D87A',
+              letterSpacing: '0.03em',
+              margin: 0,
+              textShadow: [
+                '0 0 0 rgba(0,0,0,1)',
+                '2px 2px 0 rgba(0,0,0,0.95)',
+                '4px 4px 0 rgba(0,0,0,0.6)',
+                '0 8px 30px rgba(0,0,0,1)',
+                '0 0 60px rgba(232,201,122,0.7)',
+                '0 0 120px rgba(232,201,122,0.35)',
+              ].join(', '),
+            }}>
+              Thennakoon<br />Gems
+            </p>
+
+            {/* bottom ornament */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              gap: '1rem', marginTop: '2rem',
+            }}>
+              <div style={{
+                flex: 1, maxWidth: 140, height: 1,
+                background: 'linear-gradient(to right, transparent, #E8C97A)',
+              }} />
+              <div style={{
+                width: 7, height: 7,
+                background: '#E8C97A',
+                transform: 'rotate(45deg)',
+                boxShadow: '0 0 12px rgba(232,201,122,0.9)',
+              }} />
+              <div style={{
+                flex: 1, maxWidth: 140, height: 1,
+                background: 'linear-gradient(to left, transparent, #E8C97A)',
+              }} />
+            </div>
+          </div>
         </div>
 
         {/* ── HERO TEXT LAYER ── */}
