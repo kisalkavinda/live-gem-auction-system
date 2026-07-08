@@ -12,6 +12,12 @@ import CTABand from './components/CTABand'
 import Footer from './components/Footer'
 import ShopPage from './pages/ShopPage'
 import GemDetailPage from './pages/GemDetailPage'
+import AuctionListPage from './pages/AuctionListPage'
+import AuctionRoomPage from './pages/AuctionRoomPage'
+import LandListingPage from './pages/LandListingPage'
+import LandDetailPage from './pages/LandDetailPage'
+import KnowledgeHubPage from './pages/KnowledgeHubPage'
+import ArticleDetailPage from './pages/ArticleDetailPage'
 
 // Landing page keeps its own Preloader + Lenis scroll setup
 function LandingPage() {
@@ -46,6 +52,12 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/shop" element={<ShopPage />} />
         <Route path="/shop/:id" element={<GemDetailPage />} />
+        <Route path="/auctions" element={<AuctionListPage />} />
+        <Route path="/auctions/:id" element={<AuctionRoomPage />} />
+        <Route path="/land" element={<LandListingPage />} />
+        <Route path="/land/:id" element={<LandDetailPage />} />
+        <Route path="/knowledge-hub" element={<KnowledgeHubPage />} />
+        <Route path="/knowledge-hub/:slug" element={<ArticleDetailPage />} />
       </Routes>
     </BrowserRouter>
   )

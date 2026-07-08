@@ -30,6 +30,15 @@ export default function TunnelScrollHero() {
   const ctaRef        = useRef(null)
   const scrollCueRef  = useRef(null)
 
+  // Wrappers for scroll animations to avoid conflicts with entrance animations
+  const eyebrowWrapRef   = useRef(null)
+  const line1WrapRef     = useRef(null)
+  const line2WrapRef     = useRef(null)
+  const subtitleWrapRef  = useRef(null)
+  const statsWrapRef     = useRef(null)
+  const ctaWrapRef       = useRef(null)
+  const scrollCueWrapRef = useRef(null)
+
   const tunnelWrapRef  = useRef(null)
   const overlayRef     = useRef(null)
   const bridgeTextRef  = useRef(null)
@@ -223,13 +232,13 @@ export default function TunnelScrollHero() {
       })
 
       // CURTAIN: title lines fly apart like stage curtains
-      tl.to(line1Ref.current, {
+      tl.to(line1WrapRef.current, {
         x: () => -window.innerWidth * 1.15,
         opacity: 0,
         ease: 'power2.inOut',
         duration: CURTAIN_END,
       }, 0)
-      tl.to(line2Ref.current, {
+      tl.to(line2WrapRef.current, {
         x: () => window.innerWidth * 1.15,
         opacity: 0,
         ease: 'power2.inOut',
@@ -237,15 +246,15 @@ export default function TunnelScrollHero() {
       }, 0)
 
       // Remaining hero content fades upward
-      tl.to(eyebrowRef.current,
+      tl.to(eyebrowWrapRef.current,
         { opacity: 0, y: -22, duration: CURTAIN_END * 0.65 }, 0)
-      tl.to(subtitleRef.current,
+      tl.to(subtitleWrapRef.current,
         { opacity: 0, y: -12, duration: CURTAIN_END * 0.60 }, 0.02)
-      tl.to(statsRef.current?.querySelectorAll('.stat-item') ?? [],
-        { opacity: 0, y: -10, stagger: 0.01, duration: CURTAIN_END * 0.55 }, 0.03)
-      tl.to(ctaRef.current,
+      tl.to(statsWrapRef.current,
+        { opacity: 0, y: -10, duration: CURTAIN_END * 0.55 }, 0.03)
+      tl.to(ctaWrapRef.current,
         { opacity: 0, y: -10, duration: CURTAIN_END * 0.50 }, 0.04)
-      tl.to(scrollCueRef.current,
+      tl.to(scrollCueWrapRef.current,
         { opacity: 0, duration: CURTAIN_END * 0.4 }, 0)
       tl.to(particleRef.current,
         { opacity: 0, duration: CURTAIN_END }, 0)
@@ -446,22 +455,24 @@ export default function TunnelScrollHero() {
         }}>
 
           {/* Eyebrow */}
-          <div ref={eyebrowRef} style={{ opacity: 0, marginBottom: '2.8rem' }}>
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.85rem',
-              fontSize: '0.58rem', letterSpacing: '0.36em',
-              textTransform: 'uppercase', color: '#C9A84C',
-            }}>
+          <div ref={eyebrowWrapRef} style={{ willChange: 'transform, opacity' }}>
+            <div ref={eyebrowRef} style={{ opacity: 0, marginBottom: '2.8rem' }}>
               <span style={{
-                width: 36, height: 1, display: 'inline-block',
-                background: 'linear-gradient(to right, transparent, #C9A84C)',
-              }} />
-              Live Gem Auctions
-              <span style={{
-                width: 36, height: 1, display: 'inline-block',
-                background: 'linear-gradient(to left, transparent, #C9A84C)',
-              }} />
-            </span>
+                display: 'inline-flex', alignItems: 'center', gap: '0.85rem',
+                fontSize: '0.58rem', letterSpacing: '0.36em',
+                textTransform: 'uppercase', color: '#C9A84C',
+              }}>
+                <span style={{
+                  width: 36, height: 1, display: 'inline-block',
+                  background: 'linear-gradient(to right, transparent, #C9A84C)',
+                }} />
+                Live Gem Auctions
+                <span style={{
+                  width: 36, height: 1, display: 'inline-block',
+                  background: 'linear-gradient(to left, transparent, #C9A84C)',
+                }} />
+              </span>
+            </div>
           </div>
 
           {/* Title — two lines that split like stage curtains on scroll */}
@@ -470,125 +481,139 @@ export default function TunnelScrollHero() {
             perspective: '900px',
             marginBottom: '2.4rem',
           }}>
-            <div ref={line1Ref} style={{
-              opacity: 0,
-              display: 'block',
-              willChange: 'transform, opacity',
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(3rem, 8.5vw, 7.2rem)',
-              fontWeight: 300,
-              lineHeight: 1.02,
-              color: '#FFFFFF',
-              letterSpacing: '-0.03em',
-              textShadow: '0 0 120px rgba(201,168,76,0.10)',
-            }}>Where Rare Gems</div>
+            <div ref={line1WrapRef} style={{ willChange: 'transform, opacity' }}>
+              <div ref={line1Ref} style={{
+                opacity: 0,
+                display: 'block',
+                willChange: 'transform, opacity',
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 'clamp(3rem, 8.5vw, 7.2rem)',
+                fontWeight: 300,
+                lineHeight: 1.02,
+                color: '#FFFFFF',
+                letterSpacing: '-0.03em',
+                textShadow: '0 0 120px rgba(201,168,76,0.10)',
+              }}>Where Rare Gems</div>
+            </div>
 
-            <div ref={line2Ref} style={{
-              opacity: 0,
-              display: 'block',
-              willChange: 'transform, opacity',
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: 'clamp(3rem, 8.5vw, 7.2rem)',
-              fontWeight: 300,
-              lineHeight: 1.02,
-              color: '#C9A84C',
-              letterSpacing: '-0.03em',
-              fontStyle: 'italic',
-            }}>Find Their Value</div>
+            <div ref={line2WrapRef} style={{ willChange: 'transform, opacity' }}>
+              <div ref={line2Ref} style={{
+                opacity: 0,
+                display: 'block',
+                willChange: 'transform, opacity',
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: 'clamp(3rem, 8.5vw, 7.2rem)',
+                fontWeight: 300,
+                lineHeight: 1.02,
+                color: '#C9A84C',
+                letterSpacing: '-0.03em',
+                fontStyle: 'italic',
+              }}>Find Their Value</div>
+            </div>
           </div>
 
           {/* Subtitle */}
-          <p ref={subtitleRef} style={{
-            opacity: 0,
-            margin: '0 0 2.8rem',
-            fontSize: 'clamp(0.8rem, 1.15vw, 0.93rem)',
-            color: 'rgba(255,255,255,0.35)',
-            maxWidth: 360,
-            lineHeight: 1.88,
-            fontWeight: 300,
-            textAlign: 'center',
-            letterSpacing: '0.01em',
-          }}>
-            Real-time auctions on conflict-free certified stones.
-            Full geological data. No reserve surprises.
-          </p>
+          <div ref={subtitleWrapRef} style={{ willChange: 'transform, opacity', marginBottom: '2.8rem' }}>
+            <p ref={subtitleRef} style={{
+              opacity: 0,
+              margin: '0',
+              fontSize: 'clamp(0.8rem, 1.15vw, 0.93rem)',
+              color: 'rgba(255,255,255,0.35)',
+              maxWidth: 360,
+              lineHeight: 1.88,
+              fontWeight: 300,
+              textAlign: 'center',
+              letterSpacing: '0.01em',
+            }}>
+              Real-time auctions on conflict-free certified stones.
+              Full geological data. No reserve surprises.
+            </p>
+          </div>
 
           {/* Stats */}
-          <div ref={statsRef} style={{
-            display: 'flex', gap: '2.8rem', flexWrap: 'wrap',
-            justifyContent: 'center', marginBottom: '2.8rem',
-          }}>
-            {STATS.map(({ num, label }) => (
-              <div key={label} className="stat-item" style={{ opacity: 0, textAlign: 'center' }}>
-                <div style={{
-                  fontSize: 'clamp(1rem, 1.8vw, 1.4rem)',
-                  fontFamily: "'Cormorant Garamond', serif",
-                  color: '#fff', fontWeight: 600, letterSpacing: '-0.01em',
-                }}>{num}</div>
-                <div style={{
-                  fontSize: '0.52rem', letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(255,255,255,0.26)', marginTop: '0.22rem',
-                }}>{label}</div>
-              </div>
-            ))}
+          <div ref={statsWrapRef} style={{ willChange: 'transform, opacity', marginBottom: '2.8rem' }}>
+            <div ref={statsRef} style={{
+              display: 'flex', gap: '2.8rem', flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}>
+              {STATS.map(({ num, label }) => (
+                <div key={label} className="stat-item" style={{ opacity: 0, textAlign: 'center' }}>
+                  <div style={{
+                    fontSize: 'clamp(1rem, 1.8vw, 1.4rem)',
+                    fontFamily: "'Cormorant Garamond', serif",
+                    color: '#fff', fontWeight: 600, letterSpacing: '-0.01em',
+                  }}>{num}</div>
+                  <div style={{
+                    fontSize: '0.52rem', letterSpacing: '0.18em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255,255,255,0.26)', marginTop: '0.22rem',
+                  }}>{label}</div>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* CTAs */}
-          <div ref={ctaRef} style={{
-            opacity: 0,
-            display: 'flex', gap: '0.8rem',
-            alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center',
-          }}>
-            <button
-              onClick={() => navigate('/shop')}
-              style={{
-                padding: '0.82rem 2.2rem',
-                background: 'linear-gradient(135deg, #C9A84C 0%, #E8D5A3 100%)',
-                color: '#0A080F', border: 'none', borderRadius: '2px',
-                fontSize: '0.63rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-                fontWeight: 700, cursor: 'pointer',
-                transition: 'opacity 0.25s, transform 0.25s',
-                boxShadow: '0 4px 28px rgba(201,168,76,0.22)',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '0.84'; e.currentTarget.style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.transform = 'translateY(0)' }}
-            >
-              Browse Live Auctions
-            </button>
-            <button
-              style={{
-                padding: '0.82rem 1.8rem',
-                background: 'transparent',
-                color: 'rgba(255,255,255,0.48)',
-                border: '1px solid rgba(255,255,255,0.14)', borderRadius: '2px',
-                fontSize: '0.63rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-                cursor: 'pointer', transition: 'border-color 0.25s, color 0.25s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.55)'; e.currentTarget.style.color = '#C9A84C' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'rgba(255,255,255,0.48)' }}
-            >
-              How It Works
-            </button>
+          <div ref={ctaWrapRef} style={{ willChange: 'transform, opacity' }}>
+            <div ref={ctaRef} style={{
+              opacity: 0,
+              display: 'flex', gap: '0.8rem',
+              alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center',
+            }}>
+              <button
+                onClick={() => navigate('/shop')}
+                style={{
+                  padding: '0.82rem 2.2rem',
+                  background: 'linear-gradient(135deg, #C9A84C 0%, #E8D5A3 100%)',
+                  color: '#0A080F', border: 'none', borderRadius: '2px',
+                  fontSize: '0.63rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+                  fontWeight: 700, cursor: 'pointer',
+                  transition: 'opacity 0.25s, transform 0.25s',
+                  boxShadow: '0 4px 28px rgba(201,168,76,0.22)',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.84'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1';    e.currentTarget.style.transform = 'translateY(0)' }}
+              >
+                Browse Live Auctions
+              </button>
+              <button
+                style={{
+                  padding: '0.82rem 1.8rem',
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.48)',
+                  border: '1px solid rgba(255,255,255,0.14)', borderRadius: '2px',
+                  fontSize: '0.63rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+                  cursor: 'pointer', transition: 'border-color 0.25s, color 0.25s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(201,168,76,0.55)'; e.currentTarget.style.color = '#C9A84C' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'; e.currentTarget.style.color = 'rgba(255,255,255,0.48)' }}
+              >
+                How It Works
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Scroll cue */}
-        <div ref={scrollCueRef} aria-hidden="true" style={{
+        <div ref={scrollCueWrapRef} style={{
           position: 'absolute', bottom: '1.75rem', left: '50%',
-          transform: 'translateX(-50%)', opacity: 0,
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
-          pointerEvents: 'none', zIndex: 5,
+          transform: 'translateX(-50%)', zIndex: 5, pointerEvents: 'none',
+          willChange: 'opacity'
         }}>
-          <span style={{
-            fontSize: '0.46rem', letterSpacing: '0.3em', textTransform: 'uppercase',
-            color: 'rgba(255,255,255,0.22)',
-          }}>Enter the mine</span>
-          <div style={{
-            width: 1, height: 36,
-            background: 'linear-gradient(to bottom, rgba(201,168,76,0.5), transparent)',
-            animation: 'scrollPulse 1.8s ease-in-out infinite',
-          }} />
+          <div ref={scrollCueRef} aria-hidden="true" style={{
+            opacity: 0,
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+          }}>
+            <span style={{
+              fontSize: '0.46rem', letterSpacing: '0.3em', textTransform: 'uppercase',
+              color: 'rgba(255,255,255,0.22)',
+            }}>Enter the mine</span>
+            <div style={{
+              width: 1, height: 36,
+              background: 'linear-gradient(to bottom, rgba(201,168,76,0.5), transparent)',
+              animation: 'scrollPulse 1.8s ease-in-out infinite',
+            }} />
+          </div>
         </div>
 
         {/* Scroll hint (tunnel phase) */}

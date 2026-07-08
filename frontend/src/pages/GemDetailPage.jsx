@@ -160,15 +160,28 @@ export default function GemDetailPage() {
                 pointerEvents: 'none',
               }} />
 
-              {/* Large faceted gem */}
-              <div style={{
-                position: 'relative', zIndex: 1,
-                width: 200, height: 200,
-                background: `linear-gradient(135deg, ${gem.color}DD, ${gem.color}55)`,
-                clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-                boxShadow: `0 0 80px ${gem.color}55, 0 0 160px ${gem.color}22, inset 0 0 40px rgba(255,255,255,0.12)`,
-                animation: 'gemFloat 4s ease-in-out infinite',
-              }} />
+              {/* Large faceted gem or Image */}
+              {gem.imageUrl ? (
+                <img
+                  src={gem.imageUrl}
+                  alt={gem.name}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    width: '100%', height: '100%',
+                    objectFit: 'cover',
+                    zIndex: 1,
+                  }}
+                />
+              ) : (
+                <div style={{
+                  position: 'relative', zIndex: 1,
+                  width: 200, height: 200,
+                  background: `linear-gradient(135deg, ${gem.color}DD, ${gem.color}55)`,
+                  clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
+                  boxShadow: `0 0 80px ${gem.color}55, 0 0 160px ${gem.color}22, inset 0 0 40px rgba(255,255,255,0.12)`,
+                  animation: 'gemFloat 4s ease-in-out infinite',
+                }} />
+              )}
 
               {/* Cert badge */}
               <div style={{

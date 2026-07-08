@@ -4,7 +4,7 @@ import { gsap } from '../utils/gsap'
 
 const gems = [
   {
-    id: 1,
+    id: 'a1',
     name: 'Burmese Ruby',
     carat: 3.2,
     cut: 'Oval',
@@ -16,7 +16,7 @@ const gems = [
     bids: 24,
   },
   {
-    id: 2,
+    id: 'a2',
     name: 'Ceylon Sapphire',
     carat: 5.1,
     cut: 'Cushion',
@@ -28,7 +28,7 @@ const gems = [
     bids: 41,
   },
   {
-    id: 3,
+    id: 'a3',
     name: 'Colombian Emerald',
     carat: 2.8,
     cut: 'Emerald',
@@ -40,7 +40,7 @@ const gems = [
     bids: 0,
   },
   {
-    id: 4,
+    id: 'a4',
     name: 'Padparadscha Sapphire',
     carat: 1.9,
     cut: 'Oval',
@@ -117,6 +117,7 @@ function GemCard({ gem, index }) {
   return (
     <div
       ref={cardRef}
+      onClick={() => navigate(`/auctions/${gem.id}`)}
       style={{
         opacity: 0,
         position: 'relative',
@@ -264,7 +265,7 @@ function GemCard({ gem, index }) {
         <button 
         onClick={(e) => {
           e.stopPropagation();
-          navigate('/shop');
+          navigate(`/auctions/${gem.id}`);
         }}
         style={{
           width: '100%',
@@ -342,7 +343,7 @@ export default function AuctionsSection() {
             }}>Featured Auctions</h2>
           </div>
           <button
-          onClick={() => navigate('/shop')}
+          onClick={() => navigate('/auctions')}
           style={{
             padding: '0.6rem 1.5rem',
             background: 'transparent',

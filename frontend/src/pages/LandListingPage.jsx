@@ -1,20 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchGems } from '../data/mockGems'
+import { fetchLandPlots } from '../data/mockLandPlots'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
-// ─── Gem type colour map ────────────────────────────────────────────────────
-const GEM_TYPES = ['All', 'Ruby', 'Sapphire', 'Emerald', 'Alexandrite', 'Tourmaline', 'Garnet', 'Spinel', 'Topaz']
-const CLARITY_GRADES = ['All', 'IF', 'VVS1', 'VVS2', 'VS1', 'VS2', 'SI1', 'SI2']
+// ─── Constants & Helpers ────────────────────────────────────────────────────
+const REGIONS = ['All', 'Ratnapura', 'Pelmadulla', 'Elahera', 'Opanayake', 'Nivithigala', 'Kuruwita']
+const STATUSES = ['All', 'Available', 'Reserved', 'Under Survey']
 const SORT_OPTIONS = [
   { value: 'default', label: 'Featured' },
-  { value: 'price-asc', label: 'Price: Low → High' },
-  { value: 'price-desc', label: 'Price: High → Low' },
+  { value: 'size-asc', label: 'Size: Smallest First' },
+  { value: 'size-desc', label: 'Size: Largest First' },
 ]
-
-const LKR = (n) => 'LKR ' + n.toLocaleString('en-LK')
 
 // ─── Skeleton card ───────────────────────────────────────────────────────────
 function SkeletonCard() {
@@ -46,8 +44,8 @@ function SkeletonCard() {
   )
 }
 
-// ─── Gem card ────────────────────────────────────────────────────────────────
-function GemCard({ gem, index }) {
+// ─── Land Plot card ────────────────────────────────────────────────────────────────
+function LandPlotCard({ plot, index }) {
   const cardRef = useRef(null)
   const navigate = useNavigate()
 
@@ -78,10 +76,20 @@ function GemCard({ gem, index }) {
     return () => { card.removeEventListener('mousemove', onMove); card.removeEventListener('mouseleave', onLeave) }
   }, [index])
 
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'Available': return '#10B981'; // green
+      case 'Reserved': return '#C9A84C'; // gold
+      case 'Under Survey': return '#3B82F6'; // blue
+      default: return '#fff';
+    }
+  }
+  const statusColor = getStatusColor(plot.status);
+
   return (
     <div
       ref={cardRef}
-      onClick={() => navigate(`/shop/${gem.id}`)}
+      onClick={() => navigate(`/land/${plot.id}`)}
       style={{
         opacity: 0,
         position: 'relative',
@@ -94,121 +102,113 @@ function GemCard({ gem, index }) {
         transformStyle: 'preserve-3d',
         transition: 'border-color 0.3s',
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = `${gem.color}60`}
+      onMouseEnter={e => e.currentTarget.style.borderColor = `rgba(201,168,76,0.6)`}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
     >
-      {/* Gem visual */}
+      {/* Land visual */}
       <div style={{
         height: 180,
-        background: `radial-gradient(ellipse at 38% 38%, ${gem.color}35, rgba(5,5,8,0.92))`,
+        background: `rgba(201,168,76,0.1)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderBottom: `1px solid ${gem.color}20`,
+        borderBottom: `1px solid rgba(201,168,76,0.2)`,
       }}>
-        {/* Faceted gem or Image */}
-        {gem.imageUrl ? (
+        {plot.images && plot.images.length > 0 ? (
           <img
-            src={gem.imageUrl}
-            alt={gem.name}
+            src={plot.images[0]}
+            alt={plot.locationName}
             style={{
               width: '100%', height: '100%',
               objectFit: 'cover',
               position: 'absolute',
               top: 0, left: 0,
+              filter: 'brightness(0.7) contrast(1.1)'
             }}
           />
         ) : (
           <div style={{
-            width: 76, height: 76,
-            background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}44)`,
-            clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-            boxShadow: `0 0 36px ${gem.color}55, inset 0 0 18px rgba(255,255,255,0.1)`,
-            animation: 'gemFloat 3s ease-in-out infinite',
-            animationDelay: `${index * 0.4}s`,
-          }} />
+             width: '100%', height: '100%',
+             background: 'linear-gradient(135deg, rgba(201,168,76,0.1) 0%, rgba(5,5,8,1) 100%)',
+             display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+             <span style={{color: 'rgba(255,255,255,0.2)', fontSize: '0.8rem'}}>No Image</span>
+          </div>
         )}
 
-        {/* Type badge */}
+        {/* Yield Potential badge */}
         <div style={{
           position: 'absolute', top: '0.75rem', left: '0.75rem',
           padding: '0.25rem 0.55rem',
-          background: `${gem.color}18`,
-          border: `1px solid ${gem.color}40`,
+          background: `rgba(0,0,0,0.6)`,
+          border: `1px solid rgba(201,168,76,0.4)`,
           borderRadius: '2px',
           backdropFilter: 'blur(8px)',
         }}>
-          <span style={{ fontSize: '0.58rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: gem.color }}>
-            {gem.type}
+          <span style={{ fontSize: '0.58rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: '#C9A84C' }}>
+            {plot.yieldPotential}
           </span>
         </div>
 
-        {/* Cert badge */}
+        {/* Status badge */}
         <div style={{
           position: 'absolute', top: '0.75rem', right: '0.75rem',
           padding: '0.25rem 0.45rem',
-          background: 'rgba(201,168,76,0.08)',
-          border: '1px solid rgba(201,168,76,0.2)',
+          background: 'rgba(0,0,0,0.6)',
+          border: `1px solid ${statusColor}40`,
           borderRadius: '2px',
           backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.3rem'
         }}>
-          <span style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: '#C9A84C' }}>
-            {gem.certAuthority}
+          <div style={{
+             width: '6px', height: '6px', borderRadius: '50%', background: statusColor,
+             boxShadow: `0 0 8px ${statusColor}`
+          }} />
+          <span style={{ fontSize: '0.55rem', letterSpacing: '0.1em', color: statusColor, textTransform: 'uppercase' }}>
+            {plot.status}
           </span>
         </div>
       </div>
 
       {/* Info */}
       <div style={{ padding: '1.25rem' }}>
-        <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: gem.color, marginBottom: '0.35rem' }}>
-          {gem.colorName}
+        <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.35rem' }}>
+          {plot.region}
         </div>
         <h3 style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: '1.15rem', fontWeight: 400, color: '#fff',
           marginBottom: '0.4rem', lineHeight: 1.25,
         }}>
-          {gem.name}
+          {plot.locationName}
         </h3>
+        
+        {/* Specs */}
         <div style={{
           display: 'flex', gap: '0.75rem',
           fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)',
           marginBottom: '0.85rem', letterSpacing: '0.05em',
         }}>
-          <span>{gem.caratWeight} ct</span>
+          <span>{plot.sizeAcres} Acres ({plot.sizePerch} Perches)</span>
           <span>·</span>
-          <span>{gem.cut} Cut</span>
-          <span>·</span>
-          <span>{gem.clarity}</span>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
-          <div>
-            <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-              Price
-            </div>
-            <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 600 }}>
-              {LKR(gem.price)}
-            </div>
-          </div>
-          <div style={{ fontSize: '0.58rem', color: 'rgba(255,255,255,0.22)', letterSpacing: '0.06em' }}>
-            #{gem.certNumber.split('-').pop()}
-          </div>
+          <span>Surveyed: {plot.surveyDate.split('-')[0]}</span>
         </div>
 
         <button
-          onClick={e => { e.stopPropagation(); navigate(`/shop/${gem.id}`) }}
+          onClick={e => { e.stopPropagation(); navigate(`/land/${plot.id}`) }}
           style={{
             width: '100%', padding: '0.65rem',
-            background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}77)`,
-            border: `1px solid ${gem.color}55`,
-            borderRadius: '2px', color: '#fff',
+            background: `transparent`,
+            border: `1px solid rgba(201,168,76,0.3)`,
+            borderRadius: '2px', color: '#C9A84C',
             fontSize: '0.65rem', letterSpacing: '0.12em', textTransform: 'uppercase',
-            cursor: 'pointer', fontWeight: 600, transition: 'opacity 0.25s',
+            cursor: 'pointer', fontWeight: 600, transition: 'all 0.25s',
           }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.08)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.8)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)' }}
         >
-          View Details
+          View Site
         </button>
       </div>
     </div>
@@ -249,8 +249,8 @@ function FilterChip({ label, active, onClick }) {
   )
 }
 
-// ─── Price input ──────────────────────────────────────────────────────────────
-function PriceInput({ value, onChange, placeholder }) {
+// ─── Input ──────────────────────────────────────────────────────────────
+function NumberInput({ value, onChange, placeholder }) {
   return (
     <input
       type="number"
@@ -272,34 +272,34 @@ function PriceInput({ value, onChange, placeholder }) {
   )
 }
 
-// ─── Main ShopPage ───────────────────────────────────────────────────────────
-export default function ShopPage() {
+// ─── Main LandListingPage ───────────────────────────────────────────────────────────
+export default function LandListingPage() {
   const headingRef = useRef(null)
   const gridRef = useRef(null)
 
-  const [gems, setGems] = useState([])
+  const [plots, setPlots] = useState([])
   const [loading, setLoading] = useState(true)
 
-  const [typeFilter, setTypeFilter] = useState('All')
-  const [clarityFilter, setClarityFilter] = useState('All')
-  const [minPrice, setMinPrice] = useState('')
-  const [maxPrice, setMaxPrice] = useState('')
+  const [regionFilter, setRegionFilter] = useState('All')
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [minAcres, setMinAcres] = useState('')
+  const [maxAcres, setMaxAcres] = useState('')
   const [sort, setSort] = useState('default')
   const [filtersOpen, setFiltersOpen] = useState(false)
 
   const load = useCallback(async () => {
     setLoading(true)
     const filters = {
-      type: typeFilter !== 'All' ? typeFilter : undefined,
-      clarity: clarityFilter !== 'All' ? clarityFilter : undefined,
-      minPrice: minPrice !== '' ? Number(minPrice) : undefined,
-      maxPrice: maxPrice !== '' ? Number(maxPrice) : undefined,
+      region: regionFilter !== 'All' ? regionFilter : undefined,
+      status: statusFilter !== 'All' ? statusFilter : undefined,
+      minAcres: minAcres !== '' ? Number(minAcres) : undefined,
+      maxAcres: maxAcres !== '' ? Number(maxAcres) : undefined,
       sort: sort !== 'default' ? sort : undefined,
     }
-    const data = await fetchGems(filters)
-    setGems(data)
+    const data = await fetchLandPlots(filters)
+    setPlots(data)
     setLoading(false)
-  }, [typeFilter, clarityFilter, minPrice, maxPrice, sort])
+  }, [regionFilter, statusFilter, minAcres, maxAcres, sort])
 
   useEffect(() => { load() }, [load])
 
@@ -312,14 +312,14 @@ export default function ShopPage() {
   }, [])
 
   const resetFilters = () => {
-    setTypeFilter('All')
-    setClarityFilter('All')
-    setMinPrice('')
-    setMaxPrice('')
+    setRegionFilter('All')
+    setStatusFilter('All')
+    setMinAcres('')
+    setMaxAcres('')
     setSort('default')
   }
 
-  const hasActiveFilters = typeFilter !== 'All' || clarityFilter !== 'All' || minPrice !== '' || maxPrice !== '' || sort !== 'default'
+  const hasActiveFilters = regionFilter !== 'All' || statusFilter !== 'All' || minAcres !== '' || maxAcres !== '' || sort !== 'default'
 
   return (
     <div style={{ background: '#050508', minHeight: '100vh', color: '#fff' }}>
@@ -341,7 +341,7 @@ export default function ShopPage() {
             display: 'block', fontSize: '0.6rem', letterSpacing: '0.3em',
             textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.75rem',
           }}>
-            ◆ Certified Collection
+            ◆ Mining & Exploration
           </span>
           <h1 style={{
             fontFamily: "'Cormorant Garamond', serif",
@@ -349,15 +349,14 @@ export default function ShopPage() {
             fontWeight: 300, color: '#fff', letterSpacing: '-0.02em',
             marginBottom: '0.75rem', lineHeight: 1.1,
           }}>
-            The Gem Catalogue
+            Land Reservations
           </h1>
           <p style={{
             fontSize: 'clamp(0.78rem, 1.2vw, 0.9rem)',
             color: 'rgba(255,255,255,0.38)', maxWidth: 480,
             lineHeight: 1.72, fontWeight: 300,
           }}>
-            Every stone is GIA, GRS, or SSEF certified. Full geological provenance,
-            no reserve surprises, conflict-free.
+            Exclusive access to prime gem-bearing terrain. View geological surveys, assess yield potential, and reserve sites for mining operations.
           </p>
         </div>
       </section>
@@ -416,10 +415,10 @@ export default function ShopPage() {
             </div>
           </div>
 
-          {/* Gem type chips — always visible */}
+          {/* Region chips — always visible */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', paddingBottom: '0.9rem' }}>
-            {GEM_TYPES.map(t => (
-              <FilterChip key={t} label={t} active={typeFilter === t} onClick={() => setTypeFilter(t)} />
+            {REGIONS.map(r => (
+              <FilterChip key={r} label={r} active={regionFilter === r} onClick={() => setRegionFilter(r)} />
             ))}
           </div>
 
@@ -430,22 +429,22 @@ export default function ShopPage() {
               gap: '1.25rem', paddingBottom: '1.25rem',
               borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.1rem',
             }}>
-              {/* Clarity */}
+              {/* Status */}
               <div>
-                <FilterLabel>Clarity</FilterLabel>
+                <FilterLabel>Status</FilterLabel>
                 <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                  {CLARITY_GRADES.map(g => (
-                    <FilterChip key={g} label={g} active={clarityFilter === g} onClick={() => setClarityFilter(g)} />
+                  {STATUSES.map(s => (
+                    <FilterChip key={s} label={s} active={statusFilter === s} onClick={() => setStatusFilter(s)} />
                   ))}
                 </div>
               </div>
 
-              {/* Price Range */}
+              {/* Size Range */}
               <div>
-                <FilterLabel>Price Range (LKR)</FilterLabel>
+                <FilterLabel>Size Range (Acres)</FilterLabel>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <PriceInput value={minPrice} onChange={setMinPrice} placeholder="Min" />
-                  <PriceInput value={maxPrice} onChange={setMaxPrice} placeholder="Max" />
+                  <NumberInput value={minAcres} onChange={setMinAcres} placeholder="Min" />
+                  <NumberInput value={maxAcres} onChange={setMaxAcres} placeholder="Max" />
                 </div>
               </div>
 
@@ -472,7 +471,7 @@ export default function ShopPage() {
               fontSize: '0.62rem', letterSpacing: '0.12em', textTransform: 'uppercase',
               color: 'rgba(255,255,255,0.25)', marginBottom: '2rem',
             }}>
-              {gems.length} {gems.length === 1 ? 'stone' : 'stones'} found
+              {plots.length} {plots.length === 1 ? 'plot' : 'plots'} found
             </div>
           )}
 
@@ -486,13 +485,13 @@ export default function ShopPage() {
             }}
           >
             {loading
-              ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)
-              : gems.length === 0
+              ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+              : plots.length === 0
                 ? (
                   <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 0' }}>
                     <div style={{ fontSize: '2rem', marginBottom: '1rem', opacity: 0.18 }}>◆</div>
                     <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontWeight: 300, color: 'rgba(255,255,255,0.3)' }}>
-                      No stones match your filters
+                      No plots match your filters
                     </p>
                     <button
                       onClick={resetFilters}
@@ -510,7 +509,7 @@ export default function ShopPage() {
                     </button>
                   </div>
                 )
-                : gems.map((gem, i) => <GemCard key={gem.id} gem={gem} index={i} />)
+                : plots.map((plot, i) => <LandPlotCard key={plot.id} plot={plot} index={i} />)
             }
           </div>
         </div>
@@ -522,10 +521,6 @@ export default function ShopPage() {
         @keyframes shimmer {
           0% { background-position: -200% 0; }
           100% { background-position: 200% 0; }
-        }
-        @keyframes gemFloat {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-8px) rotate(4deg); }
         }
       `}</style>
     </div>

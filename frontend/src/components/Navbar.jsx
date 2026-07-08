@@ -4,7 +4,7 @@ import { gsap } from '../utils/gsap'
 
 const NAV_LINKS = [
   { label: 'Shop', to: '/shop' },
-  { label: 'Auctions', to: '/#auctions' },
+  { label: 'Auctions', to: '/auctions' },
   { label: 'How It Works', to: '/#how-it-works' },
 ]
 
@@ -64,9 +64,10 @@ export default function Navbar({ visible }) {
         {/* Nav links */}
         <div style={{ display: 'flex', gap: '2rem' }}>
           {[
-            { label: 'Auctions', path: '/#auctions' },
+            { label: 'Auctions', path: '/auctions' },
             { label: 'Shop', path: '/shop' },
-            { label: 'Education', path: '/#education' },
+            { label: 'Land', path: '/land' },
+            { label: 'Education', path: '/knowledge-hub' },
             { label: 'About', path: '/#about' }
           ].map((item) => {
             return (

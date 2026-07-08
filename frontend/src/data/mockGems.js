@@ -22,7 +22,7 @@ export const MOCK_GEMS = [
     colorName: 'Pigeon Blood Red',
     description:
       'An exceptional Burmese ruby of the finest pigeon blood hue, sourced from the legendary Mogok valley. GIA certified with no heat treatment — a rarity in today\'s market.',
-    imageUrl: null, // swap for real URL
+    imageUrl: '/images/gems/ruby.png',
   },
   {
     id: '2',
@@ -39,7 +39,7 @@ export const MOCK_GEMS = [
     colorName: 'Royal Blue',
     description:
       'A prized royal blue sapphire from the gem fields of Ratnapura, bearing the intense velvety hue synonymous with Ceylon stones. Unheated, GRS certified.',
-    imageUrl: null,
+    imageUrl: '/images/gems/sapphire.png',
   },
   {
     id: '3',
@@ -56,7 +56,7 @@ export const MOCK_GEMS = [
     colorName: 'Vivid Green',
     description:
       'Muzo origin vivid green emerald exhibiting the classic warm saturation unique to Colombian stones. Minor natural inclusions — a hallmark of genuine unheated Muzo material.',
-    imageUrl: null,
+    imageUrl: '/images/gems/emerald.png',
   },
   {
     id: '4',
@@ -73,7 +73,7 @@ export const MOCK_GEMS = [
     colorName: 'Lotus Pink-Orange',
     description:
       'An exceptionally rare Padparadscha sapphire exhibiting the delicate salmon-pink hue reminiscent of a lotus blossom. Certified unheated — among the rarest of all sapphire varieties.',
-    imageUrl: null,
+    imageUrl: '/images/gems/topaz.png',
   },
   {
     id: '5',
@@ -90,7 +90,7 @@ export const MOCK_GEMS = [
     colorName: 'Colour-Change Green / Red',
     description:
       'A Brazilian alexandrite with pronounced colour change — vivid green under daylight, raspberry red under incandescent light — combined with a sharp cat\'s eye phenomenon.',
-    imageUrl: null,
+    imageUrl: '/images/gems/emerald.png',
   },
   {
     id: '6',
@@ -107,7 +107,7 @@ export const MOCK_GEMS = [
     colorName: 'Kashmir Cornflower Blue',
     description:
       'The holy grail of sapphires — a Kashmir origin cushion cut with the legendary velvety cornflower blue. GIA certified, unheated. Fewer than 1% of sapphires carry a Kashmir origin report.',
-    imageUrl: null,
+    imageUrl: '/images/gems/sapphire.png',
   },
   {
     id: '7',
@@ -124,7 +124,7 @@ export const MOCK_GEMS = [
     colorName: 'Neon Electric Blue',
     description:
       'A copper-bearing Paraíba-type tourmaline from Mozambique radiating an electric neon glow. GRS confirmed copper-bearing origin — the source of its extraordinary luminescence.',
-    imageUrl: null,
+    imageUrl: '/images/gems/paraiba.png',
   },
   {
     id: '8',
@@ -141,7 +141,7 @@ export const MOCK_GEMS = [
     colorName: 'Golden Yellow',
     description:
       'A rich golden-yellow Ceylon sapphire of superb clarity and lively brilliance. Unheated, GIA certified — an undervalued collector\'s gem of pure Sri Lankan origin.',
-    imageUrl: null,
+    imageUrl: '/images/gems/topaz.png',
   },
   {
     id: '9',
@@ -158,7 +158,7 @@ export const MOCK_GEMS = [
     colorName: 'Vivid Chrome Green',
     description:
       'A fine Merelani tsavorite garnet with saturated chrome-green colour rivalling the finest emeralds — without inclusions. SSEF certified with an exceptional colour grade.',
-    imageUrl: null,
+    imageUrl: '/images/gems/emerald.png',
   },
   {
     id: '10',
@@ -175,7 +175,7 @@ export const MOCK_GEMS = [
     colorName: 'Cobalt Blue',
     description:
       'A cobalt-blue Mogok spinel — one of the most sought-after collector gems, prized for its saturated blue and exceptional brilliance. GRS certified cobalt-bearing.',
-    imageUrl: null,
+    imageUrl: '/images/gems/sapphire.png',
   },
   {
     id: '11',
@@ -192,7 +192,7 @@ export const MOCK_GEMS = [
     colorName: 'Raspberry Pink',
     description:
       'A vibrant raspberry-rose rhodolite garnet from the Umba Valley with excellent transparency and life. An accessible luxury gem of outstanding colour saturation.',
-    imageUrl: null,
+    imageUrl: '/images/gems/ruby.png',
   },
   {
     id: '12',
@@ -209,7 +209,7 @@ export const MOCK_GEMS = [
     colorName: 'Imperial Orange',
     description:
       'A true imperial topaz — the rarest colour variant, a warm peachy-orange — from the historic Ouro Preto deposit in Brazil. Internally flawless. An heirloom-quality stone.',
-    imageUrl: null,
+    imageUrl: '/images/gems/topaz.png',
   },
 ]
 
