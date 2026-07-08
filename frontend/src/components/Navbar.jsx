@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
 const NAV_LINKS = [
@@ -11,6 +11,7 @@ const NAV_LINKS = [
 export default function Navbar({ visible }) {
   const navRef = useRef(null)
   const location = useLocation()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (!navRef.current) return
@@ -95,6 +96,7 @@ export default function Navbar({ visible }) {
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0 }}>
           <button
+            onClick={() => navigate('/login')}
             style={{
               padding: '0.45rem 1.1rem',
               border: '1px solid rgba(201,168,76,0.4)',
@@ -122,6 +124,7 @@ export default function Navbar({ visible }) {
             Log In
           </button>
           <button
+            onClick={() => navigate('/register')}
             style={{
               padding: '0.45rem 1.25rem',
               border: 'none',
