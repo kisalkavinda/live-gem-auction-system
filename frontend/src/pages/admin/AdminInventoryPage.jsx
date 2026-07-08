@@ -4,7 +4,7 @@ import { useDashboard } from '../../context/DashboardContext'
 import { addGem, updateGem, deleteGem } from '../../services/adminService'
 
 export default function AdminInventoryPage() {
-  const { gems, sellers, addGemState, updateGemState, deleteGemState } = useDashboard()
+  const { gems, addGemState, updateGemState, deleteGemState } = useDashboard()
   const [searchTerm, setSearchTerm] = useState('')
   const [filterType, setFilterType] = useState('All')
 
@@ -18,7 +18,7 @@ export default function AdminInventoryPage() {
   const [formData, setFormData] = useState({
     name: '', type: 'Sapphire', carat: '', price: '', 
     clarity: '', origin: '', certNumber: '', 
-    description: '', sellerId: '', status: 'Draft'
+    description: '', status: 'Draft'
   })
 
   const filteredGems = useMemo(() => {
@@ -34,7 +34,7 @@ export default function AdminInventoryPage() {
     setFormData({
       name: '', type: 'Sapphire', carat: '', price: '', 
       clarity: '', origin: '', certNumber: '', 
-      description: '', sellerId: sellers[0]?.id || '', status: 'Draft'
+      description: '', status: 'Draft'
     })
     setIsModalOpen(true)
   }
@@ -252,12 +252,7 @@ export default function AdminInventoryPage() {
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Seller</label>
-                <select value={formData.sellerId} onChange={e => setFormData({...formData, sellerId: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  {sellers.map(s => <option key={s.id} value={s.id} style={{ background: '#050508' }}>{s.businessName}</option>)}
-                </select>
-              </div>
+
 
               <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>

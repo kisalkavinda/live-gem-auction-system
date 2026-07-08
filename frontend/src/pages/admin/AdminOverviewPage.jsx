@@ -4,11 +4,11 @@ import { useDashboard } from '../../context/DashboardContext'
 
 export default function AdminOverviewPage() {
   const navigate = useNavigate()
-  const { gems, auctions, sellers } = useDashboard()
+  const { gems, auctions, buyers } = useDashboard()
 
   const totalGems = gems.length
   const activeAuctions = auctions.filter(a => a.status === 'Live' || a.status === 'Scheduled').length
-  const totalSellers = sellers.length
+  const totalBuyers = buyers.length
   
   // Mock revenue
   const revenue = '$4,250,000'
@@ -35,8 +35,8 @@ export default function AdminOverviewPage() {
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#C9A84C' }}>{activeAuctions}</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '4px', padding: '1.5rem' }}>
-          <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Total Sellers</div>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#fff' }}>{totalSellers}</div>
+          <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Total Buyers</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#fff' }}>{totalBuyers}</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '4px', padding: '1.5rem' }}>
           <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Monthly Revenue</div>
@@ -91,7 +91,7 @@ export default function AdminOverviewPage() {
           {/* Mock Rows */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
             <div>10 mins ago</div>
-            <div>New seller registration: <span style={{ color: '#fff' }}>Royal Mogok Stones</span></div>
+            <div>New buyer registration: <span style={{ color: '#fff' }}>Sophia Laurent</span></div>
             <div>
               <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ADE80', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
                 Approved

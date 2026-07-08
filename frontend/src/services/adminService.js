@@ -73,9 +73,9 @@ export async function deleteLandListing(id) {
   return { success: true };
 }
 
-export async function updateSellerStatus(sellerId, status) {
+export async function updateBuyerStatus(buyerId, status) {
   await delay(500);
-  console.log(`Mock API: Update Seller ${sellerId} to ${status}`);
+  console.log(`Mock API: Update Buyer ${buyerId} to ${status}`);
   return { success: true };
 }
 
@@ -85,8 +85,3 @@ export async function updateBookingStatus(bookingId, status) {
   return { success: true };
 }
 
-export async function requestConsignGem(gemData) {
-  await delay(800);
-  console.log('Mock API: Seller Request to Consign Gem', gemData);
-  return { success: true, message: 'Request submitted for review.' };
-}

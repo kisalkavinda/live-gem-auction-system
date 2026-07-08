@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
 import { MOCK_GEMS } from '../data/mockGems';
 import { MOCK_LAND_PLOTS } from '../data/mockLandPlots';
-import { mockSellers } from '../data/mockSellers';
+import { mockBuyers } from '../data/mockBuyers';
 import { mockBookings } from '../data/mockBookings';
 
 const DashboardContext = createContext();
@@ -47,7 +47,7 @@ export function DashboardProvider({ children }) {
   ]);
   
   const [lands, setLands] = useState(MOCK_LAND_PLOTS);
-  const [sellers, setSellers] = useState(mockSellers);
+  const [buyers, setBuyers] = useState(mockBuyers);
   const [bookings, setBookings] = useState(mockBookings);
 
   // Expose updater functions to be called after adminService resolves
@@ -62,7 +62,7 @@ export function DashboardProvider({ children }) {
   const addLandState = (land) => setLands(prev => [land, ...prev]);
   const deleteLandState = (id) => setLands(prev => prev.filter(l => l.id !== id));
 
-  const updateSellerStatusState = (id, status) => setSellers(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+  const updateBuyerStatusState = (id, status) => setBuyers(prev => prev.map(b => b.id === id ? { ...b, status } : b));
   const updateBookingStatusState = (id, status) => setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
 
   return (
@@ -70,7 +70,7 @@ export function DashboardProvider({ children }) {
       gems, addGemState, updateGemState, deleteGemState,
       auctions, addAuctionState, updateAuctionState, deleteAuctionState,
       lands, addLandState, deleteLandState,
-      sellers, updateSellerStatusState,
+      buyers, updateBuyerStatusState,
       bookings, updateBookingStatusState
     }}>
       {children}

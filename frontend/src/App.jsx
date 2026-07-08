@@ -22,6 +22,7 @@ import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import VerifyEmailPendingPage from './pages/VerifyEmailPendingPage'
 import VerifyEmailConfirmPage from './pages/VerifyEmailConfirmPage'
+import MyAccountPage from './pages/MyAccountPage'
 
 // Dashboard Pages
 import { DashboardProvider } from './context/DashboardContext'
@@ -29,8 +30,7 @@ import AdminOverviewPage from './pages/admin/AdminOverviewPage'
 import AdminInventoryPage from './pages/admin/AdminInventoryPage'
 import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
 import AdminLandPage from './pages/admin/AdminLandPage'
-import AdminSellersPage from './pages/admin/AdminSellersPage'
-import SellerDashboardPage from './pages/seller/SellerDashboardPage'
+import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 
 // Landing page keeps its own Preloader + Lenis scroll setup
 function LandingPage() {
@@ -76,16 +76,14 @@ export default function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/verify-email" element={<VerifyEmailPendingPage />} />
           <Route path="/verify-email/:token" element={<VerifyEmailConfirmPage />} />
+          <Route path="/account" element={<MyAccountPage />} />
           
           {/* Admin Dashboard Routes */}
           <Route path="/admin" element={<AdminOverviewPage />} />
           <Route path="/admin/inventory" element={<AdminInventoryPage />} />
           <Route path="/admin/auctions" element={<AdminAuctionsPage />} />
           <Route path="/admin/land" element={<AdminLandPage />} />
-          <Route path="/admin/sellers" element={<AdminSellersPage />} />
-
-          {/* Seller Dashboard Routes */}
-          <Route path="/seller" element={<SellerDashboardPage />} />
+          <Route path="/admin/buyers" element={<AdminBuyersPage />} />
         </Routes>
       </BrowserRouter>
     </DashboardProvider>

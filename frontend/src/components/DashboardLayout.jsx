@@ -7,18 +7,12 @@ const ADMIN_LINKS = [
   { label: 'Inventory', to: '/admin/inventory' },
   { label: 'Auctions', to: '/admin/auctions' },
   { label: 'Land Listings', to: '/admin/land' },
-  { label: 'Sellers', to: '/admin/sellers' }
+  { label: 'Buyers', to: '/admin/buyers' }
 ];
 
-const SELLER_LINKS = [
-  { label: 'Dashboard', to: '/seller' }
-];
-
-export default function DashboardLayout({ children, role = 'admin' }) {
+export default function DashboardLayout({ children }) {
   const location = useLocation()
   const contentRef = useRef(null)
-
-  const links = role === 'admin' ? ADMIN_LINKS : SELLER_LINKS;
 
   useEffect(() => {
     if (contentRef.current) {
@@ -56,12 +50,12 @@ export default function DashboardLayout({ children, role = 'admin' }) {
             marginTop: '0.75rem', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)',
             letterSpacing: '0.15em', textTransform: 'uppercase'
           }}>
-            {role === 'admin' ? 'Admin Portal' : 'Seller Portal'}
+            Admin Portal
           </div>
         </div>
 
         <nav style={{ flex: 1, padding: '1.5rem 0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          {links.map(link => {
+          {ADMIN_LINKS.map(link => {
             const isActive = location.pathname === link.to;
             return (
               <Link

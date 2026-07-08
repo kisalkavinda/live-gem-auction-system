@@ -25,8 +25,7 @@ export default function RegisterPage() {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '',
-    businessName: ''
+    confirmPassword: ''
   })
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -65,10 +64,6 @@ export default function RegisterPage() {
       newErrors.confirmPassword = 'Passwords do not match.'
     }
 
-    if (!formData.businessName.trim()) {
-      newErrors.businessName = 'Business name is required.'
-    }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors)
       return
@@ -76,7 +71,7 @@ export default function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      await registerUser({ ...formData, role: 'seller' })
+      await registerUser({ ...formData, role: 'buyer' })
       // On success, redirect to verify email page, passing the email via state
       navigate('/verify-email', { state: { email: formData.email } })
     } catch (err) {
@@ -112,7 +107,7 @@ export default function RegisterPage() {
           
           <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
             <span style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>
-              Seller Registration
+              Create Your Account
             </span>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', fontWeight: 300, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
               Join GemHaven
@@ -167,25 +162,7 @@ export default function RegisterPage() {
               {errors.email && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.email}</div>}
             </div>
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>
-                Business Name
-              </label>
-              <input
-                name="businessName"
-                type="text"
-                value={formData.businessName}
-                onChange={handleChange}
-                style={{
-                  width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '2px', padding: '0.75rem', color: '#fff', fontSize: '0.9rem',
-                  transition: 'border-color 0.3s', outline: 'none'
-                }}
-                onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
-              {errors.businessName && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.businessName}</div>}
-            </div>
+
 
             <div>
               <label style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>
