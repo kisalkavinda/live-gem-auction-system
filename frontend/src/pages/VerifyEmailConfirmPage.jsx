@@ -12,7 +12,12 @@ export default function VerifyEmailConfirmPage() {
   const [status, setStatus] = useState('verifying') // 'verifying', 'success', 'error'
   const [errorMsg, setErrorMsg] = useState('')
 
+  const hasRun = useRef(false)
+
   useEffect(() => {
+    if (hasRun.current) return
+    hasRun.current = true
+    
     let mounted = true
     
     if (cardRef.current) {

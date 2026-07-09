@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
@@ -12,6 +12,21 @@ export default function Navbar({ visible }) {
   const navRef = useRef(null)
   const location = useLocation()
   const navigate = useNavigate()
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user')
+    if (storedUser) {
+      try { setUser(JSON.parse(storedUser)) } catch (e) {}
+    }
+  }, [])
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setUser(null)
+    navigate('/')
+  }
 
   useEffect(() => {
     if (!navRef.current) return
@@ -95,55 +110,111 @@ export default function Navbar({ visible }) {
 
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0 }}>
-          <button
-            onClick={() => navigate('/login')}
-            style={{
-              padding: '0.45rem 1.1rem',
-              border: '1px solid rgba(201,168,76,0.4)',
-              borderRadius: '100px',
-              background: 'transparent',
-              color: 'rgba(255,255,255,0.75)',
-              fontSize: '0.68rem',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              transition: 'all 0.25s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = 'rgba(201,168,76,0.1)'
-              e.currentTarget.style.borderColor = '#C9A84C'
-              e.currentTarget.style.color = '#fff'
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = 'transparent'
-              e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)'
-              e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
-            }}
-          >
-            Log In
-          </button>
-          <button
-            onClick={() => navigate('/register')}
-            style={{
-              padding: '0.45rem 1.25rem',
-              border: 'none',
-              borderRadius: '100px',
-              background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
-              color: '#0A0A0D',
-              fontSize: '0.68rem',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              cursor: 'pointer',
-              fontWeight: 700,
-              transition: 'opacity 0.25s, transform 0.25s',
-              whiteSpace: 'nowrap',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.02)' }}
-            onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
-          >
-            Register
-          </button>
+          {user ? (
+            <>
+              <button
+                onClick={() => navigate(user.role === 'ADMIN' ? '/admin' : '/account')}
+                style={{
+                  padding: '0.45rem 1.1rem',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  borderRadius: '100px',
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(201,168,76,0.1)'
+                  e.currentTarget.style.borderColor = '#C9A84C'
+                  e.currentTarget.style.color = '#fff'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
+                }}
+              >
+                {user.role === 'ADMIN' ? 'Dashboard' : 'My Account'}
+              </button>
+              <button
+                onClick={handleLogout}
+                style={{
+                  padding: '0.45rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '100px',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  color: '#EF4444',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  transition: 'background 0.25s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+              >
+                Log Out
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                style={{
+                  padding: '0.45rem 1.1rem',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  borderRadius: '100px',
+                  background: 'transparent',
+                  color: 'rgba(255,255,255,0.75)',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  transition: 'all 0.25s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(201,168,76,0.1)'
+                  e.currentTarget.style.borderColor = '#C9A84C'
+                  e.currentTarget.style.color = '#fff'
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.borderColor = 'rgba(201,168,76,0.4)'
+                  e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
+                }}
+              >
+                Log In
+              </button>
+              <button
+                onClick={() => navigate('/register')}
+                style={{
+                  padding: '0.45rem 1.25rem',
+                  border: 'none',
+                  borderRadius: '100px',
+                  background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
+                  color: '#0A0A0D',
+                  fontSize: '0.68rem',
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                  fontWeight: 700,
+                  transition: 'opacity 0.25s, transform 0.25s',
+                  whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.02)' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
+              >
+                Register
+              </button>
+            </>
+          )}
         </div>
       </div>
     </nav>
