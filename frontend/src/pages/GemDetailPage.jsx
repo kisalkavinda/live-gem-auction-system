@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchGemById } from '../data/mockGems'
+import { fetchGemById } from '../services/gemService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
