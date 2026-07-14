@@ -52,9 +52,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auctions/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/land/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/uploads/**").permitAll()
 
                 // Admin-only — full management
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST,   "/api/upload").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST,   "/api/gems/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/gems/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/gems/**").hasRole("ADMIN")

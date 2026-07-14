@@ -44,17 +44,14 @@ npm run dev
 Runs at `http://localhost:5173`
 
 ### Backend
-Configure your database in `backend/src/main/resources/application.properties`:
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/gemhaven
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
-```
-Then run:
+The backend uses environment variables for production configuration. For local development, an `application-local.properties` is provided.
+
+Ensure you have a PostgreSQL database named `gemhaven_db` with username `postgres` and password `12345` (or update `backend/src/main/resources/application-local.properties` to match your setup).
+
+Then run the backend using the `local` profile:
 ```bash
 cd backend
-./mvnw spring-boot:run
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 Runs at `http://localhost:8080`
 

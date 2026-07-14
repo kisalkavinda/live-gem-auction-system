@@ -18,6 +18,22 @@ export async function addGem(gemData) {
   }
 }
 
+export async function uploadImage(file) {
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await apiClient.post('/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data; // { url: '...' }
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+}
+
 export async function updateGem(id, gemData) {
   try {
     const response = await apiClient.put(`/gems/${id}`, gemData);

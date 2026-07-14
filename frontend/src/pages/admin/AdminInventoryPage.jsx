@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
-import { addGem, updateGem, deleteGem } from '../../services/adminService'
+import { addGem, updateGem, deleteGem, uploadImage } from '../../services/adminService'
 
 export default function AdminInventoryPage() {
   const { gems, addGemState, updateGemState, deleteGemState } = useDashboard()
@@ -15,11 +15,14 @@ export default function AdminInventoryPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Form state
-  const [formData, setFormData] = useState({
+  const initialFormState = {
     name: '', type: 'Sapphire', carat: '', price: '', 
-    clarity: '', origin: '', certNumber: '', 
-    description: '', status: 'Draft'
-  })
+    cut: '', colorName: '', color: '#1D4ED8',
+    clarity: 'VS1', origin: '', certAuthority: 'GIA', certNumber: '', 
+    imageUrl: '', description: '', status: 'Draft'
+  }
+  const [formData, setFormData] = useState(initialFormState)
+  const [imageFile, setImageFile] = useState(null)
 
   const filteredGems = useMemo(() => {
     return gems.filter(gem => {
@@ -31,17 +34,15 @@ export default function AdminInventoryPage() {
 
   const openAddModal = () => {
     setActiveGem(null)
-    setFormData({
-      name: '', type: 'Sapphire', carat: '', price: '', 
-      clarity: '', origin: '', certNumber: '', 
-      description: '', status: 'Draft'
-    })
+    setFormData(initialFormState)
+    setImageFile(null)
     setIsModalOpen(true)
   }
 
   const openEditModal = (gem) => {
     setActiveGem(gem)
     setFormData({ ...gem })
+    setImageFile(null)
     setIsModalOpen(true)
   }
 
@@ -54,12 +55,25 @@ export default function AdminInventoryPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      let finalImageUrl = formData.imageUrl || '';
+      if (imageFile) {
+        const uploadRes = await uploadImage(imageFile);
+        finalImageUrl = uploadRes.url;
+      }
+
       const payload = {
         ...formData,
         caratWeight: Number(formData.carat || 0),
         reservationStatus: formData.status ? formData.status.toUpperCase() : 'DRAFT',
-        cut: formData.cut || 'Unknown Cut',
-        color: formData.color || '#FFFFFF',
+        cut: formData.cut || 'Oval',
+        color: formData.color || '#1D4ED8',
+        colorName: formData.colorName || 'Blue',
+        clarity: formData.clarity || 'VS1',
+        origin: formData.origin || 'Unknown',
+        certAuthority: formData.certAuthority || 'GIA',
+        certNumber: formData.certNumber || '000000',
+        imageUrl: finalImageUrl,
+        description: formData.description || '',
       };
 
       if (activeGem) {
@@ -224,8 +238,8 @@ export default function AdminInventoryPage() {
 
       {/* Add/Edit Modal */}
       {isModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: '100%', maxWidth: '560px', background: '#050508', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', zIndex: 1000, display: 'flex', justifyContent: 'center', paddingTop: '5vh' }}>
+          <div style={{ width: '100%', maxWidth: '560px', maxHeight: '90vh', overflowY: 'auto', background: '#050508', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '2rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', fontWeight: 300, margin: 0 }}>
                 {activeGem ? 'Edit Gemstone' : 'Add New Gemstone'}
@@ -260,9 +274,77 @@ export default function AdminInventoryPage() {
                 </div>
               </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Cut</label>
+                  <input required type="text" value={formData.cut} onChange={e => setFormData({...formData, cut: e.target.value})} placeholder="e.g. Oval, Cushion" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Clarity</label>
+                  <select value={formData.clarity} onChange={e => setFormData({...formData, clarity: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
+                    <option style={{ background: '#050508' }}>IF</option>
+                    <option style={{ background: '#050508' }}>VVS1</option>
+                    <option style={{ background: '#050508' }}>VVS2</option>
+                    <option style={{ background: '#050508' }}>VS1</option>
+                    <option style={{ background: '#050508' }}>VS2</option>
+                    <option style={{ background: '#050508' }}>SI1</option>
+                    <option style={{ background: '#050508' }}>SI2</option>
+                  </select>
+                </div>
+              </div>
 
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Color (Hex)</label>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="color" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} style={{ width: '40px', height: '40px', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }} />
+                    <input required type="text" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                  </div>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Color Name</label>
+                  <input required type="text" value={formData.colorName} onChange={e => setFormData({...formData, colorName: e.target.value})} placeholder="e.g. Royal Blue" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Origin</label>
+                  <input type="text" value={formData.origin} onChange={e => setFormData({...formData, origin: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Cert Auth</label>
+                  <select value={formData.certAuthority} onChange={e => setFormData({...formData, certAuthority: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
+                    <option style={{ background: '#050508' }}>GIA</option>
+                    <option style={{ background: '#050508' }}>GRS</option>
+                    <option style={{ background: '#050508' }}>SSEF</option>
+                    <option style={{ background: '#050508' }}>CDTEC</option>
+                    <option style={{ background: '#050508' }}>None</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Cert Number</label>
+                  <input type="text" value={formData.certNumber} onChange={e => setFormData({...formData, certNumber: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                </div>
+              </div>
 
               <div>
+                <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Image Upload</label>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                  <input type="file" accept="image/*" onChange={e => {
+                    const file = e.target.files[0]
+                    if (file) setImageFile(file)
+                  }} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.6rem', color: '#fff', borderRadius: '2px', fontSize: '0.8rem' }} />
+                  {(imageFile || formData.imageUrl) && (
+                    <img src={imageFile ? URL.createObjectURL(imageFile) : formData.imageUrl} alt="Preview" style={{ height: '45px', width: '45px', objectFit: 'cover', borderRadius: '2px', border: '1px solid rgba(255,255,255,0.2)' }} />
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Description</label>
+                <textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px', resize: 'vertical' }} />
+              </div>              <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
                 <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
                   <option style={{ background: '#050508' }}>Draft</option>
