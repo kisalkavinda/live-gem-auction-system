@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { MOCK_GEMS } from '../data/mockGems';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { fetchGems } from '../services/gemService';
 import { MOCK_LAND_PLOTS } from '../data/mockLandPlots';
 import { mockBuyers } from '../data/mockBuyers';
 import { mockBookings } from '../data/mockBookings';
@@ -7,8 +7,11 @@ import { mockBookings } from '../data/mockBookings';
 const DashboardContext = createContext();
 
 export function DashboardProvider({ children }) {
-  // We use the imported mock data as the initial state
-  const [gems, setGems] = useState(MOCK_GEMS);
+  const [gems, setGems] = useState([]);
+  
+  useEffect(() => {
+    fetchGems({ status: 'ALL' }).then(data => setGems(data));
+  }, []);
   
   // Since we don't have a separate mockAuctions file, we derive initial mock auctions 
   // from the mockGems that have auction data (e.g., currentBid).

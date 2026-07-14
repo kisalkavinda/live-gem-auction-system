@@ -54,11 +54,19 @@ export default function AdminInventoryPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
+      const payload = {
+        ...formData,
+        caratWeight: Number(formData.carat || 0),
+        reservationStatus: formData.status ? formData.status.toUpperCase() : 'DRAFT',
+        cut: formData.cut || 'Unknown Cut',
+        color: formData.color || '#FFFFFF',
+      };
+
       if (activeGem) {
-        const res = await updateGem(activeGem.id, formData)
+        const res = await updateGem(activeGem.id, payload)
         updateGemState(activeGem.id, res.gem)
       } else {
-        const res = await addGem(formData)
+        const res = await addGem(payload)
         addGemState(res.gem)
       }
       setIsModalOpen(false)
@@ -186,9 +194,9 @@ export default function AdminInventoryPage() {
             <div key={gem.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
               <div style={{ color: '#fff', fontWeight: 500 }}>{gem.name}</div>
               <div>{gem.type}</div>
-              <div>{gem.carat} ct</div>
+              <div>{gem.caratWeight || gem.carat} ct</div>
               <div>${gem.price?.toLocaleString()}</div>
-              <div>{getStatusBadge(gem.status || 'Draft')}</div>
+              <div>{getStatusBadge(gem.reservationStatus || gem.status || 'Draft')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => openEditModal(gem)}

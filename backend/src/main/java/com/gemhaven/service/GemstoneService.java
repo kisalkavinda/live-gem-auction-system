@@ -18,13 +18,21 @@ public class GemstoneService {
         this.gemstoneRepository = gemstoneRepository;
     }
 
-    public List<Gemstone> getAll(String type, String clarity, String sort,
-                                  Gemstone.ReservationStatus status) {
+    public List<Gemstone> getAll(String type, String clarity, String sort, String status) {
         List<Gemstone> gems;
-        if (type != null && !type.isBlank()) {
-            gems = gemstoneRepository.findByReservationStatusAndType(status, type);
+        if ("ALL".equalsIgnoreCase(status)) {
+            if (type != null && !type.isBlank()) {
+                gems = gemstoneRepository.findByType(type);
+            } else {
+                gems = gemstoneRepository.findAll();
+            }
         } else {
-            gems = gemstoneRepository.findByReservationStatus(status);
+            Gemstone.ReservationStatus resStatus = Gemstone.ReservationStatus.valueOf(status.toUpperCase());
+            if (type != null && !type.isBlank()) {
+                gems = gemstoneRepository.findByReservationStatusAndType(resStatus, type);
+            } else {
+                gems = gemstoneRepository.findByReservationStatus(resStatus);
+            }
         }
 
         // Clarity filter (in-memory — small dataset)
@@ -54,7 +62,9 @@ public class GemstoneService {
     }
 
     public Gemstone create(Gemstone gemstone) {
-        gemstone.setReservationStatus(Gemstone.ReservationStatus.DRAFT);
+        if (gemstone.getReservationStatus() == null) {
+            gemstone.setReservationStatus(Gemstone.ReservationStatus.DRAFT);
+        }
         return gemstoneRepository.save(gemstone);
     }
 
@@ -74,6 +84,9 @@ public class GemstoneService {
         existing.setPrice(updated.getPrice());
         existing.setDescription(updated.getDescription());
         existing.setImageUrl(updated.getImageUrl());
+        if (updated.getReservationStatus() != null) {
+            existing.setReservationStatus(updated.getReservationStatus());
+        }
         return gemstoneRepository.save(existing);
     }
 

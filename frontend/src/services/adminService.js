@@ -1,34 +1,41 @@
+import apiClient from './apiClient';
+
 /**
  * adminService.js
  * 
- * Mock service functions for Dashboard CRUD operations.
- * Simulates network latency and resolves with mock response structures.
+ * Live API service functions for Dashboard CRUD operations.
  */
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 export async function addGem(gemData) {
-  await delay(600);
-  console.log('Mock API: Add Gem', gemData);
-  return {
-    success: true,
-    gem: {
-      ...gemData,
-      id: `new-gem-${Date.now()}` // Mock ID generation
-    }
-  };
+  try {
+    const response = await apiClient.post('/gems', gemData);
+    return { success: true, gem: response.data };
+  } catch (error) {
+    console.error("Error adding gem:", error);
+    throw error;
+  }
 }
 
 export async function updateGem(id, gemData) {
-  await delay(600);
-  console.log(`Mock API: Update Gem ${id}`, gemData);
-  return { success: true, gem: { ...gemData, id } };
+  try {
+    const response = await apiClient.put(`/gems/${id}`, gemData);
+    return { success: true, gem: response.data };
+  } catch (error) {
+    console.error(`Error updating gem ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function deleteGem(id) {
-  await delay(600);
-  console.log(`Mock API: Delete Gem ${id}`);
-  return { success: true };
+  try {
+    await apiClient.delete(`/gems/${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Error deleting gem ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function createAuction(auctionData) {

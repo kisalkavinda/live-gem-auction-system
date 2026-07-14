@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchGems } from '../data/mockGems'
+import { fetchGems } from '../services/gemService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 

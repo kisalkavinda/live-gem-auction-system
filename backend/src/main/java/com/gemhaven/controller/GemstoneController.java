@@ -27,7 +27,7 @@ public class GemstoneController {
             @RequestParam(required = false) String type,
             @RequestParam(required = false) String clarity,
             @RequestParam(required = false) String sort,
-            @RequestParam(defaultValue = "PUBLISHED") Gemstone.ReservationStatus status
+            @RequestParam(defaultValue = "PUBLISHED") String status
     ) {
         return ResponseEntity.ok(gemstoneService.getAll(type, clarity, sort, status));
     }
