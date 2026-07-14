@@ -53,9 +53,13 @@ export default function LoginPage() {
     try {
       const response = await loginUser(formData)
       console.log('Login successful:', response)
-      // On success, normally you'd set context/store token here.
-      // Redirecting to home for now.
-      navigate('/')
+      
+      // Redirect to admin panel if the user is an admin
+      if (response.user && response.user.role === 'ADMIN') {
+        navigate('/admin')
+      } else {
+        navigate('/')
+      }
     } catch (err) {
       setServerError(err.message || 'Login failed. Please try again.')
     } finally {
