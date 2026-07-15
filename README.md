@@ -95,3 +95,8 @@ git push origin feature/your-feature-name
 | Chamindu Shenal | Frontend Developer |
 | Isuri Pathirana | Frontend Developer |
 | HKP Pamuditha | Database / QA |
+
+
+
+Email: admin@gemhaven.com
+Password: admin123
