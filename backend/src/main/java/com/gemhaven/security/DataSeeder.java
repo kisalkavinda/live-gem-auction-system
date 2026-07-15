@@ -1,12 +1,15 @@
 package com.gemhaven.security;
 
+import com.gemhaven.model.Auction;
 import com.gemhaven.model.Gemstone;
+import com.gemhaven.repository.AuctionRepository;
 import com.gemhaven.repository.GemstoneRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,9 +18,11 @@ import java.util.List;
 public class DataSeeder implements CommandLineRunner {
 
     private final GemstoneRepository gemstoneRepository;
+    private final AuctionRepository auctionRepository;
 
-    public DataSeeder(GemstoneRepository gemstoneRepository) {
+    public DataSeeder(GemstoneRepository gemstoneRepository, AuctionRepository auctionRepository) {
         this.gemstoneRepository = gemstoneRepository;
+        this.auctionRepository = auctionRepository;
     }
 
     @Override
@@ -41,6 +46,17 @@ public class DataSeeder implements CommandLineRunner {
 
             gemstoneRepository.saveAll(gems);
             System.out.println("[INFO] " + gems.size() + " gemstones seeded successfully.");
+
+            if (auctionRepository.count() == 0) {
+                System.out.println("[INFO] Seeding initial auctions...");
+                List<Auction> auctions = new ArrayList<>();
+                auctions.add(createAuction(gems.get(0), 1200000, 50000, LocalDateTime.now().plusHours(2), Auction.AuctionStatus.LIVE, 1240000.0));
+                auctions.add(createAuction(gems.get(1), 2500000, 100000, LocalDateTime.now().plusHours(4), Auction.AuctionStatus.LIVE, 2890000.0));
+                auctions.add(createAuction(gems.get(2), 2000000, 50000, LocalDateTime.now().plusDays(1), Auction.AuctionStatus.SCHEDULED, null));
+                auctions.add(createAuction(gems.get(3), 4000000, 150000, LocalDateTime.now().plusHours(1), Auction.AuctionStatus.LIVE, 4150000.0));
+                auctionRepository.saveAll(auctions);
+                System.out.println("[INFO] " + auctions.size() + " auctions seeded successfully.");
+            }
         } else {
             System.out.println("[INFO] Gemstones already exist. Skipping seed.");
         }
@@ -63,5 +79,18 @@ public class DataSeeder implements CommandLineRunner {
         g.setImageUrl(img);
         g.setReservationStatus(Gemstone.ReservationStatus.PUBLISHED); // Set to PUBLISHED so they appear in Shop
         return g;
+    }
+
+    private Auction createAuction(Gemstone gem, double startingPrice, double minIncrement, LocalDateTime endTime, Auction.AuctionStatus status, Double currentBid) {
+        Auction a = new Auction();
+        a.setGemstone(gem);
+        a.setStartingPrice(BigDecimal.valueOf(startingPrice));
+        a.setMinIncrement(BigDecimal.valueOf(minIncrement));
+        a.setEndTime(endTime);
+        a.setStatus(status);
+        if (currentBid != null && currentBid > 0) {
+            a.setCurrentBid(BigDecimal.valueOf(currentBid));
+        }
+        return a;
     }
 }
