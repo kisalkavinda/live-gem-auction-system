@@ -38,7 +38,20 @@ export default function AdminLandPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const res = await addLandListing(formData)
+      let statusEnum = 'AVAILABLE';
+      if (formData.status === 'Reserved') statusEnum = 'RESERVED';
+      if (formData.status === 'Under Survey') statusEnum = 'UNDER_SURVEY';
+      
+      const payload = {
+        name: formData.name,
+        region: formData.region,
+        sizeAcres: parseFloat(formData.size) || null,
+        yieldPotential: formData.yieldPotential,
+        description: formData.description,
+        status: statusEnum
+      };
+
+      const res = await addLandListing(payload)
       addLandState(res.land)
       setIsModalOpen(false)
     } catch (err) {
@@ -170,9 +183,9 @@ export default function AdminLandPage() {
             <div key={land.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
               <div style={{ color: '#fff', fontWeight: 500 }}>{land.name || land.location}</div>
               <div>{land.region}</div>
-              <div>{land.size}</div>
+              <div>{land.sizeAcres ? `${land.sizeAcres} Acres` : land.size}</div>
               <div>{land.yieldPotential}</div>
-              <div>{getStatusBadge(land.status)}</div>
+              <div>{getStatusBadge(land.status === 'UNDER_SURVEY' ? 'Under Survey' : land.status === 'RESERVED' ? 'Reserved' : 'Available')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => handleDeleteLand(land.id)}
@@ -205,10 +218,10 @@ export default function AdminLandPage() {
           ) : (
             bookings.map(booking => (
               <div key={booking.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr 1fr 1fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-                <div>{new Date(booking.date).toLocaleDateString()}</div>
-                <div style={{ color: '#fff', fontWeight: 500 }}>{booking.name}</div>
+                <div>{new Date(booking.preferredVisitDate || booking.date).toLocaleDateString()}</div>
+                <div style={{ color: '#fff', fontWeight: 500 }}>{booking.fullName || booking.name}</div>
                 <div>{booking.email}</div>
-                <div>{booking.landPlotId}</div>
+                <div>{booking.landPlot?.name || booking.landPlotId}</div>
                 <div>{getStatusBadge(booking.status)}</div>
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                   {booking.status === 'Pending' && (

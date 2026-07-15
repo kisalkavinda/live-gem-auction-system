@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { fetchGems } from '../services/gemService';
-import { MOCK_LAND_PLOTS } from '../data/mockLandPlots';
+import apiClient from '../services/apiClient';
 import { mockBuyers } from '../data/mockBuyers';
-import { mockBookings } from '../data/mockBookings';
 
 const DashboardContext = createContext();
 
@@ -11,6 +10,10 @@ export function DashboardProvider({ children }) {
   
   useEffect(() => {
     fetchGems({ status: 'ALL' }).then(data => setGems(data));
+    
+    // Fetch live lands and bookings for the admin dashboard
+    apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
+    apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
   }, []);
   
   // Since we don't have a separate mockAuctions file, we derive initial mock auctions 
@@ -49,9 +52,9 @@ export function DashboardProvider({ children }) {
     }
   ]);
   
-  const [lands, setLands] = useState(MOCK_LAND_PLOTS);
+  const [lands, setLands] = useState([]);
   const [buyers, setBuyers] = useState(mockBuyers);
-  const [bookings, setBookings] = useState(mockBookings);
+  const [bookings, setBookings] = useState([]);
 
   // Expose updater functions to be called after adminService resolves
   const addGemState = (gem) => setGems(prev => [gem, ...prev]);
