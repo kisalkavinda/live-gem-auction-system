@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
-import { addLandListing, deleteLandListing, updateBookingStatus } from '../../services/adminService'
+import { addLandListing, deleteLandListing, updateBookingStatus, uploadImage } from '../../services/adminService'
 
 export default function AdminLandPage() {
   const { lands, bookings, addLandState, deleteLandState, updateBookingStatusState } = useDashboard()
@@ -9,6 +9,7 @@ export default function AdminLandPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
   
   // Land form data
   const [formData, setFormData] = useState({
@@ -31,6 +32,7 @@ export default function AdminLandPage() {
       description: '',
       status: 'Available'
     })
+    setSelectedFile(null)
     setIsModalOpen(true)
   }
 
@@ -42,13 +44,20 @@ export default function AdminLandPage() {
       if (formData.status === 'Reserved') statusEnum = 'RESERVED';
       if (formData.status === 'Under Survey') statusEnum = 'UNDER_SURVEY';
       
+      let imageUrl = null;
+      if (selectedFile) {
+        const uploadRes = await uploadImage(selectedFile);
+        imageUrl = uploadRes.url;
+      }
+      
       const payload = {
         name: formData.name,
         region: formData.region,
         sizeAcres: parseFloat(formData.size) || null,
         yieldPotential: formData.yieldPotential,
         description: formData.description,
-        status: statusEnum
+        status: statusEnum,
+        images: imageUrl ? [imageUrl] : []
       };
 
       const res = await addLandListing(payload)
@@ -293,13 +302,19 @@ export default function AdminLandPage() {
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
-                <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  <option style={{ background: '#050508' }}>Available</option>
-                  <option style={{ background: '#050508' }}>Reserved</option>
-                  <option style={{ background: '#050508' }}>Under Survey</option>
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
+                  <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
+                    <option style={{ background: '#050508' }}>Available</option>
+                    <option style={{ background: '#050508' }}>Reserved</option>
+                    <option style={{ background: '#050508' }}>Under Survey</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Image</label>
+                  <input type="file" onChange={e => setSelectedFile(e.target.files[0])} accept="image/*" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.65rem', color: '#fff', borderRadius: '2px', fontSize: '0.75rem' }} />
+                </div>
               </div>
 
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
