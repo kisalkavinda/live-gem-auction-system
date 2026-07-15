@@ -3,11 +3,18 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
 const NAV_LINKS = [
+<<<<<<< HEAD
   { label: 'Auctions', to: '/auctions' },
   { label: 'Shop', to: '/shop' },
   { label: 'Land', to: '/land' },
   { label: 'Education', to: '/knowledge-hub' },
   { label: 'About', to: '/#about' },
+=======
+  { label: 'Auctions', path: '/#auctions' },
+  { label: 'Shop', path: '/shop' },
+  { label: 'Education', path: '/#education' },
+  { label: 'About', path: '/#about' }
+>>>>>>> d4ea919bcc7e0a0d06eb5138c245225c032587ce
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -185,7 +192,11 @@ export default function Navbar({ visible }) {
           {NAV_LINKS.map((item) => (
             <MagneticItem key={item.label} range={35} strength={10}>
               <Link
+<<<<<<< HEAD
                 to={item.to}
+=======
+                to={item.path}
+>>>>>>> d4ea919bcc7e0a0d06eb5138c245225c032587ce
                 style={{
                   display: 'inline-block',
                   color: 'rgba(232,224,208,0.65)',
@@ -207,6 +218,7 @@ export default function Navbar({ visible }) {
         </div>
 
         {/* Actions Button Panel */}
+<<<<<<< HEAD
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', flexShrink: 0 }}>
           {user ? (
             <>
@@ -321,6 +333,61 @@ export default function Navbar({ visible }) {
               </MagneticItem>
             </>
           )}
+=======
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+          <MagneticItem range={38} strength={11}>
+            <button
+              style={{
+                padding: '0.45rem 1.15rem',
+                border: '1px solid rgba(201,168,76,0.3)',
+                borderRadius: '100px',
+                background: 'rgba(255,255,255,0.01)',
+                color: 'rgba(232,224,208,0.8)',
+                fontSize: '0.68rem',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: 'all 0.25s ease',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(201,168,76,0.08)'
+                e.currentTarget.style.borderColor = '#C9A84C'
+                e.currentTarget.style.color = '#fff'
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.01)'
+                e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)'
+                e.currentTarget.style.color = 'rgba(232,224,208,0.8)'
+              }}
+            >
+              Log In
+            </button>
+          </MagneticItem>
+
+          <MagneticItem range={38} strength={12}>
+            <button
+              style={{
+                padding: '0.45rem 1.35rem',
+                border: 'none',
+                borderRadius: '100px',
+                background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
+                color: '#0A0A0D',
+                fontSize: '0.68rem',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                fontWeight: 700,
+                transition: 'opacity 0.25s, transform 0.25s',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.opacity = '0.85'; e.currentTarget.style.transform = 'scale(1.02)' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.transform = 'scale(1)' }}
+            >
+              Register
+            </button>
+          </MagneticItem>
+>>>>>>> d4ea919bcc7e0a0d06eb5138c245225c032587ce
         </div>
       </div>
 
