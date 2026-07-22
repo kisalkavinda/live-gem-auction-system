@@ -96,11 +96,12 @@ export default function LandDetailPage() {
     setBookingStatus('submitting')
     try {
       const res = await submitSiteVisitBooking({ ...formData, plotId: plot.id })
-      setBookingRef(res.bookingReference)
+      const refCode = res?.id ? `BK-${String(res.id).padStart(4, '0')}` : `BK-${Date.now().toString().slice(-4)}`;
+      setBookingRef(refCode)
       setBookingStatus('success')
     } catch (err) {
       setBookingStatus('idle')
-      alert("Failed to submit booking.")
+      alert("Failed to submit booking. Please check your connection or log in.")
     }
   }
 

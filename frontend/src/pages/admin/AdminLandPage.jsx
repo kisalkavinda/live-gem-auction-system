@@ -82,8 +82,8 @@ export default function AdminLandPage() {
 
   const handleConfirmBooking = async (id) => {
     try {
-      await updateBookingStatus(id, 'Confirmed')
-      updateBookingStatusState(id, 'Confirmed')
+      await updateBookingStatus(id, 'CONFIRMED')
+      updateBookingStatusState(id, 'CONFIRMED')
     } catch (err) {
       console.error(err)
     }
@@ -91,8 +91,8 @@ export default function AdminLandPage() {
 
   const handleCompleteBooking = async (id) => {
     try {
-      await updateBookingStatus(id, 'Completed')
-      updateBookingStatusState(id, 'Completed')
+      await updateBookingStatus(id, 'COMPLETED')
+      updateBookingStatusState(id, 'COMPLETED')
     } catch (err) {
       console.error(err)
     }
@@ -103,18 +103,15 @@ export default function AdminLandPage() {
     let border = 'rgba(255,255,255,0.2)'
     let color = '#fff'
 
-    if (status === 'Available' || status === 'Active') {
+    const s = (status || '').toUpperCase();
+    if (s === 'AVAILABLE' || s === 'ACTIVE' || s === 'CONFIRMED' || s === 'COMPLETED') {
       bg = 'rgba(74, 222, 128, 0.1)'
       border = 'rgba(74, 222, 128, 0.3)'
       color = '#4ADE80'
-    } else if (status === 'Pending' || status === 'Reserved' || status === 'Under Survey') {
+    } else if (s === 'PENDING' || s === 'RESERVED' || s === 'UNDER_SURVEY' || s === 'UNDER SURVEY') {
       bg = 'rgba(201,168,76,0.15)'
       border = 'rgba(201,168,76,0.4)'
       color = '#C9A84C'
-    } else if (status === 'Confirmed' || status === 'Completed') {
-      bg = 'rgba(74, 222, 128, 0.1)'
-      border = 'rgba(74, 222, 128, 0.3)'
-      color = '#4ADE80'
     }
 
     return (
@@ -233,7 +230,7 @@ export default function AdminLandPage() {
                 <div>{booking.landPlot?.name || booking.landPlotId}</div>
                 <div>{getStatusBadge(booking.status)}</div>
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                  {booking.status === 'Pending' && (
+                  {(booking.status === 'PENDING' || booking.status === 'Pending') && (
                     <button
                       onClick={() => handleConfirmBooking(booking.id)}
                       style={{
@@ -244,7 +241,7 @@ export default function AdminLandPage() {
                       Confirm
                     </button>
                   )}
-                  {booking.status === 'Confirmed' && (
+                  {(booking.status === 'CONFIRMED' || booking.status === 'Confirmed') && (
                     <button
                       onClick={() => handleCompleteBooking(booking.id)}
                       style={{

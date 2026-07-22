@@ -78,6 +78,15 @@ public class LandController {
         return ResponseEntity.ok(landService.getAllBookings(status));
     }
 
+    /** GET /api/land/my-bookings — Authenticated User */
+    @GetMapping("/my-bookings")
+    public ResponseEntity<List<Booking>> getMyBookings(@AuthenticationPrincipal User authenticatedUser) {
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(landService.getUserBookings(authenticatedUser));
+    }
+
     /** PUT /api/land/bookings/{id}/status — ADMIN only */
     @PutMapping("/bookings/{id}/status")
     public ResponseEntity<Booking> updateBookingStatus(

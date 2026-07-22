@@ -32,9 +32,19 @@ export async function submitSiteVisitBooking(bookingData) {
       message: bookingData.notes
     };
     const response = await apiClient.post(`/land/${bookingData.plotId}/bookings`, payload);
-    return response.data; // usually returns the created booking
+    return response.data; // returns the created booking
   } catch (error) {
     console.error(`Error submitting booking for land ${bookingData.plotId}:`, error);
     throw error;
+  }
+}
+
+export async function fetchMyBookings() {
+  try {
+    const response = await apiClient.get('/land/my-bookings');
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching user site visit bookings:", error);
+    return [];
   }
 }
