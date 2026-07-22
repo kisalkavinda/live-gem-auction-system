@@ -38,7 +38,11 @@ function SkeletonCard({ spanTwo = false }) {
 // ─── Article card ────────────────────────────────────────────────────────────────
 function ArticleCard({ article, index, spanTwo = false }) {
   const cardRef = useRef(null)
+  const glowRef = useRef(null)
+  const imgRef = useRef(null)
   const navigate = useNavigate()
+  const [coords, setCoords] = useState({ x: 0, y: 0 })
+  const [hovered, setHovered] = useState(false)
 
   useEffect(() => {
     const card = cardRef.current
@@ -54,15 +58,73 @@ function ArticleCard({ article, index, spanTwo = false }) {
     )
 
     function onMove(e) {
-      if (spanTwo) return; // Disable heavy 3D on featured full-width cards
       const rect = card.getBoundingClientRect()
       const x = (e.clientX - rect.left) / rect.width - 0.5
       const y = (e.clientY - rect.top) / rect.height - 0.5
-      gsap.to(card, { rotateY: x * 8, rotateX: -y * 8, translateZ: 12, duration: 0.25, ease: 'power2.out', transformPerspective: 800 })
+      
+      setCoords({ x, y })
+      setHovered(true)
+
+      if (!spanTwo) {
+        gsap.to(card, { 
+          rotateY: x * 10, 
+          rotateX: -y * 10, 
+          translateZ: 14, 
+          duration: 0.25, 
+          ease: 'power2.out', 
+          transformPerspective: 800 
+        })
+      }
+
+      if (imgRef.current) {
+        gsap.to(imgRef.current, {
+          scale: 1.08,
+          x: x * 16,
+          y: y * 16,
+          duration: 0.3,
+          ease: 'power2.out',
+        })
+      }
+
+      if (glowRef.current) {
+        gsap.to(glowRef.current, {
+          opacity: 0.6,
+          x: x * 30,
+          y: y * 30,
+          duration: 0.3,
+          ease: 'power2.out',
+        })
+      }
     }
+
     function onLeave() {
-      if (spanTwo) return;
-      gsap.to(card, { rotateY: 0, rotateX: 0, translateZ: 0, duration: 0.6, ease: 'elastic.out(1, 0.5)' })
+      setHovered(false)
+      if (!spanTwo) {
+        gsap.to(card, { 
+          rotateY: 0, 
+          rotateX: 0, 
+          translateZ: 0, 
+          duration: 0.6, 
+          ease: 'power3.out' 
+        })
+      }
+      if (imgRef.current) {
+        gsap.to(imgRef.current, {
+          scale: 1,
+          x: 0,
+          y: 0,
+          duration: 0.6,
+          ease: 'power3.out',
+        })
+      }
+      if (glowRef.current) {
+        gsap.to(glowRef.current, {
+          opacity: 0,
+          x: 0,
+          y: 0,
+          duration: 0.4,
+        })
+      }
     }
     
     card.addEventListener('mousemove', onMove)
@@ -73,6 +135,8 @@ function ArticleCard({ article, index, spanTwo = false }) {
     }
   }, [index, spanTwo])
 
+  const accentColor = '#C9A84C'
+
   return (
     <div
       ref={cardRef}
@@ -81,37 +145,81 @@ function ArticleCard({ article, index, spanTwo = false }) {
         gridColumn: spanTwo ? '1 / -1' : 'auto',
         opacity: 0,
         position: 'relative',
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid rgba(255,255,255,0.07)',
-        borderRadius: '4px',
+        background: hovered ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.005)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.04)',
+        borderRadius: '6px',
         overflow: 'hidden',
         cursor: 'pointer',
         willChange: 'transform',
         transformStyle: 'preserve-3d',
-        transition: 'border-color 0.3s, transform 0.3s',
+        transition: 'background 0.5s ease, border-color 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1)',
         display: spanTwo ? 'flex' : 'block',
         flexDirection: spanTwo ? 'row' : 'column',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.borderColor = `rgba(201,168,76,0.6)`
-        if (spanTwo) e.currentTarget.style.transform = 'translateY(-4px)'
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-        if (spanTwo) e.currentTarget.style.transform = 'none'
+        boxShadow: hovered ? '0 30px 65px -25px rgba(201,168,76,0.18)' : '0 12px 40px rgba(0,0,0,0.3)',
+        transform: (spanTwo && hovered) ? 'translateY(-6px)' : 'none',
       }}
     >
+      {/* 1. Dynamic Refractive Facet Overlay */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(${110 + coords.x * 60}deg, transparent 38%, rgba(201,168,76,0.12) 50%, transparent 62%)`,
+          opacity: hovered ? 1 : 0,
+          mixBlendMode: 'color-dodge',
+          pointerEvents: 'none',
+          transition: 'opacity 0.4s ease',
+          zIndex: 2,
+        }}
+      />
+
+      {/* 2. Interactive Outer Radial Glow */}
+      <div
+        ref={glowRef}
+        style={{
+          position: 'absolute',
+          inset: '-60%',
+          background: `radial-gradient(circle at center, rgba(201,168,76,0.18), transparent 60%)`,
+          opacity: 0,
+          pointerEvents: 'none',
+          willChange: 'transform, opacity',
+          zIndex: 1,
+        }}
+      />
+
+      {/* 3. Perimeter Gradient Light Trace */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '6px',
+          padding: '1px',
+          background: hovered 
+            ? `conic-gradient(from ${((Math.atan2(coords.y, coords.x) * 180) / Math.PI + 180)}deg, transparent, ${accentColor}dd, transparent 40%, transparent)` 
+            : 'linear-gradient(135deg, rgba(255,255,255,0.03), transparent, rgba(255,255,255,0.02))',
+          WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+          pointerEvents: 'none',
+          zIndex: 3,
+          transition: 'background 0.4s ease',
+        }}
+      />
+
       {/* Visual */}
       <div style={{
         height: spanTwo ? 'auto' : 180,
         flex: spanTwo ? '1 1 50%' : 'none',
-        background: `rgba(201,168,76,0.05)`,
+        background: `rgba(201,168,76,0.03)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderBottom: spanTwo ? 'none' : `1px solid rgba(255,255,255,0.1)`,
-        borderRight: spanTwo ? `1px solid rgba(255,255,255,0.1)` : 'none',
+        borderBottom: spanTwo ? 'none' : `1px solid rgba(255,255,255,0.06)`,
+        borderRight: spanTwo ? `1px solid rgba(255,255,255,0.06)` : 'none',
+        overflow: 'hidden',
       }}>
         <img
+          ref={imgRef}
           src={article.coverImage}
           alt={article.title}
           style={{
@@ -119,20 +227,31 @@ function ArticleCard({ article, index, spanTwo = false }) {
             objectFit: 'cover',
             position: 'absolute',
             top: 0, left: 0,
-            filter: 'brightness(0.8) contrast(1.1)'
+            filter: hovered ? 'brightness(0.95) contrast(1.05)' : 'brightness(0.72) contrast(1.1)',
+            willChange: 'transform, filter',
+            transition: 'filter 0.5s ease',
           }}
         />
 
-        {/* Category badge */}
+        {/* Upgraded Category badge */}
         <div style={{
           position: 'absolute', top: '1rem', left: '1rem',
-          padding: '0.3rem 0.6rem',
-          background: `rgba(0,0,0,0.7)`,
-          border: `1px solid rgba(201,168,76,0.5)`,
-          borderRadius: '2px',
+          padding: '0.35rem 0.75rem',
+          background: `rgba(8,7,12,0.65)`,
+          border: `1px solid rgba(201,168,76,0.4)`,
+          borderRadius: '100px',
           backdropFilter: 'blur(8px)',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+          zIndex: 4,
         }}>
-          <span style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C' }}>
+          <span style={{ 
+            fontSize: '0.58rem', 
+            letterSpacing: '0.15em', 
+            textTransform: 'uppercase', 
+            color: '#C9A84C',
+            fontWeight: 600,
+            textShadow: '0 0 6px rgba(201,168,76,0.4)',
+          }}>
             {article.category}
           </span>
         </div>
@@ -140,31 +259,41 @@ function ArticleCard({ article, index, spanTwo = false }) {
 
       {/* Info */}
       <div style={{ 
-        padding: spanTwo ? '3rem' : '1.25rem', 
+        padding: spanTwo ? '3.5rem 3rem' : '1.5rem 1.25rem', 
         flex: spanTwo ? '1 1 50%' : 'none',
-        display: 'flex', flexDirection: 'column', justifyContent: 'center'
+        display: 'flex', flexDirection: 'column', justifyContent: 'center',
+        position: 'relative',
+        zIndex: 3,
+        transform: 'translateZ(18px)',
       }}>
         <h3 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: spanTwo ? '2rem' : '1.25rem', 
-          fontWeight: 400, color: '#fff',
-          marginBottom: '0.75rem', lineHeight: 1.25,
+          fontSize: spanTwo ? '2.1rem' : '1.3rem', 
+          fontWeight: 400, 
+          color: hovered ? '#fff' : '#E8E0D0',
+          marginBottom: '0.85rem', 
+          lineHeight: 1.25,
+          transition: 'color 0.3s ease',
         }}>
           {article.title}
         </h3>
         
         <p style={{
-          fontSize: '0.85rem', color: 'rgba(255,255,255,0.5)',
-          marginBottom: '1.25rem', lineHeight: 1.6,
-          display: '-webkit-box', WebkitLineClamp: spanTwo ? 3 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden'
+          fontSize: '0.85rem', 
+          color: hovered ? 'rgba(232,224,208,0.72)' : 'rgba(232,224,208,0.45)',
+          marginBottom: '1.5rem', 
+          lineHeight: 1.6,
+          display: '-webkit-box', WebkitLineClamp: spanTwo ? 3 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden',
+          transition: 'color 0.3s ease',
         }}>
           {article.excerpt}
         </p>
 
         <div style={{
           display: 'flex', gap: '0.75rem', alignItems: 'center',
-          fontSize: '0.65rem', color: 'rgba(255,255,255,0.35)',
-          letterSpacing: '0.05em', marginTop: spanTwo ? 'auto' : 0
+          fontSize: '0.65rem', color: hovered ? 'rgba(232,224,208,0.4)' : 'rgba(232,224,208,0.28)',
+          letterSpacing: '0.05em', marginTop: spanTwo ? 'auto' : 0,
+          transition: 'color 0.3s ease',
         }}>
           <span>{article.readTime}</span>
           <span>·</span>
@@ -174,6 +303,7 @@ function ArticleCard({ article, index, spanTwo = false }) {
     </div>
   )
 }
+
 
 
 // ─── Main KnowledgeHubPage ───────────────────────────────────────────────────────────
