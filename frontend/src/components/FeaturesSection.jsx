@@ -1,30 +1,59 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '../utils/gsap'
 
 const features = [
   {
-    icon: '◈',
     title: 'GIA Certified',
     desc: 'Every stone carries full GIA documentation — grade, origin, weight, treatment history. Zero ambiguity.',
-    accent: '#B91C1C',
+    accent: '#ef4444', // Premium Ruby Red
+    icon: (accent) => (
+      <svg viewBox="0 0 100 100" width="44" height="44" style={{ fill: 'none', stroke: accent, strokeWidth: 1.5, overflow: 'visible' }}>
+        <polygon points="50,12 85,32 85,68 50,88 15,68 15,32" />
+        <line x1="15" y1="32" x2="85" y2="32" />
+        <line x1="15" y1="32" x2="50" y2="88" />
+        <line x1="85" y1="32" x2="50" y2="88" />
+        <line x1="50" y1="12" x2="50" y2="88" />
+        <line x1="50" y1="12" x2="15" y2="32" />
+        <line x1="50" y1="12" x2="85" y2="32" />
+        <circle cx="50" cy="50" r="3" fill={accent} opacity="0.7" />
+      </svg>
+    )
   },
   {
-    icon: '⬡',
     title: 'Live Bidding',
     desc: 'Real-time auction engine. Sub-100ms bid propagation. Every participant sees the same price simultaneously.',
-    accent: '#1D4ED8',
+    accent: '#3b82f6', // Sapphire Blue
+    icon: (accent) => (
+      <svg viewBox="0 0 100 100" width="44" height="44" style={{ fill: 'none', stroke: accent, strokeWidth: 1.5, overflow: 'visible' }}>
+        <path d="M32,45 L50,27 L70,47 L52,65 Z" />
+        <line x1="42.5" y1="54.5" x2="20" y2="77" strokeWidth="2.5" />
+        <line x1="15" y1="84" x2="45" y2="84" strokeWidth="2" />
+        {/* Radar pulses */}
+        <path d="M65,30 A 28 28 0 0 1 88,58" strokeDasharray="3 3" />
+        <path d="M72,20 A 40 40 0 0 1 97,58" />
+      </svg>
+    )
   },
   {
-    icon: '◇',
     title: 'Escrow Protected',
     desc: 'Funds held in escrow until gem delivery confirmed. Fully insured transit on every transaction.',
-    accent: '#15803D',
+    accent: '#10b981', // Emerald Green
+    icon: (accent) => (
+      <svg viewBox="0 0 100 100" width="44" height="44" style={{ fill: 'none', stroke: accent, strokeWidth: 1.5, overflow: 'visible' }}>
+        <path d="M30,22 L50,12 L70,22 C70,48 50,78 50,78 C50,78 30,48 30,22 Z" />
+        <path d="M42,42 L48,48 L58,36" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="50" cy="86" r="3.5" fill={accent} />
+        <circle cx="50" cy="86" r="8" stroke={accent} strokeWidth="1" strokeDasharray="2 2" />
+      </svg>
+    )
   },
 ]
 
 function FeatureCard({ feature, index }) {
   const cardRef = useRef(null)
   const glowRef = useRef(null)
+  const [coords, setCoords] = useState({ x: 0, y: 0 })
+  const [hovered, setHovered] = useState(false)
 
   useEffect(() => {
     const card = cardRef.current
@@ -34,30 +63,34 @@ function FeatureCard({ feature, index }) {
       const rect = card.getBoundingClientRect()
       const x = (e.clientX - rect.left) / rect.width - 0.5
       const y = (e.clientY - rect.top) / rect.height - 0.5
+      
+      setCoords({ x, y })
+      setHovered(true)
 
       gsap.to(card, {
-        rotateY: x * 18,
-        rotateX: -y * 18,
+        rotateY: x * 15,
+        rotateX: -y * 15,
         duration: 0.3,
         ease: 'power2.out',
-        transformPerspective: 800,
+        transformPerspective: 1000,
       })
 
       gsap.to(glowRef.current, {
-        opacity: 0.6,
-        x: x * 40,
-        y: y * 40,
+        opacity: 0.75,
+        x: x * 35,
+        y: y * 35,
         duration: 0.3,
         ease: 'power2.out',
       })
     }
 
     function onLeave() {
+      setHovered(false)
       gsap.to(card, {
         rotateY: 0,
         rotateX: 0,
-        duration: 0.6,
-        ease: 'elastic.out(1, 0.6)',
+        duration: 0.65,
+        ease: 'power3.out',
       })
       gsap.to(glowRef.current, {
         opacity: 0,
@@ -81,17 +114,17 @@ function FeatureCard({ feature, index }) {
 
     gsap.fromTo(
       card,
-      { opacity: 0, y: 60, scale: 0.92 },
+      { opacity: 0, y: 60, scale: 0.94 },
       {
         opacity: 1,
         y: 0,
         scale: 1,
         duration: 0.8,
         ease: 'power3.out',
-        delay: index * 0.12,
+        delay: index * 0.15,
         scrollTrigger: {
           trigger: card,
-          start: 'top 85%',
+          start: 'top 88%',
           toggleActions: 'play none none reverse',
         },
       }
@@ -103,69 +136,110 @@ function FeatureCard({ feature, index }) {
       ref={cardRef}
       style={{
         position: 'relative',
-        padding: '2.5rem',
-        background: 'rgba(255,255,255,0.03)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: '4px',
+        padding: '3rem 2.5rem',
+        background: hovered ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.005)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(255,255,255,0.04)',
+        borderRadius: '8px',
         cursor: 'default',
         willChange: 'transform',
         transformStyle: 'preserve-3d',
         overflow: 'hidden',
+        transition: 'background 0.5s ease, border 0.5s ease',
+        boxShadow: hovered ? `0 25px 60px -25px ${feature.accent}30` : 'none',
       }}
     >
-      {/* Glow */}
+      {/* 1. Dynamic Refractive Facet Overlay (moves with mouse, mimics reflection) */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: `linear-gradient(${110 + coords.x * 60}deg, transparent 38%, ${feature.accent}20 50%, transparent 62%)`,
+          opacity: hovered ? 1 : 0,
+          mixBlendMode: 'color-dodge',
+          pointerEvents: 'none',
+          transition: 'opacity 0.4s ease',
+          zIndex: 1,
+        }}
+      />
+
+      {/* 2. Interactive Outer Radial Glow */}
       <div
         ref={glowRef}
         style={{
           position: 'absolute',
-          inset: '-50%',
-          background: `radial-gradient(circle at center, ${feature.accent}30, transparent 60%)`,
+          inset: '-60%',
+          background: `radial-gradient(circle at center, ${feature.accent}35, transparent 65%)`,
           opacity: 0,
           pointerEvents: 'none',
           willChange: 'transform, opacity',
+          zIndex: 0,
         }}
       />
 
-      {/* Top border accent */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '1px',
-        background: `linear-gradient(90deg, transparent, ${feature.accent}80, transparent)`,
-      }} />
+      {/* 3. Perimeter Gradient Light Trace */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '8px',
+          padding: '1.5px',
+          background: hovered 
+            ? `conic-gradient(from ${timeToAngle(coords.x, coords.y)}deg, transparent, ${feature.accent}dd, transparent 40%, transparent)` 
+            : 'linear-gradient(135deg, rgba(255,255,255,0.04), transparent, rgba(255,255,255,0.02))',
+          WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+          pointerEvents: 'none',
+          zIndex: 2,
+          transition: 'background 0.4s ease',
+        }}
+      />
 
-      <div style={{
-        fontSize: '2rem',
-        color: feature.accent,
-        marginBottom: '1.5rem',
-        display: 'block',
-      }}>
-        {feature.icon}
+      {/* Content wrapper */}
+      <div style={{ position: 'relative', zIndex: 3, transform: 'translateZ(30px)' }}>
+        
+        {/* Dynamic SVG Icon */}
+        <div style={{
+          marginBottom: '2rem',
+          display: 'inline-block',
+          transform: hovered ? 'scale(1.08) translateZ(10px)' : 'scale(1)',
+          transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        }}>
+          {feature.icon(feature.accent)}
+        </div>
+
+        <h3 style={{
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: '1.5rem',
+          fontWeight: 400,
+          color: hovered ? '#fff' : '#E8E0D0',
+          marginBottom: '0.85rem',
+          letterSpacing: '0.01em',
+          transition: 'color 0.3s ease',
+        }}>
+          {feature.title}
+        </h3>
+
+        <p style={{
+          fontSize: '0.88rem',
+          color: hovered ? 'rgba(232,224,208,0.72)' : 'rgba(232,224,208,0.45)',
+          lineHeight: 1.8,
+          fontWeight: 300,
+          transition: 'color 0.3s ease',
+        }}>
+          {feature.desc}
+        </p>
       </div>
-
-      <h3 style={{
-        fontFamily: "'Cormorant Garamond', serif",
-        fontSize: '1.4rem',
-        fontWeight: 400,
-        color: '#fff',
-        marginBottom: '0.75rem',
-        letterSpacing: '0.02em',
-      }}>
-        {feature.title}
-      </h3>
-
-      <p style={{
-        fontSize: '0.85rem',
-        color: 'rgba(255,255,255,0.45)',
-        lineHeight: 1.8,
-        fontWeight: 300,
-      }}>
-        {feature.desc}
-      </p>
     </div>
   )
+}
+
+// Helper to determine gradient angle based on mouse coordinates
+function timeToAngle(x, y) {
+  const angleRad = Math.atan2(y, x)
+  const angleDeg = (angleRad * 180) / Math.PI + 180
+  return angleDeg
 }
 
 export default function FeaturesSection() {
@@ -194,41 +268,45 @@ export default function FeaturesSection() {
     <section
       ref={sectionRef}
       style={{
-        background: '#050508',
-        padding: '10rem 6vw',
+        background: '#070503', // Match main cavern theme
+        padding: '11rem 6vw',
         position: 'relative',
         overflow: 'hidden',
       }}
     >
-      {/* Ambient gem glow background */}
+      {/* Ambient warm background illumination */}
       <div style={{
         position: 'absolute',
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        width: '80vw',
-        height: '80vw',
-        background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.04) 0%, transparent 65%)',
+        width: '90vw',
+        height: '90vw',
+        background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.02) 0%, transparent 68%)',
         pointerEvents: 'none',
+        zIndex: 0,
       }} />
 
-      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        <div ref={headingRef} style={{ opacity: 0, marginBottom: '5rem' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        
+        {/* Section title */}
+        <div ref={headingRef} style={{ opacity: 0, marginBottom: '5.5rem' }}>
           <span style={{
             display: 'block',
-            fontSize: '0.65rem',
-            letterSpacing: '0.3em',
+            fontSize: '0.62rem',
+            letterSpacing: '0.35em',
             textTransform: 'uppercase',
             color: '#C9A84C',
-            marginBottom: '0.75rem',
+            marginBottom: '0.9rem',
+            fontWeight: '600',
           }}>
             Why GemHaven
           </span>
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 'clamp(2rem, 4vw, 3.5rem)',
+            fontSize: 'clamp(2.2rem, 5vw, 3.8rem)',
             fontWeight: 300,
-            color: '#fff',
+            color: '#E8E0D0',
             letterSpacing: '-0.02em',
             lineHeight: 1.1,
           }}>
@@ -236,16 +314,26 @@ export default function FeaturesSection() {
           </h2>
         </div>
 
-        <div style={{
+        {/* Feature Grid */}
+        <div className="gh-features-grid" style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, 1fr)',
-          gap: '1.5rem',
+          gap: '2rem',
         }}>
           {features.map((f, i) => (
             <FeatureCard key={f.title} feature={f} index={i} />
           ))}
         </div>
       </div>
+
+      <style>{`
+        @media (max-width: 992px) {
+          .gh-features-grid {
+            grid-template-columns: 1fr !important;
+            gap: 1.8rem !important;
+          }
+        }
+      `}</style>
     </section>
   )
 }
