@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 // ─── Constants & Helpers ────────────────────────────────────────────────────
-const CATEGORIES = ['All', 'Mining & Origin', 'Buying Guide', 'Certification & Grading']
+const CATEGORIES = ['All', 'Gem History', 'Buying Guide', 'Certification & Grading', 'Mining & Origin']
 
 // ─── Skeleton card ───────────────────────────────────────────────────────────
 function SkeletonCard({ spanTwo = false }) {
@@ -53,6 +53,7 @@ function ArticleCard({ article, index, spanTwo = false }) {
       {
         opacity: 1, y: 0, duration: 0.6, ease: 'power3.out',
         delay: (index % 6) * 0.08,
+        scrollTrigger: { trigger: card, start: 'top 90%', toggleActions: 'play none none reverse' },
       }
     )
 
@@ -187,9 +188,28 @@ function ArticleCard({ article, index, spanTwo = false }) {
         }}
       />
 
+      {/* 3. Perimeter Gradient Light Trace */}
+      <div 
+        style={{
+          position: 'absolute',
+          inset: 0,
+          borderRadius: '6px',
+          padding: '1px',
+          background: hovered 
+            ? `conic-gradient(from ${((Math.atan2(coords.y, coords.x) * 180) / Math.PI + 180)}deg, transparent, ${accentColor}dd, transparent 40%, transparent)` 
+            : 'linear-gradient(135deg, rgba(255,255,255,0.03), transparent, rgba(255,255,255,0.02))',
+          WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+          pointerEvents: 'none',
+          zIndex: 3,
+          transition: 'background 0.4s ease',
+        }}
+      />
+
       {/* Visual */}
       <div style={{
-        height: spanTwo ? 'auto' : 220,
+        height: spanTwo ? 'auto' : 180,
         flex: spanTwo ? '1 1 50%' : 'none',
         background: `rgba(201,168,76,0.03)`,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -207,13 +227,13 @@ function ArticleCard({ article, index, spanTwo = false }) {
             objectFit: 'cover',
             position: 'absolute',
             top: 0, left: 0,
-            filter: hovered ? 'brightness(0.95) contrast(1.05)' : 'brightness(0.78) contrast(1.1)',
+            filter: hovered ? 'brightness(0.95) contrast(1.05)' : 'brightness(0.72) contrast(1.1)',
             willChange: 'transform, filter',
             transition: 'filter 0.5s ease',
           }}
         />
 
-        {/* Category badge */}
+        {/* Upgraded Category badge */}
         <div style={{
           position: 'absolute', top: '1rem', left: '1rem',
           padding: '0.35rem 0.75rem',
@@ -283,6 +303,8 @@ function ArticleCard({ article, index, spanTwo = false }) {
     </div>
   )
 }
+
+
 
 // ─── Main KnowledgeHubPage ───────────────────────────────────────────────────────────
 export default function KnowledgeHubPage() {

@@ -86,6 +86,7 @@ function RelatedArticleCard({ article, index }) {
   )
 }
 
+
 export default function ArticleDetailPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
@@ -102,6 +103,7 @@ export default function ArticleDetailPage() {
       if (data) {
         setArticle(data)
         const allArticles = await fetchArticles()
+        // Get 3 articles from the same category (or random) excluding current
         let rel = allArticles.filter(a => a.id !== data.id && a.category === data.category)
         if (rel.length < 3) {
           rel = [...rel, ...allArticles.filter(a => a.id !== data.id && a.category !== data.category)]
