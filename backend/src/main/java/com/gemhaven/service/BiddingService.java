@@ -6,16 +6,18 @@ import com.gemhaven.model.Bid;
 import com.gemhaven.model.User;
 import com.gemhaven.repository.AuctionRepository;
 import com.gemhaven.repository.BidRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.lang.NonNull;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import com.gemhaven.repository.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 
 @Service
 @SuppressWarnings("null")
@@ -23,114 +25,195 @@ public class BiddingService {
 
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final UserRepository userRepository;
+    private final SimpMessageSendingOperations messagingTemplate;
+    private final ApplicationEventPublisher eventPublisher;
 
     public BiddingService(BidRepository bidRepository,
                           AuctionRepository auctionRepository,
-                          SimpMessagingTemplate messagingTemplate) {
+                          UserRepository userRepository,
+                          SimpMessageSendingOperations messagingTemplate,
+                          ApplicationEventPublisher eventPublisher) {
         this.bidRepository = bidRepository;
         this.auctionRepository = auctionRepository;
+        this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
+        this.eventPublisher = eventPublisher;
     }
+
+    // ─── Internal event payload for after-commit broadcasting ────────────────
+
+    /**
+     * Carries the data needed to broadcast after the DB transaction commits.
+     * Using an internal event prevents clients from receiving a notification
+     * if the transaction rolls back.
+     */
+    public record BidPlacedEvent(
+        Long auctionId,
+        BigDecimal currentBid,
+        String maskedBidder,
+        LocalDateTime endTime,
+        Long previousHighestBidderId,
+        Long newBidderId
+    ) {}
+
+    public record AuctionEndedEvent(
+        Long auctionId,
+        BigDecimal winningBid,
+        Long winnerId,
+        String message
+    ) {}
+
+    public record AuctionStartedEvent(Long auctionId) {}
+
+    // ─── Transactional bid placement ─────────────────────────────────────────
 
     /**
      * Places a bid. Uses pessimistic write lock to ensure atomicity.
      *
-     * Additionally:
-     * - Lazily transitions the auction to ENDED if endTime has passed (and broadcasts AUCTION_ENDED).
-     * - Sends a targeted /user/queue/outbid message to the previous highest bidder.
+     * Flow:
+     * 1. Acquire lock
+     * 2. Validate status == LIVE
+     * 3. Validate bid >= currentBid (or startingPrice if no bids) + minIncrement
+     * 4. Store previousHighestBidderId
+     * 5. Update auction.currentBid + highestBidderId
+     * 6. Save Bid row
+     * 7. Anti-sniping: extend endTime by 30s if < 30s remaining
+     * 8. Save auction
+     * 9. Publish after-commit event (broadcast happens outside transaction)
      *
-     * @throws IllegalStateException   if the auction has ended
-     * @throws IllegalArgumentException if the bid is too low (below current max + min increment)
+     * @throws IllegalStateException   if the auction is not LIVE
+     * @throws IllegalArgumentException if the bid does not meet the minimum increment
      */
     @Transactional
-    public Bid placeNewBid(User user, @NonNull Long auctionId, BigDecimal bidAmount) {
+    public Bid placeNewBid(User user, Long auctionId, BigDecimal bidAmount) {
         Auction auction = auctionRepository.findByIdWithPessimisticLock(auctionId)
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
 
-        // Lazy expiry: if endTime has passed but status is not yet ENDED, transition now
-        if (LocalDateTime.now().isAfter(auction.getEndTime())) {
-            if (auction.getStatus() != Auction.AuctionStatus.ENDED) {
-                auction.setStatus(Auction.AuctionStatus.ENDED);
-                auctionRepository.save(auction);
-                broadcastAuctionEnded(auction);
-            }
-            throw new IllegalStateException("Auction has ended.");
+        // Step 2 — auction must be LIVE (no auto-transitions allowed)
+        if (auction.getStatus() != Auction.AuctionStatus.LIVE) {
+            throw new IllegalStateException("Auction is not live");
         }
 
-        if (auction.getStatus() == Auction.AuctionStatus.ENDED) {
-            throw new IllegalStateException("Auction has ended.");
-        }
-
-        // If auction was SCHEDULED and someone bids, move to LIVE
-        if (auction.getStatus() == Auction.AuctionStatus.SCHEDULED) {
-            auction.setStatus(Auction.AuctionStatus.LIVE);
-        }
-
-        BigDecimal currentMax = auction.getCurrentBid() != null
+        // Step 3 — validate minimum increment
+        BigDecimal baseline = auction.getCurrentBid() != null
                 ? auction.getCurrentBid()
                 : auction.getStartingPrice();
-
-        BigDecimal minRequired = auction.getMinIncrement() != null
-                ? currentMax.add(auction.getMinIncrement())
-                : currentMax.add(BigDecimal.ONE); // fallback: at least +1
+        BigDecimal minRequired = baseline.add(auction.getMinIncrement());
 
         if (bidAmount.compareTo(minRequired) < 0) {
-            throw new IllegalArgumentException(
-                    "Bid must be at least " + minRequired + " (current: " + currentMax +
-                    " + min increment: " + (auction.getMinIncrement() != null ? auction.getMinIncrement() : 1) + ").");
+            throw new IllegalArgumentException("Bid does not meet minimum increment");
         }
 
-        // Find the previous highest bidder BEFORE saving the new bid (for outbid notification)
-        List<Bid> topBids = bidRepository.findByAuctionIdOrderByAmountDesc(auctionId);
-        Optional<User> previousTopBidder = topBids.isEmpty()
-                ? Optional.empty()
-                : Optional.of(topBids.get(0).getUser());
+        // Step 4 — remember previous highest bidder before overwriting
+        Long previousHighestBidderId = auction.getHighestBidderId();
 
-        // 1. Create and save the new bid
+        // Step 5 — update auction state
+        auction.setCurrentBid(bidAmount);
+        auction.setHighestBidderId(user.getId());
+
+        // Step 6 — persist the bid row
         Bid bid = new Bid();
         bid.setAuction(auction);
         bid.setUser(user);
         bid.setAmount(bidAmount);
         bidRepository.save(bid);
 
-        // 2. Update the auction's current max bid
-        auction.setCurrentBid(bidAmount);
+        // Step 7 — anti-sniping: extend endTime if < 30 seconds remain
+        LocalDateTime now = LocalDateTime.now();
+        long secondsRemaining = Duration.between(now, auction.getEndTime()).getSeconds();
+        if (secondsRemaining < 30) {
+            auction.setEndTime(auction.getEndTime().plusSeconds(30));
+        }
+
+        // Step 8 — save auction (with potentially extended endTime)
         auctionRepository.save(auction);
 
-        // 3. Broadcast BID_PLACED to all subscribers of this auction topic
-        String maskedBidder = maskBidderName(user.getEmail());
-        BidEventDTO event = BidEventDTO.bidPlaced(auctionId, bidAmount, maskedBidder, Instant.now());
-        messagingTemplate.convertAndSend("/topic/auctions/" + auctionId, event);
-
-        // 4. Send targeted outbid notification to previous highest bidder (if different from current bidder)
-        previousTopBidder.ifPresent(prevBidder -> {
-            if (!prevBidder.getId().equals(user.getId())) {
-                messagingTemplate.convertAndSendToUser(
-                        prevBidder.getEmail(),
-                        "/queue/outbid",
-                        BidEventDTO.bidPlaced(auctionId, bidAmount, maskedBidder, Instant.now())
-                );
-            }
-        });
+        // Step 9 — publish event to be broadcast AFTER this transaction commits
+        eventPublisher.publishEvent(new BidPlacedEvent(
+                auctionId,
+                bidAmount,
+                maskBidderName(user.getEmail()),
+                auction.getEndTime(),
+                previousHighestBidderId,
+                user.getId()
+        ));
 
         return bid;
     }
 
-    /** Called by AuctionScheduler and lazy expiry — broadcasts AUCTION_ENDED to topic */
-    public void broadcastAuctionEnded(Auction auction) {
-        String winner = "N/A";
-        BigDecimal winningBid = BigDecimal.ZERO;
-        if (auction.getCurrentBid() != null) {
-            winningBid = auction.getCurrentBid();
-            List<Bid> topBids = bidRepository.findByAuctionIdOrderByAmountDesc(auction.getId());
-            if (!topBids.isEmpty()) {
-                winner = maskBidderName(topBids.get(0).getUser().getEmail());
-            }
+    // ─── After-commit broadcast listeners ────────────────────────────────────
+
+    /**
+     * Broadcasts BID_PLACED to the auction topic and sends targeted outbid
+     * notification to the previous highest bidder.
+     * Runs AFTER the transaction commits — prevents phantom notifications on rollback.
+     */
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onBidPlaced(BidPlacedEvent event) {
+        // Broadcast to all subscribers of this auction
+        messagingTemplate.convertAndSend(
+                "/topic/auctions/" + event.auctionId(),
+                BidEventDTO.bidPlaced(
+                        event.auctionId(),
+                        event.currentBid(),
+                        event.maskedBidder(),
+                        event.endTime(),
+                        Instant.now()
+                )
+        );
+
+        // Targeted outbid notification to the previous highest bidder (if different user)
+        Long prevId = event.previousHighestBidderId();
+        if (prevId != null && !prevId.equals(event.newBidderId())) {
+            userRepository.findById(prevId).ifPresent(prevUser -> {
+                messagingTemplate.convertAndSendToUser(
+                        prevUser.getEmail(),
+                        "/queue/outbid",
+                        java.util.Map.of(
+                                "auctionId", event.auctionId(),
+                                "newHighestBid", event.currentBid()
+                        )
+                );
+            });
         }
-        BidEventDTO endEvent = BidEventDTO.auctionEnded(auction.getId(), winningBid, winner);
-        messagingTemplate.convertAndSend("/topic/auctions/" + auction.getId(), endEvent);
     }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onAuctionEnded(AuctionEndedEvent event) {
+        messagingTemplate.convertAndSend(
+                "/topic/auctions/" + event.auctionId(),
+                BidEventDTO.auctionEnded(
+                        event.auctionId(),
+                        event.winningBid(),
+                        event.winnerId(),
+                        event.message()
+                )
+        );
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onAuctionStarted(AuctionStartedEvent event) {
+        messagingTemplate.convertAndSend(
+                "/topic/auctions/" + event.auctionId(),
+                BidEventDTO.auctionStarted(event.auctionId())
+        );
+    }
+
+    // ─── Public event publishing helpers (called by AuctionService/Scheduler) ──
+
+    /** Publishes an AUCTION_ENDED event to be broadcast after the enclosing transaction commits. */
+    public void publishAuctionEndedEvent(Long auctionId, BigDecimal winningBid,
+                                          Long winnerId, String message) {
+        eventPublisher.publishEvent(new AuctionEndedEvent(auctionId, winningBid, winnerId, message));
+    }
+
+    /** Publishes an AUCTION_STARTED event to be broadcast after the enclosing transaction commits. */
+    public void publishAuctionStartedEvent(Long auctionId) {
+        eventPublisher.publishEvent(new AuctionStartedEvent(auctionId));
+    }
+
+    // ─── Utility ──────────────────────────────────────────────────────────────
 
     /** Masks bidder identity: shows last 2 chars of the email local part e.g. "Bidder ****er" */
     private String maskBidderName(String email) {

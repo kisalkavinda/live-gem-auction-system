@@ -49,7 +49,7 @@ public class AdminService {
                 .count();
 
         // Revenue = sum of winning bids on ENDED auctions (simplified)
-        BigDecimal revenueThisMonth = auctionRepository.findByStatus(Auction.AuctionStatus.ENDED)
+        BigDecimal revenueThisMonth = auctionRepository.findByStatus(Auction.AuctionStatus.CLOSED)
                 .stream()
                 .filter(a -> a.getCurrentBid() != null)
                 .filter(a -> a.getCreatedAt() != null &&
