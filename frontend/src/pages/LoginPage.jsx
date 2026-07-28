@@ -1,196 +1,585 @@
-import { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { gsap } from '../utils/gsap'
-import { loginUser } from '../services/authService'
-import Navbar from '../components/Navbar'
+import {
+  useState,
+} from 'react'
 
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return re.test(email)
-}
+import {
+  useLocation,
+  useNavigate,
+} from 'react-router-dom'
+
+import apiClient from '../services/apiClient'
+
+import Navbar from '../components/Navbar'
+import Footer from '../components/Footer'
 
 export default function LoginPage() {
-  const navigate = useNavigate()
-  const cardRef = useRef(null)
+  const navigate =
+    useNavigate()
 
-  const [formData, setFormData] = useState({ email: '', password: '' })
-  const [errors, setErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [serverError, setServerError] = useState('')
+  const location =
+    useLocation()
 
-  useEffect(() => {
-    if (cardRef.current) {
-      gsap.fromTo(cardRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
-      )
-    }
-  }, [])
+  const [
+    email,
+    setEmail,
+  ] = useState('')
 
-  const handleChange = (e) => {
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
-    if (errors[e.target.name]) {
-      setErrors(prev => ({ ...prev, [e.target.name]: '' }))
-    }
-  }
+  const [
+    password,
+    setPassword,
+  ] = useState('')
 
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setServerError('')
+  const [
+    loading,
+    setLoading,
+  ] = useState(false)
 
-    const newErrors = {}
-    if (!formData.email.trim()) newErrors.email = 'Email is required.'
-    else if (!validateEmail(formData.email)) newErrors.email = 'Please enter a valid email address.'
-    
-    if (!formData.password) newErrors.password = 'Password is required.'
+  const [
+    error,
+    setError,
+  ] = useState('')
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors)
-      return
-    }
+  // -----------------------------------------
+  // LOGIN
+  // -----------------------------------------
 
-    setIsSubmitting(true)
-    try {
-      const response = await loginUser(formData)
-      console.log('Login successful:', response)
-      
-      // Redirect to admin panel if the user is an admin
-      if (response.user && response.user.role === 'ADMIN') {
-        navigate('/admin')
-      } else {
-        navigate('/')
+  const handleLogin =
+    async e => {
+      e.preventDefault()
+
+      setError('')
+
+      if (!email.trim()) {
+        setError(
+          'Please enter your email.'
+        )
+
+        return
       }
-    } catch (err) {
-      setServerError(err.message || 'Login failed. Please try again.')
-    } finally {
-      setIsSubmitting(false)
+
+      if (!password) {
+        setError(
+          'Please enter your password.'
+        )
+
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        const response =
+          await apiClient.post(
+            '/auth/login',
+            {
+              email:
+                email.trim(),
+              password,
+            }
+          )
+
+        console.log(
+          'Login response:',
+          response.data
+        )
+
+        const token =
+          response.data.token
+
+        const user =
+          response.data.user
+
+        if (!token) {
+          throw new Error(
+            'Login response did not contain a token.'
+          )
+        }
+
+        // -----------------------------------------
+        // SAVE LOGIN
+        // -----------------------------------------
+
+        localStorage.setItem(
+          'token',
+          token
+        )
+
+        if (user) {
+          localStorage.setItem(
+            'user',
+            JSON.stringify(user)
+          )
+        }
+
+        // -----------------------------------------
+        // INFORM CART CONTEXT
+        // -----------------------------------------
+
+        window.dispatchEvent(
+          new Event(
+            'gemhaven-auth-updated'
+          )
+        )
+
+        // -----------------------------------------
+        // RETURN TO PREVIOUS ACTION
+        // -----------------------------------------
+
+        const from =
+          location.state?.from
+
+        const action =
+          location.state?.action
+
+        console.log(
+          'Login action:',
+          action
+        )
+
+        console.log(
+          'Return path:',
+          from
+        )
+
+        if (from) {
+          navigate(from, {
+            replace: true,
+
+            state: {
+              continueAction:
+                action,
+            },
+          })
+
+          return
+        }
+
+        // Default
+        navigate('/', {
+          replace: true,
+        })
+
+      } catch (err) {
+        console.error(
+          'Login error:',
+          err
+        )
+
+        if (
+          err.response?.data
+            ?.message
+        ) {
+          setError(
+            err.response.data.message
+          )
+        } else if (
+          err.response?.data
+            ?.error
+        ) {
+          setError(
+            err.response.data.error
+          )
+        } else if (
+          err.response
+            ?.status === 401
+        ) {
+          setError(
+            'Invalid email or password.'
+          )
+        } else {
+          setError(
+            'Unable to login. Please try again.'
+          )
+        }
+
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
   return (
-    <div style={{ background: '#050508', minHeight: '100vh', color: '#fff', display: 'flex', flexDirection: 'column' }}>
-      <Navbar visible={true} />
-      
-      <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '6rem 1.5rem', position: 'relative' }}>
-        
-        {/* Ambient glow */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: '50vw', height: '50vw', background: 'radial-gradient(ellipse, rgba(201,168,76,0.05) 0%, transparent 60%)',
-          pointerEvents: 'none', zIndex: 0
-        }} />
+    <div
+      style={{
+        background:
+          '#050508',
+        minHeight:
+          '100vh',
+        color: '#fff',
+        display:
+          'flex',
+        flexDirection:
+          'column',
+      }}
+    >
+      <Navbar
+        visible={true}
+      />
 
-        <div ref={cardRef} style={{
-          position: 'relative', zIndex: 1,
-          width: '100%', maxWidth: '440px',
-          background: 'rgba(255,255,255,0.02)',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: '4px', padding: '2.5rem',
-          backdropFilter: 'blur(10px)'
-        }}>
-          
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <span style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>
-              Authentication
-            </span>
-            <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', fontWeight: 300, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
+      <main
+        style={{
+          flex: 1,
+          display:
+            'flex',
+          alignItems:
+            'center',
+          justifyContent:
+            'center',
+          padding:
+            '8rem 1.5rem 5rem',
+        }}
+      >
+        <div
+          style={{
+            width:
+              '100%',
+            maxWidth:
+              '460px',
+          }}
+        >
+          {/* HEADER */}
+
+          <div
+            style={{
+              textAlign:
+                'center',
+              marginBottom:
+                '2.5rem',
+            }}
+          >
+            <div
+              style={{
+                color:
+                  '#C9A84C',
+                fontSize:
+                  '0.6rem',
+                letterSpacing:
+                  '0.25em',
+                textTransform:
+                  'uppercase',
+                marginBottom:
+                  '0.7rem',
+              }}
+            >
+              ◆ GemHaven
+            </div>
+
+            <h1
+              style={{
+                fontFamily:
+                  "'Cormorant Garamond', serif",
+                fontSize:
+                  'clamp(2.3rem, 5vw, 3.5rem)',
+                fontWeight:
+                  300,
+                margin:
+                  0,
+              }}
+            >
               Welcome Back
             </h1>
+
+            <p
+              style={{
+                color:
+                  'rgba(255,255,255,0.35)',
+                fontSize:
+                  '0.75rem',
+                marginTop:
+                  '0.6rem',
+              }}
+            >
+              Sign in to continue
+            </p>
           </div>
 
-          <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-            
-            {serverError && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#EF4444', padding: '0.75rem', fontSize: '0.8rem', borderRadius: '2px', textAlign: 'center' }}>
-                {serverError}
+          {/* LOGIN CARD */}
+
+          <form
+            onSubmit={
+              handleLogin
+            }
+            style={{
+              padding:
+                '2rem',
+              border:
+                '1px solid rgba(255,255,255,0.08)',
+              background:
+                'rgba(255,255,255,0.015)',
+            }}
+          >
+
+            {/* EMAIL */}
+
+            <label
+              style={{
+                display:
+                  'block',
+                marginBottom:
+                  '1.25rem',
+              }}
+            >
+              <span
+                style={{
+                  display:
+                    'block',
+                  fontSize:
+                    '0.58rem',
+                  letterSpacing:
+                    '0.15em',
+                  textTransform:
+                    'uppercase',
+                  color:
+                    'rgba(255,255,255,0.35)',
+                  marginBottom:
+                    '0.5rem',
+                }}
+              >
+                Email
+              </span>
+
+              <input
+                type="email"
+                value={
+                  email
+                }
+                onChange={e =>
+                  setEmail(
+                    e.target.value
+                  )
+                }
+                placeholder="Enter your email"
+                autoComplete="email"
+                style={{
+                  width:
+                    '100%',
+                  boxSizing:
+                    'border-box',
+                  padding:
+                    '0.85rem',
+                  background:
+                    'rgba(255,255,255,0.025)',
+                  border:
+                    '1px solid rgba(255,255,255,0.1)',
+                  color:
+                    '#fff',
+                  outline:
+                    'none',
+                  borderRadius:
+                    '2px',
+                  fontSize:
+                    '0.75rem',
+                }}
+              />
+            </label>
+
+            {/* PASSWORD */}
+
+            <label
+              style={{
+                display:
+                  'block',
+                marginBottom:
+                  '1.25rem',
+              }}
+            >
+              <span
+                style={{
+                  display:
+                    'block',
+                  fontSize:
+                    '0.58rem',
+                  letterSpacing:
+                    '0.15em',
+                  textTransform:
+                    'uppercase',
+                  color:
+                    'rgba(255,255,255,0.35)',
+                  marginBottom:
+                    '0.5rem',
+                }}
+              >
+                Password
+              </span>
+
+              <input
+                type="password"
+                value={
+                  password
+                }
+                onChange={e =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                style={{
+                  width:
+                    '100%',
+                  boxSizing:
+                    'border-box',
+                  padding:
+                    '0.85rem',
+                  background:
+                    'rgba(255,255,255,0.025)',
+                  border:
+                    '1px solid rgba(255,255,255,0.1)',
+                  color:
+                    '#fff',
+                  outline:
+                    'none',
+                  borderRadius:
+                    '2px',
+                  fontSize:
+                    '0.75rem',
+                }}
+              />
+            </label>
+
+            {/* ERROR */}
+
+            {error && (
+              <div
+                style={{
+                  padding:
+                    '0.8rem',
+                  marginBottom:
+                    '1rem',
+                  background:
+                    'rgba(239,68,68,0.08)',
+                  border:
+                    '1px solid rgba(239,68,68,0.25)',
+                  color:
+                    '#f87171',
+                  fontSize:
+                    '0.68rem',
+                  lineHeight:
+                    1.5,
+                }}
+              >
+                {error}
               </div>
             )}
 
-            <div>
-              <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>
-                Email Address
-              </label>
-              <input
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                style={{
-                  width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '2px', padding: '0.75rem', color: '#fff', fontSize: '0.9rem',
-                  transition: 'border-color 0.3s', outline: 'none'
-                }}
-                onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
-              {errors.email && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.email}</div>}
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '0.5rem' }}>
-                <label style={{ fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>
-                  Password
-                </label>
-                <button
-                  type="button"
-                  onClick={() => navigate('/forgot-password')}
-                  style={{ background: 'transparent', border: 'none', color: '#C9A84C', fontSize: '0.65rem', cursor: 'pointer', padding: 0 }}
-                >
-                  Forgot password?
-                </button>
-              </div>
-              
-              <input
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                style={{
-                  width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '2px', padding: '0.75rem', color: '#fff', fontSize: '0.9rem',
-                  transition: 'border-color 0.3s', outline: 'none'
-                }}
-                onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
-              {errors.password && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.password}</div>}
-            </div>
+            {/* LOGIN BUTTON */}
 
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={
+                loading
+              }
               style={{
-                width: '100%',
-                background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
-                border: 'none',
-                borderRadius: '2px',
-                color: '#0A0A0D',
-                padding: '0.85rem',
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                marginTop: '1rem',
-                transition: 'opacity 0.2s, transform 0.2s',
-                opacity: isSubmitting ? 0.7 : 1
+                width:
+                  '100%',
+                padding:
+                  '0.95rem',
+                background:
+                  'linear-gradient(135deg, #C9A84C, #E8D5A3)',
+                border:
+                  'none',
+                borderRadius:
+                  '2px',
+                color:
+                  '#0A0A0D',
+                fontWeight:
+                  700,
+                fontSize:
+                  '0.65rem',
+                letterSpacing:
+                  '0.14em',
+                textTransform:
+                  'uppercase',
+                cursor:
+                  loading
+                    ? 'not-allowed'
+                    : 'pointer',
+                opacity:
+                  loading
+                    ? 0.6
+                    : 1,
               }}
-              onMouseEnter={e => { if(!isSubmitting) e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.opacity = '0.9' }}
-              onMouseLeave={e => { if(!isSubmitting) e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.opacity = '1' }}
             >
-              {isSubmitting ? 'Authenticating...' : 'Log In'}
+              {loading
+                ? 'Signing In...'
+                : 'Sign In'}
             </button>
-            
-            <div style={{ textAlign: 'center', marginTop: '0.5rem' }}>
-              <button type="button" onClick={() => navigate('/register')} style={{ background: 'transparent', border: 'none', color: '#C9A84C', fontSize: '0.75rem', cursor: 'pointer' }}>
-                Don't have an account? Register
+
+            {/* REGISTER */}
+
+            <div
+              style={{
+                textAlign:
+                  'center',
+                marginTop:
+                  '1.5rem',
+                fontSize:
+                  '0.68rem',
+                color:
+                  'rgba(255,255,255,0.35)',
+              }}
+            >
+              Don't have an account?{' '}
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    '/register'
+                  )
+                }
+                style={{
+                  background:
+                    'none',
+                  border:
+                    'none',
+                  padding: 0,
+                  color:
+                    '#C9A84C',
+                  cursor:
+                    'pointer',
+                  fontSize:
+                    'inherit',
+                }}
+              >
+                Create Account
               </button>
             </div>
-
           </form>
 
+          {/* BACK */}
+
+          <button
+            onClick={() =>
+              navigate('/shop')
+            }
+            style={{
+              display:
+                'block',
+              margin:
+                '1.5rem auto 0',
+              padding: 0,
+              background:
+                'none',
+              border:
+                'none',
+              color:
+                'rgba(255,255,255,0.25)',
+              fontSize:
+                '0.6rem',
+              letterSpacing:
+                '0.1em',
+              textTransform:
+                'uppercase',
+              cursor:
+                'pointer',
+            }}
+          >
+            ← Back to Catalogue
+          </button>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
