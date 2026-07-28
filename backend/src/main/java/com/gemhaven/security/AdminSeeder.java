@@ -41,7 +41,20 @@ public class AdminSeeder implements CommandLineRunner {
             userRepository.save(admin);
             System.out.println("[INFO] Predefined admin user seeded successfully: " + adminEmail);
         } else {
-            System.out.println("[INFO] Admin user already exists. Skipping seed.");
+            System.out.println("[INFO] Admin user already exists. Skipping admin seed.");
+        }
+
+        Optional<User> existingBuyer = userRepository.findByEmail("buyer@gemhaven.com");
+        if (existingBuyer.isEmpty()) {
+            User buyer = new User();
+            buyer.setFullName("Default Buyer");
+            buyer.setEmail("buyer@gemhaven.com");
+            buyer.setPasswordHash(passwordEncoder.encode("buyer123"));
+            buyer.setRole(User.Role.BUYER);
+            buyer.setEmailVerified(true);
+
+            userRepository.save(buyer);
+            System.out.println("[INFO] Predefined buyer user seeded successfully: buyer@gemhaven.com");
         }
     }
 }

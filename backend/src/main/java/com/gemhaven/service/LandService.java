@@ -110,6 +110,10 @@ public class LandService {
         return bookingRepository.findAll();
     }
 
+    public List<Booking> getUserBookings(User authenticatedUser) {
+        return bookingRepository.findByUser(authenticatedUser);
+    }
+
     @Transactional
     public Booking updateBookingStatus(Long bookingId, Booking.BookingStatus newStatus) {
         Booking booking = bookingRepository.findById(bookingId)

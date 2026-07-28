@@ -79,21 +79,23 @@ export async function deleteAuction(id) {
 }
 
 export async function addLandListing(landData) {
-  await delay(600);
-  console.log('Mock API: Add Land', landData);
-  return {
-    success: true,
-    land: {
-      ...landData,
-      id: `new-land-${Date.now()}`
-    }
-  };
+  try {
+    const response = await apiClient.post('/land', landData);
+    return { success: true, land: response.data };
+  } catch (error) {
+    console.error("Error adding land listing:", error);
+    throw error;
+  }
 }
 
 export async function deleteLandListing(id) {
-  await delay(600);
-  console.log(`Mock API: Delete Land ${id}`);
-  return { success: true };
+  try {
+    await apiClient.delete(`/land/${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Error deleting land listing ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function updateBuyerStatus(buyerId, status) {
@@ -103,8 +105,12 @@ export async function updateBuyerStatus(buyerId, status) {
 }
 
 export async function updateBookingStatus(bookingId, status) {
-  await delay(500);
-  console.log(`Mock API: Update Booking ${bookingId} to ${status}`);
-  return { success: true };
+  try {
+    await apiClient.put(`/land/bookings/${bookingId}/status`, { status });
+    return { success: true };
+  } catch (error) {
+    console.error(`Error updating booking ${bookingId} status to ${status}:`, error);
+    throw error;
+  }
 }
 

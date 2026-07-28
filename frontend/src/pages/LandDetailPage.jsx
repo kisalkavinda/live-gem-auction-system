@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchLandPlotById, submitSiteVisitBooking } from '../data/mockLandPlots'
+import { fetchLandPlotById, submitSiteVisitBooking } from '../services/landService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -96,11 +96,12 @@ export default function LandDetailPage() {
     setBookingStatus('submitting')
     try {
       const res = await submitSiteVisitBooking({ ...formData, plotId: plot.id })
-      setBookingRef(res.bookingReference)
+      const refCode = res?.id ? `BK-${String(res.id).padStart(4, '0')}` : `BK-${Date.now().toString().slice(-4)}`;
+      setBookingRef(refCode)
       setBookingStatus('success')
     } catch (err) {
       setBookingStatus('idle')
-      alert("Failed to submit booking.")
+      alert("Failed to submit booking. Please check your connection or log in.")
     }
   }
 
@@ -173,7 +174,7 @@ export default function LandDetailPage() {
               {plot.images && plot.images.length > 0 ? (
                 <img
                   src={plot.images[activeImage]}
-                  alt={`${plot.locationName} view ${activeImage + 1}`}
+                  alt={`${plot.name} view ${activeImage + 1}`}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
@@ -232,7 +233,7 @@ export default function LandDetailPage() {
               fontWeight: 300, color: '#fff', letterSpacing: '-0.02em',
               marginBottom: '2rem', lineHeight: 1.1,
             }}>
-              {plot.locationName}
+              {plot.name}
             </h1>
 
             {/* Key Stats Block */}
@@ -330,7 +331,7 @@ export default function LandDetailPage() {
                 Visit Reserved
               </h3>
               <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-                Your site visit request for {plot.locationName} has been received. Our expedition team will contact you shortly to confirm arrangements.
+                Your site visit request for {plot.name} has been received. Our expedition team will contact you shortly to confirm arrangements.
               </p>
               <div style={{
                 background: 'rgba(0,0,0,0.4)', padding: '1rem', borderRadius: '4px',

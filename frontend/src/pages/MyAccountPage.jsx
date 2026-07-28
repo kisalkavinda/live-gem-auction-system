@@ -1,9 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { gsap } from '../utils/gsap'
 import Navbar from '../components/Navbar'
+import { fetchMyBookings } from '../services/landService'
 
 export default function MyAccountPage() {
   const containerRef = useRef(null)
+  const [myBookings, setMyBookings] = useState([
+    { id: 'b-1', plotName: 'Ratnapura Blue Vein Plot', date: '2026-08-15', status: 'CONFIRMED' },
+    { id: 'b-2', plotName: 'Opanayake Deep Seam', date: '2026-09-02', status: 'PENDING' }
+  ])
 
   useEffect(() => {
     if (containerRef.current) {
@@ -12,6 +17,19 @@ export default function MyAccountPage() {
         { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
       )
     }
+
+    async function loadBookings() {
+      const data = await fetchMyBookings();
+      if (data && data.length > 0) {
+        setMyBookings(data.map(b => ({
+          id: b.id,
+          plotName: b.landPlot?.name || `Plot #${b.landPlot?.id || ''}`,
+          date: b.preferredVisitDate,
+          status: b.status
+        })));
+      }
+    }
+    loadBookings();
   }, [])
 
   // Mock data for a logged-in buyer
@@ -22,11 +40,6 @@ export default function MyAccountPage() {
 
   const myPurchases = [
     { id: 101, gemName: 'Colombian Vivid Green Emerald', type: 'Direct Buy', amount: 2450000, date: '2026-05-12', status: 'Delivered' }
-  ]
-
-  const myBookings = [
-    { id: 'b-1', plotName: 'Ratnapura Blue Vein Plot', date: '2026-08-15', status: 'Confirmed' },
-    { id: 'b-2', plotName: 'Opanayake Deep Seam', date: '2026-09-02', status: 'Pending' }
   ]
 
   const getStatusBadge = (status) => {

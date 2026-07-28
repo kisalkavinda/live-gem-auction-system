@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchLandPlots } from '../data/mockLandPlots'
+import { fetchLandPlots } from '../services/landService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -116,7 +116,7 @@ function LandPlotCard({ plot, index }) {
         {plot.images && plot.images.length > 0 ? (
           <img
             src={plot.images[0]}
-            alt={plot.locationName}
+            alt={plot.name}
             style={{
               width: '100%', height: '100%',
               objectFit: 'cover',
@@ -181,7 +181,7 @@ function LandPlotCard({ plot, index }) {
           fontSize: '1.15rem', fontWeight: 400, color: '#fff',
           marginBottom: '0.4rem', lineHeight: 1.25,
         }}>
-          {plot.locationName}
+          {plot.name}
         </h3>
         
         {/* Specs */}
@@ -192,7 +192,7 @@ function LandPlotCard({ plot, index }) {
         }}>
           <span>{plot.sizeAcres} Acres ({plot.sizePerch} Perches)</span>
           <span>·</span>
-          <span>Surveyed: {plot.surveyDate.split('-')[0]}</span>
+          <span>Surveyed: {plot.surveyDate ? plot.surveyDate.split('-')[0] : 'N/A'}</span>
         </div>
 
         <button

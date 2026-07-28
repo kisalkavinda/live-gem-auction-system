@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
-import { addLandListing, deleteLandListing, updateBookingStatus } from '../../services/adminService'
+import { addLandListing, deleteLandListing, updateBookingStatus, uploadImage } from '../../services/adminService'
 
 export default function AdminLandPage() {
   const { lands, bookings, addLandState, deleteLandState, updateBookingStatusState } = useDashboard()
@@ -9,6 +9,7 @@ export default function AdminLandPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [selectedFile, setSelectedFile] = useState(null)
   
   // Land form data
   const [formData, setFormData] = useState({
@@ -31,6 +32,7 @@ export default function AdminLandPage() {
       description: '',
       status: 'Available'
     })
+    setSelectedFile(null)
     setIsModalOpen(true)
   }
 
@@ -38,7 +40,27 @@ export default function AdminLandPage() {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const res = await addLandListing(formData)
+      let statusEnum = 'AVAILABLE';
+      if (formData.status === 'Reserved') statusEnum = 'RESERVED';
+      if (formData.status === 'Under Survey') statusEnum = 'UNDER_SURVEY';
+      
+      let imageUrl = null;
+      if (selectedFile) {
+        const uploadRes = await uploadImage(selectedFile);
+        imageUrl = uploadRes.url;
+      }
+      
+      const payload = {
+        name: formData.name,
+        region: formData.region,
+        sizeAcres: parseFloat(formData.size) || null,
+        yieldPotential: formData.yieldPotential,
+        description: formData.description,
+        status: statusEnum,
+        images: imageUrl ? [imageUrl] : []
+      };
+
+      const res = await addLandListing(payload)
       addLandState(res.land)
       setIsModalOpen(false)
     } catch (err) {
@@ -60,8 +82,8 @@ export default function AdminLandPage() {
 
   const handleConfirmBooking = async (id) => {
     try {
-      await updateBookingStatus(id, 'Confirmed')
-      updateBookingStatusState(id, 'Confirmed')
+      await updateBookingStatus(id, 'CONFIRMED')
+      updateBookingStatusState(id, 'CONFIRMED')
     } catch (err) {
       console.error(err)
     }
@@ -69,8 +91,8 @@ export default function AdminLandPage() {
 
   const handleCompleteBooking = async (id) => {
     try {
-      await updateBookingStatus(id, 'Completed')
-      updateBookingStatusState(id, 'Completed')
+      await updateBookingStatus(id, 'COMPLETED')
+      updateBookingStatusState(id, 'COMPLETED')
     } catch (err) {
       console.error(err)
     }
@@ -81,18 +103,15 @@ export default function AdminLandPage() {
     let border = 'rgba(255,255,255,0.2)'
     let color = '#fff'
 
-    if (status === 'Available' || status === 'Active') {
+    const s = (status || '').toUpperCase();
+    if (s === 'AVAILABLE' || s === 'ACTIVE' || s === 'CONFIRMED' || s === 'COMPLETED') {
       bg = 'rgba(74, 222, 128, 0.1)'
       border = 'rgba(74, 222, 128, 0.3)'
       color = '#4ADE80'
-    } else if (status === 'Pending' || status === 'Reserved' || status === 'Under Survey') {
+    } else if (s === 'PENDING' || s === 'RESERVED' || s === 'UNDER_SURVEY' || s === 'UNDER SURVEY') {
       bg = 'rgba(201,168,76,0.15)'
       border = 'rgba(201,168,76,0.4)'
       color = '#C9A84C'
-    } else if (status === 'Confirmed' || status === 'Completed') {
-      bg = 'rgba(74, 222, 128, 0.1)'
-      border = 'rgba(74, 222, 128, 0.3)'
-      color = '#4ADE80'
     }
 
     return (
@@ -170,9 +189,9 @@ export default function AdminLandPage() {
             <div key={land.id} style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr 1fr 1fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
               <div style={{ color: '#fff', fontWeight: 500 }}>{land.name || land.location}</div>
               <div>{land.region}</div>
-              <div>{land.size}</div>
+              <div>{land.sizeAcres ? `${land.sizeAcres} Acres` : land.size}</div>
               <div>{land.yieldPotential}</div>
-              <div>{getStatusBadge(land.status)}</div>
+              <div>{getStatusBadge(land.status === 'UNDER_SURVEY' ? 'Under Survey' : land.status === 'RESERVED' ? 'Reserved' : 'Available')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 <button
                   onClick={() => handleDeleteLand(land.id)}
@@ -205,13 +224,13 @@ export default function AdminLandPage() {
           ) : (
             bookings.map(booking => (
               <div key={booking.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr 1fr 1fr 1fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-                <div>{new Date(booking.date).toLocaleDateString()}</div>
-                <div style={{ color: '#fff', fontWeight: 500 }}>{booking.name}</div>
+                <div>{new Date(booking.preferredVisitDate || booking.date).toLocaleDateString()}</div>
+                <div style={{ color: '#fff', fontWeight: 500 }}>{booking.fullName || booking.name}</div>
                 <div>{booking.email}</div>
-                <div>{booking.landPlotId}</div>
+                <div>{booking.landPlot?.name || booking.landPlotId}</div>
                 <div>{getStatusBadge(booking.status)}</div>
                 <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                  {booking.status === 'Pending' && (
+                  {(booking.status === 'PENDING' || booking.status === 'Pending') && (
                     <button
                       onClick={() => handleConfirmBooking(booking.id)}
                       style={{
@@ -222,7 +241,7 @@ export default function AdminLandPage() {
                       Confirm
                     </button>
                   )}
-                  {booking.status === 'Confirmed' && (
+                  {(booking.status === 'CONFIRMED' || booking.status === 'Confirmed') && (
                     <button
                       onClick={() => handleCompleteBooking(booking.id)}
                       style={{
@@ -280,13 +299,19 @@ export default function AdminLandPage() {
                 </div>
               </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
-                <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  <option style={{ background: '#050508' }}>Available</option>
-                  <option style={{ background: '#050508' }}>Reserved</option>
-                  <option style={{ background: '#050508' }}>Under Survey</option>
-                </select>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
+                  <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
+                    <option style={{ background: '#050508' }}>Available</option>
+                    <option style={{ background: '#050508' }}>Reserved</option>
+                    <option style={{ background: '#050508' }}>Under Survey</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Image</label>
+                  <input type="file" onChange={e => setSelectedFile(e.target.files[0])} accept="image/*" style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.65rem', color: '#fff', borderRadius: '2px', fontSize: '0.75rem' }} />
+                </div>
               </div>
 
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>

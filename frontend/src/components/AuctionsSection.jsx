@@ -1,57 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 
-const gems = [
-  {
-    id: 'a1',
-    name: 'Burmese Ruby',
-    carat: 3.2,
-    cut: 'Oval',
-    color: '#B91C1C',
-    colorName: 'Pigeon Blood',
-    status: 'LIVE',
-    currentBid: 12400,
-    endsIn: '2h 14m',
-    bids: 24,
-  },
-  {
-    id: 'a2',
-    name: 'Ceylon Sapphire',
-    carat: 5.1,
-    cut: 'Cushion',
-    color: '#1D4ED8',
-    colorName: 'Royal Blue',
-    status: 'LIVE',
-    currentBid: 28900,
-    endsIn: '4h 52m',
-    bids: 41,
-  },
-  {
-    id: 'a3',
-    name: 'Colombian Emerald',
-    carat: 2.8,
-    cut: 'Emerald',
-    color: '#15803D',
-    colorName: 'Vivid Green',
-    status: 'UPCOMING',
-    currentBid: null,
-    endsIn: 'Starts in 1d',
-    bids: 0,
-  },
-  {
-    id: 'a4',
-    name: 'Padparadscha Sapphire',
-    carat: 1.9,
-    cut: 'Oval',
-    color: '#EA580C',
-    colorName: 'Lotus Pink-Orange',
-    status: 'LIVE',
-    currentBid: 19800,
-    endsIn: '1h 03m',
-    bids: 17,
-  },
-]
+function formatEndsIn(endTimeStr, status) {
+  if (status === 'ENDED') return 'Ended';
+  if (!endTimeStr) return '';
+  const diff = new Date(endTimeStr) - new Date();
+  if (diff <= 0) return 'Ended';
+  
+  const h = Math.floor(diff / (1000 * 60 * 60));
+  const m = Math.floor((diff / 1000 / 60) % 60);
+  const d = Math.floor(h / 24);
+  
+  if (d > 0) {
+    return status === 'SCHEDULED' ? `Starts in ${d}d` : `Ends in ${d}d`;
+  }
+  return `${h}h ${m}m`;
+}
 
 function GemCard({ gem, index }) {
   const cardRef = useRef(null)
@@ -130,29 +95,65 @@ function GemCard({ gem, index }) {
         transformStyle: 'preserve-3d',
         transition: 'border-color 0.3s',
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = `${gem.color}60`}
-      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${gem.color}60`
+        const img = e.currentTarget.querySelector('.gem-card-bg-img')
+        if (img) img.style.transform = 'scale(1.1)'
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+        const img = e.currentTarget.querySelector('.gem-card-bg-img')
+        if (img) img.style.transform = 'scale(1)'
+      }}
     >
       {/* Gem visual */}
       <div style={{
-        height: '180px',
-        background: `radial-gradient(ellipse at 40% 40%, ${gem.color}30, rgba(5,5,8,0.9))`,
+        height: '220px',
+        background: `radial-gradient(ellipse at 50% 50%, ${gem.color}15, rgba(5,5,8,1))`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
         borderBottom: `1px solid ${gem.color}20`,
+        overflow: 'hidden'
       }}>
-        {/* Faceted gem shape */}
-        <div style={{
-          width: 80,
-          height: 80,
-          background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}44)`,
-          clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-          boxShadow: `0 0 40px ${gem.color}60, inset 0 0 20px rgba(255,255,255,0.1)`,
-          animation: 'gemFloat 3s ease-in-out infinite',
-          animationDelay: `${index * 0.5}s`,
-        }} />
+        {/* Gem Image or Fallback */}
+        {gem.imageUrl ? (
+          <>
+            <img 
+              src={gem.imageUrl} 
+              alt={gem.name}
+              className="gem-card-bg-img"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                opacity: 0.9,
+                mixBlendMode: 'lighten',
+                transition: 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)',
+              }} 
+            />
+            {/* Elegant vignette and fade overlay */}
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              background: `linear-gradient(to bottom, transparent 40%, #07070A 100%), radial-gradient(circle at center, transparent 30%, #07070A 130%)`,
+              pointerEvents: 'none'
+            }} />
+          </>
+        ) : (
+          <div style={{
+            width: 80,
+            height: 80,
+            background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}44)`,
+            clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
+            boxShadow: `0 0 40px ${gem.color}60, inset 0 0 20px rgba(255,255,255,0.1)`,
+            animation: 'gemFloat 3s ease-in-out infinite',
+            animationDelay: `${index * 0.5}s`,
+          }} />
+        )}
 
         {/* Status badge */}
         <div style={{
@@ -294,6 +295,32 @@ function GemCard({ gem, index }) {
 export default function AuctionsSection() {
   const headingRef = useRef(null)
   const navigate = useNavigate()
+  const [gems, setGems] = useState([])
+
+  useEffect(() => {
+    fetch('/api/auctions')
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch auctions');
+        return res.json();
+      })
+      .then(data => {
+        const mapped = data.slice(0, 4).map(a => ({
+          id: a.id,
+          name: a.gemstone?.name || 'Unknown Gem',
+          carat: a.gemstone?.caratWeight || 0,
+          cut: a.gemstone?.cut || '',
+          color: a.gemstone?.color || '#FFFFFF',
+          colorName: a.gemstone?.colorName || '',
+          imageUrl: a.gemstone?.imageUrl || null,
+          status: a.status === 'SCHEDULED' ? 'UPCOMING' : a.status,
+          currentBid: a.currentBid || a.startingPrice || null,
+          endsIn: formatEndsIn(a.endTime, a.status),
+          bids: 0 
+        }));
+        setGems(mapped);
+      })
+      .catch(console.error)
+  }, [])
 
   useEffect(() => {
     gsap.fromTo(

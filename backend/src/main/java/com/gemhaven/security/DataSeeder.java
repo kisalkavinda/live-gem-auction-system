@@ -1,12 +1,18 @@
 package com.gemhaven.security;
 
+import com.gemhaven.model.Auction;
 import com.gemhaven.model.Gemstone;
+import com.gemhaven.model.MiningPlot;
+import com.gemhaven.repository.AuctionRepository;
 import com.gemhaven.repository.GemstoneRepository;
+import com.gemhaven.repository.MiningPlotRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,13 +21,85 @@ import java.util.List;
 public class DataSeeder implements CommandLineRunner {
 
     private final GemstoneRepository gemstoneRepository;
+    private final AuctionRepository auctionRepository;
+    private final MiningPlotRepository miningPlotRepository;
 
-    public DataSeeder(GemstoneRepository gemstoneRepository) {
+    public DataSeeder(GemstoneRepository gemstoneRepository, AuctionRepository auctionRepository, MiningPlotRepository miningPlotRepository) {
         this.gemstoneRepository = gemstoneRepository;
+        this.auctionRepository = auctionRepository;
+        this.miningPlotRepository = miningPlotRepository;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        if (miningPlotRepository.count() == 0) {
+            System.out.println("[INFO] Seeding initial mining land plots...");
+            List<MiningPlot> plots = new ArrayList<>();
+
+            MiningPlot p1 = new MiningPlot();
+            p1.setName("Ratnapura Blue Vein Plot");
+            p1.setRegion("Ratnapura");
+            p1.setSizePerch(BigDecimal.valueOf(120));
+            p1.setSizeAcres(BigDecimal.valueOf(0.75));
+            p1.setYieldPotential("High (Sapphire Focus)");
+            p1.setStatus(MiningPlot.PlotStatus.AVAILABLE);
+            p1.setImages(List.of("/images/land/river_valley.png", "/images/land/rocky_ridge.png"));
+            p1.setSurveyDate(LocalDate.of(2025, 11, 12));
+            p1.setSoilComposition("Alluvial gravel (illam) rich in corundum");
+            p1.setHistoricalYieldData("Historically produced fine Ceylon sapphires in 1990s adjacent plots.");
+            p1.setDescription("A prime unmined plot located in the heart of Ratnapura's traditional gem-bearing region. Extensive geological surveys indicate a high probability of sapphire-rich alluvial deposits at a depth of 15-20 meters.");
+            p1.setCoordinates("6°41'02.0\"N 80°23'49.2\"E");
+            plots.add(p1);
+
+            MiningPlot p2 = new MiningPlot();
+            p2.setName("Pelmadulla Ruby Ridge");
+            p2.setRegion("Pelmadulla");
+            p2.setSizePerch(BigDecimal.valueOf(240));
+            p2.setSizeAcres(BigDecimal.valueOf(1.5));
+            p2.setYieldPotential("Medium-High");
+            p2.setStatus(MiningPlot.PlotStatus.RESERVED);
+            p2.setImages(List.of("/images/land/rocky_ridge.png"));
+            p2.setSurveyDate(LocalDate.of(2026, 1, 5));
+            p2.setSoilComposition("Residual soil over crystalline limestone");
+            p2.setHistoricalYieldData("Known for producing star rubies and spinel.");
+            p2.setDescription("An elevated plot situated on a crystalline limestone ridge in Pelmadulla. The site shows strong indications of ruby and spinel formations in the residual soil layer.");
+            p2.setCoordinates("6°37'15.5\"N 80°32'10.1\"E");
+            plots.add(p2);
+
+            MiningPlot p3 = new MiningPlot();
+            p3.setName("Elahera Green Valley Site");
+            p3.setRegion("Elahera");
+            p3.setSizePerch(BigDecimal.valueOf(80));
+            p3.setSizeAcres(BigDecimal.valueOf(0.5));
+            p3.setYieldPotential("High (Tourmaline/Garnet)");
+            p3.setStatus(MiningPlot.PlotStatus.AVAILABLE);
+            p3.setImages(List.of("/images/land/river_valley.png"));
+            p3.setSurveyDate(LocalDate.of(2026, 3, 20));
+            p3.setSoilComposition("Metamorphic rock debris and clay");
+            p3.setHistoricalYieldData("Consistent yield of tourmaline, garnet, and occasional sapphires.");
+            p3.setDescription("A compact but highly promising plot in the renowned Elahera gem field. This region is famous for its vibrant tourmalines and garnets.");
+            p3.setCoordinates("7°45'30.0\"N 80°48'12.4\"E");
+            plots.add(p3);
+
+            MiningPlot p4 = new MiningPlot();
+            p4.setName("Opanayake Deep Seam");
+            p4.setRegion("Opanayake");
+            p4.setSizePerch(BigDecimal.valueOf(400));
+            p4.setSizeAcres(BigDecimal.valueOf(2.5));
+            p4.setYieldPotential("Very High (Mixed Corundum)");
+            p4.setStatus(MiningPlot.PlotStatus.UNDER_SURVEY);
+            p4.setImages(List.of("/images/land/deep_mine.png", "/images/land/rocky_ridge.png"));
+            p4.setSurveyDate(LocalDate.of(2026, 6, 15));
+            p4.setSoilComposition("Deep alluvial sedimentary layers");
+            p4.setHistoricalYieldData("Adjacent plots have yielded museum-quality padparadscha sapphires.");
+            p4.setDescription("A large-scale operation site currently undergoing deep seismic and geological surveying. Initial test pits reveal rich gem-bearing gravels at a depth of 30 meters.");
+            p4.setCoordinates("6°35'40.2\"N 80°38'55.8\"E");
+            plots.add(p4);
+
+            miningPlotRepository.saveAll(plots);
+            System.out.println("[INFO] " + plots.size() + " mining land plots seeded successfully.");
+        }
+
         if (gemstoneRepository.count() == 0) {
             System.out.println("[INFO] Seeding initial gemstone database...");
             List<Gemstone> gems = new ArrayList<>();
@@ -41,6 +119,17 @@ public class DataSeeder implements CommandLineRunner {
 
             gemstoneRepository.saveAll(gems);
             System.out.println("[INFO] " + gems.size() + " gemstones seeded successfully.");
+
+            if (auctionRepository.count() == 0) {
+                System.out.println("[INFO] Seeding initial auctions...");
+                List<Auction> auctions = new ArrayList<>();
+                auctions.add(createAuction(gems.get(0), 1200000, 50000, LocalDateTime.now().plusHours(2), Auction.AuctionStatus.LIVE, 1240000.0));
+                auctions.add(createAuction(gems.get(1), 2500000, 100000, LocalDateTime.now().plusHours(4), Auction.AuctionStatus.LIVE, 2890000.0));
+                auctions.add(createAuction(gems.get(2), 2000000, 50000, LocalDateTime.now().plusDays(1), Auction.AuctionStatus.SCHEDULED, null));
+                auctions.add(createAuction(gems.get(3), 4000000, 150000, LocalDateTime.now().plusHours(1), Auction.AuctionStatus.LIVE, 4150000.0));
+                auctionRepository.saveAll(auctions);
+                System.out.println("[INFO] " + auctions.size() + " auctions seeded successfully.");
+            }
         } else {
             System.out.println("[INFO] Gemstones already exist. Skipping seed.");
         }
@@ -63,5 +152,18 @@ public class DataSeeder implements CommandLineRunner {
         g.setImageUrl(img);
         g.setReservationStatus(Gemstone.ReservationStatus.PUBLISHED); // Set to PUBLISHED so they appear in Shop
         return g;
+    }
+
+    private Auction createAuction(Gemstone gem, double startingPrice, double minIncrement, LocalDateTime endTime, Auction.AuctionStatus status, Double currentBid) {
+        Auction a = new Auction();
+        a.setGemstone(gem);
+        a.setStartingPrice(BigDecimal.valueOf(startingPrice));
+        a.setMinIncrement(BigDecimal.valueOf(minIncrement));
+        a.setEndTime(endTime);
+        a.setStatus(status);
+        if (currentBid != null && currentBid > 0) {
+            a.setCurrentBid(BigDecimal.valueOf(currentBid));
+        }
+        return a;
     }
 }
