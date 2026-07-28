@@ -48,7 +48,7 @@ export const MOCK_ARTICLES = [
       },
       {
         type: 'image',
-        url: '/images/knowledge/ruby.png',
+        url: '/images/knowledge/ruby-2.png',
         caption: 'A stunning example of an unheated Burmese ruby.'
       },
       {
@@ -185,7 +185,7 @@ export const MOCK_ARTICLES = [
     title: 'Investing in Colored Gemstones vs. Diamonds',
     category: 'Buying Guide',
     excerpt: 'An analytical look at the rising market value of colored stones over the past decade.',
-    coverImage: '/images/knowledge/sapphire.png',
+    coverImage: '/images/knowledge/diamand vs gems.png',
     author: 'Elena Rostova',
     publishedDate: '2024-01-22',
     readTime: '7 min read',
@@ -237,7 +237,7 @@ export const MOCK_ARTICLES = [
     title: 'The Lost Mines of Kashmir',
     category: 'Gem History',
     excerpt: 'The brief, legendary history of the sapphire mines that set the benchmark for blue forever.',
-    coverImage: '/images/knowledge/mining.png',
+    coverImage: '/images/knowledge/kashmir-sapphire-mines.png',
     author: 'Sunil Weeraratne',
     publishedDate: '2023-09-18',
     readTime: '6 min read',
