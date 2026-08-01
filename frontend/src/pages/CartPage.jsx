@@ -4,6 +4,7 @@ import { gsap } from '../utils/gsap'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useCart } from '../context/CartContext'
+import { useAlert } from '../context/AlertContext'
 
 const LKR = (n) => 'LKR ' + Number(n || 0).toLocaleString('en-LK')
 
@@ -17,6 +18,8 @@ export default function CartPage() {
     loading,
     removeFromCart,
   } = useCart()
+
+  const { showAlert } = useAlert()
 
   useEffect(() => {
     if (!pageRef.current) return
@@ -37,7 +40,11 @@ export default function CartPage() {
     try {
       await removeFromCart(gemId)
     } catch {
-      alert('Unable to remove this gem from the cart.')
+      showAlert({
+        type: 'error',
+        title: 'Unable to remove item',
+        message: 'Unable to remove this gem from the cart.',
+      })
     }
   }
 

@@ -7,7 +7,9 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
-import apiClient from '../services/apiClient'
+import {
+  loginUser,
+} from '../services/authService'
 
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -66,48 +68,25 @@ export default function LoginPage() {
       }
 
       try {
-        setLoading(true)
+          setLoading(true)
 
         const response =
-          await apiClient.post(
-            '/auth/login',
-            {
-              email:
-                email.trim(),
-              password,
-            }
-          )
+          await loginUser({
+            email: email.trim(),
+            password,
+          })
 
         console.log(
           'Login response:',
-          response.data
+          response
         )
 
         const token =
-          response.data.token
-
-        const user =
-          response.data.user
+          response.token
 
         if (!token) {
           throw new Error(
             'Login response did not contain a token.'
-          )
-        }
-
-        // -----------------------------------------
-        // SAVE LOGIN
-        // -----------------------------------------
-
-        localStorage.setItem(
-          'token',
-          token
-        )
-
-        if (user) {
-          localStorage.setItem(
-            'user',
-            JSON.stringify(user)
           )
         }
 

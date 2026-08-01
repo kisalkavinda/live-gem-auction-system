@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
   useCallback,
 } from 'react'
 
@@ -7,6 +8,8 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  useNavigate,
+  useLocation,
 } from 'react-router-dom'
 
 import {
@@ -44,6 +47,10 @@ import MyAccountPage from './pages/MyAccountPage'
 import {
   CartProvider,
 } from './context/CartContext'
+
+import {
+  AlertProvider,
+} from './context/AlertContext'
 
 import {
   DashboardProvider,
@@ -111,182 +118,218 @@ function LandingPage() {
 }
 
 
+function AppRoutes() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      if (location.pathname === '/login') {
+        return
+      }
+
+      navigate('/login', {
+        replace: true,
+        state: {
+          from: location.pathname + location.search,
+        },
+      })
+    }
+
+    window.addEventListener(
+      'gemhaven-auth-unauthorized',
+      handleUnauthorized
+    )
+
+    return () => {
+      window.removeEventListener(
+        'gemhaven-auth-unauthorized',
+        handleUnauthorized
+      )
+    }
+  }, [navigate, location.pathname, location.search])
+
+  return (
+    <Routes>
+
+      {/* HOME */}
+
+      <Route
+        path="/"
+        element={
+          <LandingPage />
+        }
+      />
+
+      {/* SHOP */}
+
+      <Route
+        path="/shop"
+        element={
+          <ShopPage />
+        }
+      />
+
+      <Route
+        path="/shop/:id"
+        element={
+          <GemDetailPage />
+        }
+      />
+
+      {/* CART */}
+
+      <Route
+        path="/cart"
+        element={
+          <CartPage />
+        }
+      />
+
+      {/* CHECKOUT */}
+
+      <Route
+        path="/checkout"
+        element={
+          <CheckoutPage />
+        }
+      />
+
+      {/* AUCTIONS */}
+
+      <Route
+        path="/auctions"
+        element={
+          <AuctionListPage />
+        }
+      />
+
+      <Route
+        path="/auctions/:id"
+        element={
+          <AuctionRoomPage />
+        }
+      />
+
+      {/* LAND */}
+
+      <Route
+        path="/land"
+        element={
+          <LandListingPage />
+        }
+      />
+
+      <Route
+        path="/land/:id"
+        element={
+          <LandDetailPage />
+        }
+      />
+
+      {/* KNOWLEDGE HUB */}
+
+      <Route
+        path="/knowledge-hub"
+        element={
+          <KnowledgeHubPage />
+        }
+      />
+
+      <Route
+        path="/knowledge-hub/:slug"
+        element={
+          <ArticleDetailPage />
+        }
+      />
+
+      {/* AUTH */}
+
+      <Route
+        path="/register"
+        element={
+          <RegisterPage />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          <LoginPage />
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          <VerifyEmailPendingPage />
+        }
+      />
+
+      <Route
+        path="/verify-email/:token"
+        element={
+          <VerifyEmailConfirmPage />
+        }
+      />
+
+      <Route
+        path="/account"
+        element={
+          <MyAccountPage />
+        }
+      />
+
+      {/* ADMIN */}
+
+      <Route
+        path="/admin"
+        element={
+          <AdminOverviewPage />
+        }
+      />
+
+      <Route
+        path="/admin/inventory"
+        element={
+          <AdminInventoryPage />
+        }
+      />
+
+      <Route
+        path="/admin/auctions"
+        element={
+          <AdminAuctionsPage />
+        }
+      />
+
+      <Route
+        path="/admin/land"
+        element={
+          <AdminLandPage />
+        }
+      />
+
+      <Route
+        path="/admin/buyers"
+        element={
+          <AdminBuyersPage />
+        }
+      />
+
+    </Routes>
+  )
+}
+
 export default function App() {
   return (
     <DashboardProvider>
       <BrowserRouter>
-        <CartProvider>
-
-          <Routes>
-
-            {/* HOME */}
-
-            <Route
-              path="/"
-              element={
-                <LandingPage />
-              }
-            />
-
-            {/* SHOP */}
-
-            <Route
-              path="/shop"
-              element={
-                <ShopPage />
-              }
-            />
-
-            <Route
-              path="/shop/:id"
-              element={
-                <GemDetailPage />
-              }
-            />
-
-            {/* CART */}
-
-            <Route
-              path="/cart"
-              element={
-                <CartPage />
-              }
-            />
-
-            {/* CHECKOUT */}
-
-            <Route
-              path="/checkout"
-              element={
-                <CheckoutPage />
-              }
-            />
-
-            {/* AUCTIONS */}
-
-            <Route
-              path="/auctions"
-              element={
-                <AuctionListPage />
-              }
-            />
-
-            <Route
-              path="/auctions/:id"
-              element={
-                <AuctionRoomPage />
-              }
-            />
-
-            {/* LAND */}
-
-            <Route
-              path="/land"
-              element={
-                <LandListingPage />
-              }
-            />
-
-            <Route
-              path="/land/:id"
-              element={
-                <LandDetailPage />
-              }
-            />
-
-            {/* KNOWLEDGE HUB */}
-
-            <Route
-              path="/knowledge-hub"
-              element={
-                <KnowledgeHubPage />
-              }
-            />
-
-            <Route
-              path="/knowledge-hub/:slug"
-              element={
-                <ArticleDetailPage />
-              }
-            />
-
-            {/* AUTH */}
-
-            <Route
-              path="/register"
-              element={
-                <RegisterPage />
-              }
-            />
-
-            <Route
-              path="/login"
-              element={
-                <LoginPage />
-              }
-            />
-
-            <Route
-              path="/verify-email"
-              element={
-                <VerifyEmailPendingPage />
-              }
-            />
-
-            <Route
-              path="/verify-email/:token"
-              element={
-                <VerifyEmailConfirmPage />
-              }
-            />
-
-            <Route
-              path="/account"
-              element={
-                <MyAccountPage />
-              }
-            />
-
-            {/* ADMIN */}
-
-            <Route
-              path="/admin"
-              element={
-                <AdminOverviewPage />
-              }
-            />
-
-            <Route
-              path="/admin/inventory"
-              element={
-                <AdminInventoryPage />
-              }
-            />
-
-            <Route
-              path="/admin/auctions"
-              element={
-                <AdminAuctionsPage />
-              }
-            />
-
-            <Route
-              path="/admin/land"
-              element={
-                <AdminLandPage />
-              }
-            />
-
-            <Route
-              path="/admin/buyers"
-              element={
-                <AdminBuyersPage />
-              }
-            />
-
-          </Routes>
-
-        </CartProvider>
+        <AlertProvider>
+          <CartProvider>
+            <AppRoutes />
+          </CartProvider>
+        </AlertProvider>
       </BrowserRouter>
     </DashboardProvider>
   )

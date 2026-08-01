@@ -34,16 +34,24 @@ apiClient.interceptors.request.use(
 // HANDLE UNAUTHORIZED RESPONSE
 // -----------------------------------------
 
+const dispatchUnauthorizedEvent = () => {
+  window.dispatchEvent(
+    new CustomEvent('gemhaven-auth-unauthorized')
+  )
+}
+
 apiClient.interceptors.response.use(
   response => response,
 
   error => {
     if (
-      error.response?.status === 401
+      error.response?.status === 401 ||
+      error.response?.status === 403
     ) {
       console.warn(
-        'Authentication required.'
+        'Authentication required or authorization failed.'
       )
+      dispatchUnauthorizedEvent()
     }
 
     return Promise.reject(error)
