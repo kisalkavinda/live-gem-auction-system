@@ -50,6 +50,13 @@ export async function loginUser(credentials) {
   }
 }
 
+export function isLoggedIn() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+
+  return Boolean(token && user);
+}
+
 export function logoutUser() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');

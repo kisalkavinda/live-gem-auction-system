@@ -193,9 +193,11 @@ export default function GemDetailPage() {
         return
       }
 
-      alert(
-        'Unable to add this gem to the cart. Please try again.'
-      )
+      showAlert({
+        type: 'error',
+        title: 'Unable to add to cart',
+        message: 'Unable to add this gem to the cart. Please try again.',
+      })
     } finally {
       setAdding(false)
     }

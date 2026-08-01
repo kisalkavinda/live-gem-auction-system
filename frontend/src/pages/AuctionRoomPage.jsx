@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuctionSocket } from '../hooks/useAuctionSocket';
+import { useAuctionSocket } from '../hooks/useAuctionSocket'
+import { useAlert } from '../context/AlertContext'
+import { isLoggedIn } from '../services/authService'
 
 const LKR = (n) => 'LKR ' + n?.toLocaleString('en-LK');
 
@@ -28,6 +30,7 @@ const SPEC_ROWS = [
 export default function AuctionRoomPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     auction,
@@ -38,6 +41,30 @@ export default function AuctionRoomPage() {
     winner,
     placeBid
   } = useAuctionSocket(id);
+
+  const { showAlert } = useAlert()
+
+  const goToLogin = () => {
+    showAlert({
+      type: 'login',
+      title: 'Login required',
+      message: 'Please log in to place a bid.',
+      actions: [
+        {
+          label: 'Login',
+          primary: true,
+          onClick: () => navigate('/login', {
+            state: {
+              from: location.pathname,
+            },
+          }),
+        },
+        {
+          label: 'Cancel',
+        },
+      ],
+    })
+  }
 
   const [bidAmountStr, setBidAmountStr] = useState('');
   const [toast, setToast] = useState(null);
@@ -92,6 +119,12 @@ export default function AuctionRoomPage() {
 
   const submitBid = (e) => {
     e.preventDefault();
+
+    if (!isLoggedIn()) {
+      goToLogin();
+      return;
+    }
+
     const amount = parseInt(bidAmountStr, 10);
     if (isNaN(amount)) return;
 
