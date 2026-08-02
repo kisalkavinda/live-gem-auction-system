@@ -95,7 +95,7 @@ export default function AdminAuctionsPage() {
       showAlert({
         type: 'error',
         title: 'Validation Error',
-        message: err.response?.data?.message || 'Failed to create auction. Please check your inputs.'
+        message: err.response?.data?.message || `Error details: ${err.message}. Response: ${JSON.stringify(err.response?.data || {})}`
       })
     } finally {
       setIsSubmitting(false)
@@ -264,15 +264,17 @@ export default function AdminAuctionsPage() {
                     End Early
                   </button>
                 )}
-                <button
-                  onClick={() => handleDeleteClick(auction)}
-                  style={{
-                    background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '2px', color: '#EF4444',
-                    padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
-                  }}
-                >
-                  Delete
-                </button>
+                {auction.status?.toUpperCase() === 'SCHEDULED' && (
+                  <button
+                    onClick={() => handleDeleteClick(auction)}
+                    style={{
+                      background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '2px', color: '#EF4444',
+                      padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
+                    }}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))
@@ -327,6 +329,7 @@ export default function AdminAuctionsPage() {
                     dateFormat="MMMM d, yyyy h:mm aa"
                     className="custom-datepicker"
                     required
+                    minDate={new Date()}
                     placeholderText="Select start date & time"
                   />
                 </div>
@@ -342,6 +345,7 @@ export default function AdminAuctionsPage() {
                     dateFormat="MMMM d, yyyy h:mm aa"
                     className="custom-datepicker"
                     required
+                    minDate={new Date()}
                     placeholderText="Select end date & time"
                   />
                 </div>
