@@ -72,8 +72,8 @@ public class AuctionService {
         LocalDateTime now = LocalDateTime.now();
 
         // Validate startTime
-        if (req.getStartTime().isBefore(now.minusSeconds(5))) {
-            throw new IllegalArgumentException("startTime must be in the future (or now)");
+        if (req.getStartTime().isBefore(now.minusMinutes(30))) {
+            throw new IllegalArgumentException("startTime must be in the future (or now, up to 30 mins ago)");
         }
 
         // Validate endTime > startTime

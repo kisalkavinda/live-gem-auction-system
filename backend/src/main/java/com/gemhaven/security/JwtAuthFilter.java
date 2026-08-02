@@ -61,8 +61,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Invalid token — let the request continue unauthenticated
-            // (SecurityConfig will reject it if the route requires auth)
+            // Invalid or expired token — return 401 immediately so frontend can log out
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Token is invalid or expired.\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);
