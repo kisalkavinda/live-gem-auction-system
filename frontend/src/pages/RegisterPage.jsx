@@ -119,7 +119,7 @@ export default function RegisterPage() {
               Create Your Account
             </span>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', fontWeight: 300, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
-              Join GemHaven
+              Join THENNAKOON GEMS
             </h1>
           </div>
 

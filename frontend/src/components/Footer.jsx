@@ -22,7 +22,7 @@ export default function Footer() {
             letterSpacing: '0.25em',
             color: 'rgba(255,255,255,0.6)',
             fontWeight: 300,
-          }}>GEMHAVEN</span>
+          }}>THENNAKOON GEMS</span>
         </div>
 
         <div style={{ display: 'flex', gap: '2rem' }}>
@@ -51,7 +51,7 @@ export default function Footer() {
           color: 'rgba(255,255,255,0.2)',
           letterSpacing: '0.05em',
         }}>
-          © 2026 GemHaven. All rights reserved.
+          © 2026 THENNAKOON GEMS. All rights reserved.
         </p>
       </div>
     </footer>

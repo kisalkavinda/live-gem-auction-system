@@ -59,7 +59,7 @@ const ERAS = [
   },
   {
     period: '2024',
-    era: 'GemHaven',
+    era: 'THENNAKOON GEMS',
     headline: 'Live. Certified. Transparent.',
     body: 'Real-time auctions with full geological provenance, GIA certification, and conflict-free sourcing  the entire gem trade legacy, distilled into one platform.',
     side: 'right',

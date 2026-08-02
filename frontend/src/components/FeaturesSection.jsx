@@ -300,7 +300,7 @@ export default function FeaturesSection() {
             marginBottom: '0.9rem',
             fontWeight: '600',
           }}>
-            Why GemHaven
+            Why THENNAKOON GEMS
           </span>
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",

@@ -243,7 +243,7 @@ export default function Navbar({ visible }) {
                 fontWeight: 300,
               }}
             >
-              GEMHAVEN
+              THENNAKOON GEMS
             </span>
           </Link>
         </MagneticItem>

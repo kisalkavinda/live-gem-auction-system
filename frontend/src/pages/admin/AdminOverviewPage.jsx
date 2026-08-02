@@ -21,7 +21,7 @@ export default function AdminOverviewPage() {
           Dashboard Overview
         </h1>
         <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem', marginTop: '0.25rem' }}>
-          Welcome back to the GemHaven management portal.
+          Welcome back to the THENNAKOON GEMS management portal.
         </p>
       </div>
 

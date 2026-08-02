@@ -247,7 +247,7 @@ export default function LoginPage() {
                   '0.7rem',
               }}
             >
-              ◆ GemHaven
+              ◆ THENNAKOON GEMS
             </div>
 
             <h1
