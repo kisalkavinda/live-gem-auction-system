@@ -72,8 +72,12 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     try {
       await registerUser({ ...formData, role: 'buyer' })
-      // On success, redirect to verify email page, passing the email via state
-      navigate('/verify-email', { state: { email: formData.email } })
+      
+      // Dispatch event so Navbar/AuthContext can update
+      window.dispatchEvent(new Event('gemhaven-auth-updated'))
+      
+      // On success, redirect to home (or account)
+      navigate('/')
     } catch (err) {
       setServerError(err.message || 'Registration failed. Please try again.')
     } finally {
