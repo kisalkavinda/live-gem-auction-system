@@ -65,6 +65,7 @@ public class AdminService {
         // Returns a simplified recent activity feed:
         // last 10 bids, last 5 bookings, last 5 auctions ending soon
         List<Bid> recentBids = bidRepository.findAll().stream()
+                .filter(b -> b.getTimestamp() != null && b.getAuction() != null && b.getAmount() != null)
                 .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
                 .limit(10)
                 .toList();
