@@ -14,6 +14,7 @@ export default function AdminAuctionsPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [editingAuctionId, setEditingAuctionId] = useState(null)
   
   // Create Auction Form Data
   const [formData, setFormData] = useState({
@@ -38,15 +39,20 @@ export default function AdminAuctionsPage() {
   }
 
   const openEditModal = (auction) => {
-    setEditingAuctionId(auction.id)
-    setFormData({
-      gemId: auction.gemstone.id,
-      startingBid: auction.startingPrice,
-      minIncrement: auction.minIncrement,
-      startTime: new Date(auction.startTime),
-      endTime: new Date(auction.endTime)
-    })
-    setIsModalOpen(true)
+    try {
+      setEditingAuctionId(auction.id)
+      setFormData({
+        gemId: auction.gemstone?.id || '',
+        startingBid: auction.currentBid || auction.startingPrice || '',
+        minIncrement: auction.minIncrement || '',
+        startTime: auction.startTime ? new Date(auction.startTime) : null,
+        endTime: auction.endTime ? new Date(auction.endTime) : null
+      })
+      setIsModalOpen(true)
+    } catch (err) {
+      console.error(err)
+      alert("Failed to open edit modal: " + err.message)
+    }
   }
 
   const formatLocal = (date) => {
