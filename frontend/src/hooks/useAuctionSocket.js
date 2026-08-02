@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import apiClient from '../services/apiClient';
 
 // MOCK DATA
 export const MOCK_AUCTIONS = [
@@ -121,33 +122,54 @@ export function useAuctionSocket(auctionId) {
   const botBidRef = useRef(null);
   const isAuctionEnded = useRef(false);
 
-  // Initialize mock auction
+  // Initialize auction from backend
   useEffect(() => {
     if (!auctionId) return;
     
-    // Simulate connection delay
-    const initTimer = setTimeout(() => {
-      const found = MOCK_AUCTIONS.find(a => a.id === auctionId);
-      if (found) {
-        setAuction(found);
-        setCurrentBid(found.startingBid);
+    let isMounted = true;
+    
+    const fetchAuction = async () => {
+      try {
+        const { data } = await apiClient.get(`/auctions/${auctionId}`);
+        if (!isMounted) return;
+        
+        const mappedAuction = {
+          ...data,
+          ...data.gemstone,
+          id: data.id,
+          endsAt: data.endTime,
+          startsAt: data.startTime,
+        };
+        
+        setAuction(mappedAuction);
+        setCurrentBid(data.currentBid || data.startingPrice);
         setConnectionStatus('CONNECTED');
         
         // Initial bid history (just the starting bid placeholder)
         setBidHistory([{
           id: 'initial',
           bidder: 'System',
-          amount: found.startingBid,
+          amount: data.currentBid || data.startingPrice,
           timestamp: new Date().toISOString(),
           isSystem: true,
           message: 'Auction started at'
         }]);
-      } else {
+      } catch (err) {
+        if (!isMounted) return;
+        console.error("Failed to fetch auction:", err);
         setConnectionStatus('DISCONNECTED');
       }
+    };
+
+    // Simulate connection delay for dramatic effect
+    const initTimer = setTimeout(() => {
+      fetchAuction();
     }, 800);
 
-    return () => clearTimeout(initTimer);
+    return () => {
+      isMounted = false;
+      clearTimeout(initTimer);
+    };
   }, [auctionId]);
 
   // Countdown timer loop
