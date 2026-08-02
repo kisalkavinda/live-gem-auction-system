@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { MOCK_AUCTIONS } from '../hooks/useAuctionSocket';
+import apiClient from '../services/apiClient';
 import { getAuctionStatus } from '../utils/auctionStatus';
 
 const LKR = (n) => 'LKR ' + n.toLocaleString('en-LK');
@@ -228,6 +228,26 @@ function AuctionCard({ auction, index }) {
 
 export default function AuctionListPage() {
   const headingRef = useRef(null);
+  const [auctions, setAuctions] = useState([]);
+
+  useEffect(() => {
+    apiClient.get('/auctions')
+      .then(res => {
+        const mapped = res.data.map(a => ({
+          id: a.id,
+          name: a.gemstone?.name || 'Unknown Gem',
+          color: a.gemstone?.color || '#FFFFFF',
+          colorName: a.gemstone?.colorName || '',
+          imageUrl: a.gemstone?.imageUrl || null,
+          certAuthority: a.gemstone?.certAuthority || 'GIA',
+          startingBid: a.currentBid || a.startingPrice || 0,
+          endsAt: a.endTime,
+          status: a.status
+        }));
+        setAuctions(mapped);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!headingRef.current) return;
@@ -286,7 +306,7 @@ export default function AuctionListPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
             gap: '1.25rem',
           }}>
-            {MOCK_AUCTIONS.map((auction, i) => (
+            {auctions.map((auction, i) => (
               <AuctionCard key={auction.id} auction={auction} index={i} />
             ))}
           </div>
