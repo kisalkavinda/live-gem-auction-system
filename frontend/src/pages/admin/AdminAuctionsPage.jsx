@@ -11,7 +11,7 @@ import ConfirmModal from '../../components/ConfirmModal'
 export default function AdminAuctionsPage() {
   const navigate = useNavigate()
   const { showAlert } = useAlert()
-  const { auctions, gems, addAuctionState, deleteAuctionState, updateAuctionState } = useDashboard()
+  const { auctions, gems, buyers, addAuctionState, deleteAuctionState, updateAuctionState } = useDashboard()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -162,9 +162,11 @@ export default function AdminAuctionsPage() {
       )
     } else if (status === 'Ended') {
       return (
-        <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-          Ended
-        </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', alignItems: 'flex-start' }}>
+          <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+            Ended
+          </span>
+        </div>
       )
     }
     // Scheduled
@@ -218,7 +220,14 @@ export default function AdminAuctionsPage() {
             <div key={auction.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
               <div style={{ color: '#fff', fontWeight: 500 }}>{auction.gemstone?.name || 'Unknown Gem'}</div>
               <div>${(auction.currentBid || auction.startingPrice)?.toLocaleString()}</div>
-              <div>{getStatusBadge(auction.status?.charAt(0).toUpperCase() + auction.status?.slice(1).toLowerCase())}</div>
+              <div>
+                {getStatusBadge(auction.status?.charAt(0).toUpperCase() + auction.status?.slice(1).toLowerCase())}
+                {auction.status?.toUpperCase() === 'ENDED' && auction.highestBidderId && (
+                  <div style={{ marginTop: '0.25rem', fontSize: '0.6rem', color: '#C9A84C' }}>
+                    Winner: {buyers.find(b => b.id === auction.highestBidderId)?.name || `ID ${auction.highestBidderId}`}
+                  </div>
+                )}
+              </div>
               <div style={{ fontSize: '0.75rem' }}>
                 <div>Start: {new Date(auction.startTime).toLocaleString()}</div>
                 <div>End: {new Date(auction.endTime).toLocaleString()}</div>

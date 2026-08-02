@@ -17,12 +17,22 @@ export function DashboardProvider({ children }) {
 
     // Fetch auctions
     apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
+
+    // Fetch buyers
+    apiClient.get('/admin/buyers').then(res => {
+      const mapped = res.data.map(b => ({
+        ...b,
+        name: b.fullName,
+        joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
+      }));
+      setBuyers(mapped);
+    }).catch(console.error);
   }, []);
   
   const [auctions, setAuctions] = useState([]);
   
   const [lands, setLands] = useState([]);
-  const [buyers, setBuyers] = useState(mockBuyers);
+  const [buyers, setBuyers] = useState([]);
   const [bookings, setBookings] = useState([]);
 
   // Expose updater functions to be called after adminService resolves

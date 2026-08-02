@@ -185,6 +185,9 @@ export default function AuctionRoomPage() {
   const isFinished = status === 'ENDED' || Boolean(winner);
   const isUrgent = isLive && timeRemaining < 30 && timeRemaining > 0;
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const isWinner = isFinished && currentUser && auction.highestBidderId === currentUser.id;
+
   // Compute a countdown target depending on status: if upcoming, count to start; if live, count to end
   const startDate = parseDatePossible(auction.startTime || auction.startsAt || auction.start);
   const upcomingSeconds = startDate ? Math.max(0, Math.floor((new Date(startDate).getTime() - Date.now()) / 1000)) : 0;
@@ -426,23 +429,37 @@ export default function AuctionRoomPage() {
             {/* Input / Winner state */}
             <div className="detail-row">
               {isFinished ? (
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.02))',
-                  border: '1px solid rgba(201,168,76,0.3)',
-                  borderRadius: '4px',
-                  padding: '2rem 1.5rem',
-                  textAlign: 'center'
-                }}>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
-                    Auction Won
-                  </h3>
-                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>
-                    Congratulations to
-                  </p>
-                  <p style={{ fontSize: '1.1rem', color: '#C9A84C', letterSpacing: '0.05em' }}>
-                    {winner?.bidder}
-                  </p>
-                </div>
+                isWinner ? (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.02))',
+                    border: '1px solid rgba(201,168,76,0.4)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#C9A84C', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      You won this auction!
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                      Congratulations! We will contact you shortly with next steps.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      Auction Ended
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                      This auction has been concluded.
+                    </p>
+                  </div>
+                )
               ) : isUpcoming ? (
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
