@@ -83,13 +83,11 @@ export default function AuctionRoomPage() {
     
     // Initial entry animations
     const tl = gsap.timeline({ delay: 0.1 });
-    tl.fromTo(gemVisualRef.current,
-      { opacity: 0, scale: 0.85 },
-      { opacity: 1, scale: 1, duration: 0.9, ease: 'power3.out' }
+    tl.from(gemVisualRef.current,
+      { opacity: 0, scale: 0.85, duration: 0.9, ease: 'power3.out' }
     );
-    tl.fromTo(infoRef.current?.querySelectorAll('.detail-row') ?? [],
-      { opacity: 0, x: 24 },
-      { opacity: 1, x: 0, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
+    tl.from(infoRef.current?.querySelectorAll('.detail-row') ?? [],
+      { opacity: 0, x: 24, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
       '-=0.5'
     );
   }, [auction]);
@@ -249,7 +247,7 @@ export default function AuctionRoomPage() {
         }}>
 
           {/* LEFT — Visual & Specs */}
-          <div ref={gemVisualRef} style={{ opacity: 0 }}>
+          <div ref={gemVisualRef}>
             {/* Main gem display */}
             <div style={{
               background: `radial-gradient(ellipse at 38% 35%, ${auction.color}30, rgba(5,5,8,0.95))`,
