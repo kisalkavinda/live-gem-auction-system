@@ -11,22 +11,26 @@ export function DashboardProvider({ children }) {
   useEffect(() => {
     fetchGems({ status: 'ALL' }).then(data => setGems(data));
     
-    // Fetch live lands and bookings for the admin dashboard
+    // Fetch auctions and lands for everyone
     apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
-    apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
-
-    // Fetch auctions
     apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
 
-    // Fetch buyers
-    apiClient.get('/admin/buyers').then(res => {
-      const mapped = res.data.map(b => ({
-        ...b,
-        name: b.fullName,
-        joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
-      }));
-      setBuyers(mapped);
-    }).catch(console.error);
+    // Only fetch admin-specific data if the user is an ADMIN
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isAdmin = user && user.role === 'ADMIN';
+
+    if (isAdmin) {
+      apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
+      apiClient.get('/admin/buyers').then(res => {
+        const mapped = res.data.map(b => ({
+          ...b,
+          name: b.fullName,
+          joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
+        }));
+        setBuyers(mapped);
+      }).catch(console.error);
+    }
   }, []);
   
   const [auctions, setAuctions] = useState([]);
