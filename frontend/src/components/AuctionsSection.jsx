@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
+import { getAuctionStatus } from '../utils/auctionStatus'
 
 function formatEndsIn(endTimeStr, status) {
   if (status === 'ENDED') return 'Ended';
@@ -304,7 +305,10 @@ export default function AuctionsSection() {
         return res.json();
       })
       .then(data => {
-        const mapped = data.slice(0, 4).map(a => ({
+        const mapped = data.slice(0, 4).map(a => {
+          const status = getAuctionStatus(a);
+          const endField = a.endTime || a.endsAt || a.end;
+          return ({
           id: a.id,
           name: a.gemstone?.name || 'Unknown Gem',
           carat: a.gemstone?.caratWeight || 0,
@@ -312,11 +316,12 @@ export default function AuctionsSection() {
           color: a.gemstone?.color || '#FFFFFF',
           colorName: a.gemstone?.colorName || '',
           imageUrl: a.gemstone?.imageUrl || null,
-          status: a.status === 'SCHEDULED' ? 'UPCOMING' : a.status,
+          status: status,
           currentBid: a.currentBid || a.startingPrice || null,
-          endsIn: formatEndsIn(a.endTime, a.status),
+          endsIn: formatEndsIn(endField, status),
           bids: 0 
-        }));
+        })
+        );
         setGems(mapped);
       })
       .catch(console.error)

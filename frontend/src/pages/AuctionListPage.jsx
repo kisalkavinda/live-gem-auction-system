@@ -4,6 +4,7 @@ import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { MOCK_AUCTIONS } from '../hooks/useAuctionSocket';
+import { getAuctionStatus } from '../utils/auctionStatus';
 
 const LKR = (n) => 'LKR ' + n.toLocaleString('en-LK');
 
@@ -76,15 +77,16 @@ function AuctionCard({ auction, index }) {
   useEffect(() => {
     const tick = () => {
       const now = new Date().getTime();
-      const end = new Date(auction.endsAt).getTime();
+      const end = new Date(auction.endsAt || auction.endTime || auction.end || 0).getTime();
       setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
     };
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [auction.endsAt]);
+  }, [auction.endsAt, auction.endTime, auction.end]);
 
-  const isUrgent = auction.status === 'LIVE' && timeLeft < 60 && timeLeft > 0;
+  const displayStatus = getAuctionStatus(auction);
+  const isUrgent = displayStatus === 'LIVE' && timeLeft < 60 && timeLeft > 0;
 
   return (
     <div
@@ -139,7 +141,7 @@ function AuctionCard({ auction, index }) {
 
         {/* Badges */}
         <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem' }}>
-          {auction.status === 'LIVE' ? <LiveBadge /> : <UpcomingBadge />}
+          {displayStatus === 'LIVE' ? <LiveBadge /> : <UpcomingBadge />}
         </div>
         <div style={{
           position: 'absolute', top: '0.75rem', right: '0.75rem',
@@ -172,7 +174,7 @@ function AuctionCard({ auction, index }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
             <div>
               <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {auction.status === 'LIVE' ? 'Current Bid' : 'Starting Bid'}
+                {displayStatus === 'LIVE' ? 'Current Bid' : 'Starting Bid'}
               </div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 600 }}>
                 {LKR(auction.startingBid)} {/* Mock displays starting bid as base for list */}
@@ -181,7 +183,7 @@ function AuctionCard({ auction, index }) {
             
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.55rem', color: isUrgent ? '#EF4444' : 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {auction.status === 'LIVE' ? 'Ends In' : 'Starts In'}
+                {displayStatus === 'LIVE' ? 'Ends In' : 'Starts In'}
               </div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: isUrgent ? '#EF4444' : '#fff', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
                 {timeLeft > 0 ? formatTime(timeLeft) : 'Ended'}
@@ -189,7 +191,7 @@ function AuctionCard({ auction, index }) {
             </div>
           </div>
 
-          <button
+              <button
             onClick={e => { e.stopPropagation(); navigate(`/auctions/${auction.id}`); }}
             style={{
               width: '100%', padding: '0.75rem',
@@ -215,8 +217,8 @@ function AuctionCard({ auction, index }) {
                 e.currentTarget.style.background = 'transparent';
               }
             }}
-          >
-            {auction.status === 'LIVE' ? 'Enter Auction Room' : 'View Details'}
+              >
+            {displayStatus === 'LIVE' ? 'Enter Auction Room' : 'View Details'}
           </button>
         </div>
       </div>
