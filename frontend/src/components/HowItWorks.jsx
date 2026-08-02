@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { gsap } from '../utils/gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -46,22 +46,31 @@ export default function HowItWorks() {
   
   useEffect(() => {
     let ctx = gsap.context(() => {
-      // Clean fade-in for the section, zero scroll hijacking
-      gsap.fromTo(
-        '.hw-content',
-        { opacity: 0, y: 30 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: 'top 75%',
-            toggleActions: 'play none none reverse'
-          }
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 75%',
+          toggleActions: 'play none none reverse'
         }
+      });
+
+      tl.fromTo(
+        '.hw-header',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
       )
+      .fromTo(
+        '.snap-card',
+        { opacity: 0, x: 50 },
+        { opacity: 1, x: 0, duration: 0.6, stagger: 0.4, ease: 'power3.out' },
+        "-=0.4"
+      )
+      .fromTo(
+        '.process-arrow',
+        { opacity: 0, scale: 0 },
+        { opacity: 0.5, scale: 1, duration: 0.4, stagger: 0.4, ease: 'back.out(1.7)' },
+        "<0.2"
+      );
     }, sectionRef)
     
     return () => ctx.revert()
@@ -73,7 +82,7 @@ export default function HowItWorks() {
       <div className="hw-content" style={{ width: '100%', padding: '0 6vw' }}>
         
         {/* Header */}
-        <div style={{ marginBottom: '4rem', textAlign: 'center' }}>
+        <div className="hw-header" style={{ marginBottom: '4rem', textAlign: 'center' }}>
           <span style={{
             display: 'inline-block',
             fontSize: '0.75rem',
@@ -99,116 +108,123 @@ export default function HowItWorks() {
           </p>
         </div>
 
-        {/* Native Horizontal Scroll Container */}
-        <div 
-          className="horizontal-snap-container"
-          style={{
-            display: 'flex',
-            gap: '2rem',
-            overflowX: 'auto',
-            paddingTop: '1.5rem', // Space for the floating badge
-            paddingBottom: '2rem',
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-            scrollbarWidth: 'none', // Firefox
-          }}
-        >
+        <div className="horizontal-snap-container">
           {steps.map((step, i) => (
-            <div
-              key={step.num}
-              className="snap-card"
-              style={{
-                minWidth: 'min(380px, 85vw)',
-                scrollSnapAlign: 'start',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(201,168,76,0.15)',
-                padding: '3rem',
-                borderRadius: '16px',
-                position: 'relative',
-                flexShrink: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-              }}
-            >
-              {/* Floating Step number badge */}
-              <div style={{
-                position: 'absolute',
-                top: '-1.2rem',
-                left: '2rem',
-                background: '#070503',
-                border: '1px solid rgba(201,168,76,0.4)',
-                padding: '0.4rem 1.2rem',
-                borderRadius: '50px',
-                color: '#C9A84C',
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: '1rem',
-                fontWeight: 600,
-                letterSpacing: '0.1em',
-                boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
-              }}>
-                STEP {step.num}
-              </div>
-
-              <div>
+            <React.Fragment key={step.num}>
+              <div
+                className="snap-card"
+                style={{
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(201,168,76,0.15)',
+                  padding: '2rem',
+                  borderRadius: '16px',
+                  position: 'relative',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                }}
+              >
+                {/* Floating Step number badge */}
                 <div style={{
-                  width: '55px',
-                  height: '55px',
+                  position: 'absolute',
+                  top: '-1rem',
+                  left: '1.5rem',
+                  background: '#070503',
+                  border: '1px solid rgba(201,168,76,0.4)',
+                  padding: '0.25rem 0.8rem',
+                  borderRadius: '50px',
                   color: '#C9A84C',
-                  background: 'rgba(201,168,76,0.1)',
-                  borderRadius: '12px',
-                  padding: '14px',
-                  marginBottom: '2rem',
-                  marginTop: '1rem'
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize: '0.8rem',
+                  fontWeight: 600,
+                  letterSpacing: '0.1em',
+                  boxShadow: '0 5px 15px rgba(0,0,0,0.3)',
                 }}>
-                  {step.icon}
+                  STEP {step.num}
                 </div>
 
-                <h3 style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize: '2rem',
-                  fontWeight: 400,
-                  color: '#E8E0D0',
-                  marginBottom: '1rem',
-                }}>
-                  {step.title}
-                </h3>
+                <div>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    color: '#C9A84C',
+                    background: 'rgba(201,168,76,0.1)',
+                    borderRadius: '10px',
+                    padding: '8px',
+                    marginBottom: '1.2rem',
+                    marginTop: '0.5rem'
+                  }}>
+                    {step.icon}
+                  </div>
 
-                <p style={{
-                  fontSize: '0.95rem',
-                  color: 'rgba(232,224,208,0.7)',
-                  lineHeight: 1.7,
-                  marginBottom: '2.5rem',
-                  fontWeight: 300,
-                }}>
-                  {step.desc}
-                </p>
-              </div>
+                  <h3 style={{
+                    fontFamily: "'Cormorant Garamond', serif",
+                    fontSize: '1.4rem',
+                    fontWeight: 400,
+                    color: '#E8E0D0',
+                    marginBottom: '0.75rem',
+                  }}>
+                    {step.title}
+                  </h3>
 
-              <div style={{
-                paddingTop: '1.2rem',
-                borderTop: '1px solid rgba(255,255,255,0.05)',
-                fontSize: '0.7rem',
-                letterSpacing: '0.2em',
-                color: 'rgba(201,168,76,0.6)',
-                textTransform: 'uppercase',
-                fontWeight: 600,
-              }}>
-                {step.detail}
+                  <p style={{
+                    fontSize: '0.85rem',
+                    color: 'rgba(232,224,208,0.7)',
+                    lineHeight: 1.6,
+                    marginBottom: '1.5rem',
+                    fontWeight: 300,
+                  }}>
+                    {step.desc}
+                  </p>
+                </div>
+
+                <div style={{
+                  paddingTop: '1rem',
+                  borderTop: '1px solid rgba(255,255,255,0.05)',
+                  fontSize: '0.6rem',
+                  letterSpacing: '0.15em',
+                  color: 'rgba(201,168,76,0.6)',
+                  textTransform: 'uppercase',
+                  fontWeight: 600,
+                }}>
+                  {step.detail}
+                </div>
               </div>
-            </div>
+              
+              {/* Arrow between cards */}
+              {i < steps.length - 1 && (
+                <div className="process-arrow" style={{ color: '#C9A84C' }}>
+                  <svg fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ width: '32px', height: '32px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                  </svg>
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
 
       <style>{`
-        /* Hide scrollbar for Chrome, Safari and Opera */
+        .horizontal-snap-container {
+          display: flex;
+          gap: 1.5rem;
+          overflow-x: auto;
+          padding-top: 1.5rem;
+          padding-bottom: 2rem;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+        }
+        
         .horizontal-snap-container::-webkit-scrollbar {
           display: none;
         }
         
         .snap-card {
+          min-width: 80vw;
+          scroll-snap-align: start;
+          flex-shrink: 0;
           transition: transform 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
         }
         
@@ -216,6 +232,35 @@ export default function HowItWorks() {
           border-color: rgba(201,168,76,0.5) !important;
           transform: translateY(-8px);
           box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+        }
+
+        .process-arrow {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          padding: 0 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+          .snap-card {
+            min-width: 340px;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .horizontal-snap-container {
+            overflow-x: visible;
+            justify-content: space-between;
+            gap: 1rem;
+          }
+          .snap-card {
+            min-width: 0;
+            flex: 1 1 0;
+          }
+          .process-arrow {
+            padding: 0;
+          }
         }
       `}</style>
     </section>

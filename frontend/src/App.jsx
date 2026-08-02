@@ -65,17 +65,16 @@ import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 
 
 function LandingPage() {
-  const [
-    ready,
-    setReady,
-  ] = useState(false)
+  const [ready, setReady] = useState(() => {
+    return sessionStorage.getItem('gemhaven_preloader_done') === 'true'
+  })
 
   useLenis()
 
-  const handlePreloaderDone =
-    useCallback(() => {
-      setReady(true)
-    }, [])
+  const handlePreloaderDone = useCallback(() => {
+    sessionStorage.setItem('gemhaven_preloader_done', 'true')
+    setReady(true)
+  }, [])
 
   return (
     <>
