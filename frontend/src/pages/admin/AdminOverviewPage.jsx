@@ -4,14 +4,15 @@ import { useDashboard } from '../../context/DashboardContext'
 
 export default function AdminOverviewPage() {
   const navigate = useNavigate()
-  const { gems, auctions, buyers } = useDashboard()
+  const { gems, auctions, buyers, stats, recentActivity } = useDashboard()
 
-  const totalGems = gems.length
-  const activeAuctions = auctions.filter(a => a.status === 'Live' || a.status === 'Scheduled').length
-  const totalBuyers = buyers.length
+  const totalGems = stats?.totalGems !== undefined ? stats.totalGems : gems.length
+  const activeAuctions = stats?.activeAuctions !== undefined ? stats.activeAuctions : auctions.filter(a => a.status === 'LIVE' || a.status === 'SCHEDULED').length
+  const totalBuyers = stats?.totalBuyers !== undefined ? stats.totalBuyers : buyers.length
   
-  // Mock revenue
-  const revenue = '$4,250,000'
+  const formattedRevenue = stats?.revenueThisMonth 
+    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(stats.revenueThisMonth)
+    : '$0'
 
   return (
     <DashboardLayout role="admin">
@@ -40,7 +41,7 @@ export default function AdminOverviewPage() {
         </div>
         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '4px', padding: '1.5rem' }}>
           <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Monthly Revenue</div>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#fff' }}>{revenue}</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', color: '#fff' }}>{formattedRevenue}</div>
         </div>
       </div>
 
@@ -88,36 +89,30 @@ export default function AdminOverviewPage() {
             <div>Status</div>
           </div>
           
-          {/* Mock Rows */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-            <div>10 mins ago</div>
-            <div>New buyer registration: <span style={{ color: '#fff' }}>Sophia Laurent</span></div>
-            <div>
-              <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ADE80', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Approved
-              </span>
+          {/* Dynamic Rows */}
+          {recentActivity && recentActivity.length > 0 ? (
+            recentActivity.map((activity, idx) => (
+              <div key={idx} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
+                <div>{new Date(activity.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</div>
+                
+                {activity.type === 'BID' ? (
+                  <div>New bid placed: <span style={{ color: '#fff' }}>${activity.amount}</span> on Auction #{activity.auctionId}</div>
+                ) : (
+                  <div>{activity.type}</div>
+                )}
+                
+                <div>
+                  <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.3)', color: '#4ADE80', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                    {activity.type === 'BID' ? 'Placed' : activity.type}
+                  </span>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>
+              No recent activity found.
             </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-            <div>2 hours ago</div>
-            <div>Auction ended: <span style={{ color: '#fff' }}>The Crimson Heart</span></div>
-            <div>
-              <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Completed
-              </span>
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr', padding: '1rem 1.5rem', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-            <div>Yesterday</div>
-            <div>Land Plot L-001 reserved by <span style={{ color: '#fff' }}>James Winchester</span></div>
-            <div>
-              <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '2px', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.4)', color: '#C9A84C', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-                Pending Review
-              </span>
-            </div>
-          </div>
+          )}
 
         </div>
       </div>

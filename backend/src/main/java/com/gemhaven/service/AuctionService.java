@@ -171,8 +171,8 @@ public class AuctionService {
         Auction auction = auctionRepository.findByIdWithPessimisticLock(id)
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + id));
 
-        if (auction.getStatus() == Auction.AuctionStatus.CLOSED) {
-            throw new IllegalStateException("Auction is already closed.");
+        if (auction.getStatus() == Auction.AuctionStatus.ENDED) {
+            throw new IllegalStateException("Auction is already ended");
         }
         if (auction.getStatus() == Auction.AuctionStatus.SCHEDULED) {
             throw new IllegalStateException("Cannot force-close a SCHEDULED auction. Delete it instead.");
@@ -185,14 +185,14 @@ public class AuctionService {
     // ─── Shared close logic (used by scheduler + endEarly) ───────────────────
 
     /**
-     * Closes an auction: sets status=CLOSED, updates gem status, publishes AUCTION_ENDED event.
-     * MUST be called inside an existing @Transactional context with a pessimistic lock already held.
+     * Closes an auction: sets status=ENDED, updates gem status, publishes AUCTION_ENDED event.
+     * Note: This is an internal helper, usually called via scheduler or endAuctionEarly. context with a pessimistic lock already held.
      *
      * If bids exist: gem → SOLD, broadcast with winner info + "Won — Awaiting Payment & Collection"
      * If no bids:    gem → PUBLISHED (available for relisting), broadcast "No bids — auction closed"
      */
     public void closeAuction(Auction auction) {
-        auction.setStatus(Auction.AuctionStatus.CLOSED);
+        auction.setStatus(Auction.AuctionStatus.ENDED);
 
         Gemstone gem = auction.getGemstone();
         String message;

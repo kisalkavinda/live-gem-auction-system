@@ -59,7 +59,7 @@ public class Auction {
     private LocalDateTime createdAt;
 
     public enum AuctionStatus {
-        SCHEDULED, LIVE, CLOSED
+        SCHEDULED, LIVE, ENDED
     }
 
     public Auction() {}

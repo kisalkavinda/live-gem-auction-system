@@ -95,7 +95,7 @@ public class AuctionSchedulerService {
         if (auction == null) return;
 
         // Already closed by a concurrent scheduler run or admin endEarly
-        if (auction.getStatus() == Auction.AuctionStatus.CLOSED) return;
+        if (auction.getStatus() == Auction.AuctionStatus.ENDED) return;
 
         // Re-check: a last-moment bid may have extended endTime via anti-sniping
         if (!LocalDateTime.now().isAfter(auction.getEndTime())) {

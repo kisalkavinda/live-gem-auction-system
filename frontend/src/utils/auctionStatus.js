@@ -10,6 +10,10 @@ export function getAuctionStatus(auction = {}) {
   // Prefer explicit backend status when it is authoritative
   const backendStatus = (auction.status || '').toString().toUpperCase();
 
+  if (['ENDED', 'CLOSED', 'FINISHED', 'SOLD'].includes(backendStatus)) {
+    return 'ENDED';
+  }
+
   // Normalize potential date fields
   const start = parseDatePossible(auction.startTime || auction.startsAt || auction.starts_at || auction.start);
   const end = parseDatePossible(auction.endTime || auction.endsAt || auction.ends_at || auction.end || auction.endsAt);

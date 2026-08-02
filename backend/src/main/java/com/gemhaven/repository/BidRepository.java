@@ -41,7 +41,7 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
             @Param("excludeUser") User excludeUser
     );
 
-    /** Count of won auctions for a user (where their bid equals the auction's currentBid on CLOSED auctions) */
+    /** Count of won auctions for a user (where their bid equals the auction's currentBid on ENDED auctions) */
     @Query("""
         SELECT COUNT(DISTINCT b.auction.id)
         FROM Bid b
@@ -52,6 +52,6 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
     long countWonAuctionsByUserAndStatus(@Param("user") User user, @Param("status") com.gemhaven.model.Auction.AuctionStatus status);
 
     default long countWonAuctionsByUser(User user) {
-        return countWonAuctionsByUserAndStatus(user, com.gemhaven.model.Auction.AuctionStatus.CLOSED);
+        return countWonAuctionsByUserAndStatus(user, com.gemhaven.model.Auction.AuctionStatus.ENDED);
     }
 }

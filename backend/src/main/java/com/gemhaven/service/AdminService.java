@@ -49,7 +49,7 @@ public class AdminService {
                 .count();
 
         // Revenue = sum of winning bids on ENDED auctions (simplified)
-        BigDecimal revenueThisMonth = auctionRepository.findByStatus(Auction.AuctionStatus.CLOSED)
+        BigDecimal revenueThisMonth = auctionRepository.findByStatus(Auction.AuctionStatus.ENDED)
                 .stream()
                 .filter(a -> a.getCurrentBid() != null)
                 .filter(a -> a.getCreatedAt() != null &&
@@ -65,6 +65,7 @@ public class AdminService {
         // Returns a simplified recent activity feed:
         // last 10 bids, last 5 bookings, last 5 auctions ending soon
         List<Bid> recentBids = bidRepository.findAll().stream()
+                .filter(b -> b.getTimestamp() != null && b.getAuction() != null && b.getAmount() != null)
                 .sorted((a, b) -> b.getTimestamp().compareTo(a.getTimestamp()))
                 .limit(10)
                 .toList();

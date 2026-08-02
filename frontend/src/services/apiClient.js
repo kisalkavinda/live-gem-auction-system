@@ -44,14 +44,15 @@ apiClient.interceptors.response.use(
   response => response,
 
   error => {
-    if (
-      error.response?.status === 401 ||
-      error.response?.status === 403
-    ) {
-      console.warn(
-        'Authentication required or authorization failed.'
-      )
+    if (error.response?.status === 401) {
+      console.warn('Authentication required or expired token.')
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.dispatchEvent(new Event('gemhaven-auth-updated'))
       dispatchUnauthorizedEvent()
+    } else if (error.response?.status === 403) {
+      console.warn('Access forbidden.')
+      // Do NOT log them out, just reject the promise so the caller handles it
     }
 
     return Promise.reject(error)

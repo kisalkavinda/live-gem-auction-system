@@ -64,6 +64,16 @@ export async function createAuction(auctionData) {
   }
 }
 
+export async function updateAuction(id, auctionData) {
+  try {
+    const response = await apiClient.put(`/auctions/${id}`, auctionData);
+    return { success: true, auction: response.data };
+  } catch (error) {
+    console.error(`Error updating auction ${id}:`, error);
+    throw error;
+  }
+}
+
 export async function endAuctionEarly(id) {
   try {
     const response = await apiClient.post(`/auctions/${id}/end-early`);
