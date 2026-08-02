@@ -51,7 +51,11 @@ export default function AdminAuctionsPage() {
       setIsModalOpen(true)
     } catch (err) {
       console.error(err)
-      alert("Failed to open edit modal: " + err.message)
+      showAlert({
+        type: 'error',
+        title: 'Error',
+        message: 'Failed to open edit modal: ' + err.message
+      })
     }
   }
 
@@ -95,24 +99,52 @@ export default function AdminAuctionsPage() {
     }
   }
 
-  const handleEndEarly = async (id) => {
-    if (!window.confirm("Are you sure you want to end this auction early?")) return;
-    try {
-      const res = await endAuctionEarly(id)
-      updateAuctionState(id, res.auction)
-    } catch (err) {
-      console.error(err)
-    }
+  const handleEndEarly = (id) => {
+    showAlert({
+      type: 'info',
+      title: 'Confirm End Early',
+      message: 'Are you sure you want to end this auction early?',
+      actions: [
+        {
+          label: 'Yes, End Early',
+          primary: true,
+          onClick: async () => {
+            try {
+              const res = await endAuctionEarly(id)
+              updateAuctionState(id, res.auction)
+            } catch (err) {
+              console.error(err)
+              showAlert({ type: 'error', title: 'Error', message: 'Failed to end auction early.' })
+            }
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    })
   }
 
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this auction?")) return;
-    try {
-      await deleteAuction(id)
-      deleteAuctionState(id)
-    } catch (err) {
-      console.error(err)
-    }
+  const handleDelete = (id) => {
+    showAlert({
+      type: 'info',
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this auction?',
+      actions: [
+        {
+          label: 'Yes, Delete',
+          primary: true,
+          onClick: async () => {
+            try {
+              await deleteAuction(id)
+              deleteAuctionState(id)
+            } catch (err) {
+              console.error(err)
+              showAlert({ type: 'error', title: 'Error', message: 'Failed to delete auction.' })
+            }
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    })
   }
 
   const getStatusBadge = (status) => {

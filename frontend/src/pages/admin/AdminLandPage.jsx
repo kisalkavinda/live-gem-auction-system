@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
+import { useAlert } from '../../context/AlertContext'
 import { addLandListing, deleteLandListing, updateBookingStatus, uploadImage } from '../../services/adminService'
 
 export default function AdminLandPage() {
   const { lands, bookings, addLandState, deleteLandState, updateBookingStatusState } = useDashboard()
+  const { showAlert } = useAlert()
   const [activeTab, setActiveTab] = useState('listings') // 'listings' | 'bookings'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -70,14 +72,28 @@ export default function AdminLandPage() {
     }
   }
 
-  const handleDeleteLand = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this land listing?")) return;
-    try {
-      await deleteLandListing(id)
-      deleteLandState(id)
-    } catch (err) {
-      console.error(err)
-    }
+  const handleDeleteLand = (id) => {
+    showAlert({
+      type: 'info',
+      title: 'Confirm Delete',
+      message: 'Are you sure you want to delete this land listing?',
+      actions: [
+        {
+          label: 'Yes, Delete',
+          primary: true,
+          onClick: async () => {
+            try {
+              await deleteLandListing(id)
+              deleteLandState(id)
+            } catch (err) {
+              console.error(err)
+              showAlert({ type: 'error', title: 'Error', message: 'Failed to delete land listing.' })
+            }
+          }
+        },
+        { label: 'Cancel' }
+      ]
+    })
   }
 
   const handleConfirmBooking = async (id) => {
