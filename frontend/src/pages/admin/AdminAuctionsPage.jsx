@@ -34,6 +34,13 @@ export default function AdminAuctionsPage() {
     setIsModalOpen(true)
   }
 
+  const formatLocal = (date) => {
+    if (!date) return null;
+    const d = new Date(date);
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
   const handleCreate = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
@@ -43,8 +50,8 @@ export default function AdminAuctionsPage() {
         gemstoneId: Number(formData.gemId),
         startingPrice: Number(formData.startingBid),
         minIncrement: Number(formData.minIncrement),
-        startTime: new Date(formData.startTime).toISOString(),
-        endTime: new Date(formData.endTime).toISOString()
+        startTime: formatLocal(formData.startTime),
+        endTime: formatLocal(formData.endTime)
       }
       const res = await createAuction(newAuctionData)
       addAuctionState(res.auction)
