@@ -14,43 +14,12 @@ export function DashboardProvider({ children }) {
     // Fetch live lands and bookings for the admin dashboard
     apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
     apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
+
+    // Fetch auctions
+    apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
   }, []);
   
-  // Since we don't have a separate mockAuctions file, we derive initial mock auctions 
-  // from the mockGems that have auction data (e.g., currentBid).
-  // For the dashboard, we want an isolated list of auctions.
-  const [auctions, setAuctions] = useState([
-    {
-      id: 'a1',
-      gemId: 'g1',
-      gemName: 'The Crimson Heart',
-      currentBid: 1250000,
-      status: 'Live',
-      startTime: '2024-06-01T10:00:00Z',
-      endTime: '2024-06-15T10:00:00Z',
-      biddersCount: 14
-    },
-    {
-      id: 'a2',
-      gemId: 'g2',
-      gemName: 'Midnight Star Sapphire',
-      currentBid: 850000,
-      status: 'Scheduled',
-      startTime: '2024-07-01T10:00:00Z',
-      endTime: '2024-07-15T10:00:00Z',
-      biddersCount: 0
-    },
-    {
-      id: 'a3',
-      gemId: 'g3',
-      gemName: 'Royal Emerald Cut',
-      currentBid: 3200000,
-      status: 'Ended',
-      startTime: '2024-05-01T10:00:00Z',
-      endTime: '2024-05-15T10:00:00Z',
-      biddersCount: 42
-    }
-  ]);
+  const [auctions, setAuctions] = useState([]);
   
   const [lands, setLands] = useState([]);
   const [buyers, setBuyers] = useState(mockBuyers);

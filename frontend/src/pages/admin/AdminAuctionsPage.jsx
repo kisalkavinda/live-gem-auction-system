@@ -37,11 +37,11 @@ export default function AdminAuctionsPage() {
     try {
       const selectedGem = gems.find(g => g.id === formData.gemId)
       const newAuctionData = {
-        ...formData,
-        gemName: selectedGem?.name || 'Unknown Gem',
-        currentBid: Number(formData.startingBid),
-        status: 'Scheduled',
-        biddersCount: 0
+        gemstoneId: Number(formData.gemId),
+        startingPrice: Number(formData.startingBid),
+        minIncrement: Number(formData.minIncrement),
+        startTime: new Date(formData.startTime).toISOString(),
+        endTime: new Date(formData.endTime).toISOString()
       }
       const res = await createAuction(newAuctionData)
       addAuctionState(res.auction)
@@ -56,9 +56,8 @@ export default function AdminAuctionsPage() {
   const handleEndEarly = async (id) => {
     if (!window.confirm("Are you sure you want to end this auction early?")) return;
     try {
-      await endAuctionEarly(id)
-      const auctionToUpdate = auctions.find(a => a.id === id)
-      updateAuctionState(id, { ...auctionToUpdate, status: 'Ended' })
+      const res = await endAuctionEarly(id)
+      updateAuctionState(id, res.auction)
     } catch (err) {
       console.error(err)
     }
@@ -143,9 +142,9 @@ export default function AdminAuctionsPage() {
         ) : (
           auctions.map(auction => (
             <div key={auction.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
-              <div style={{ color: '#fff', fontWeight: 500 }}>{auction.gemName}</div>
-              <div>${auction.currentBid?.toLocaleString()}</div>
-              <div>{getStatusBadge(auction.status)}</div>
+              <div style={{ color: '#fff', fontWeight: 500 }}>{auction.gemstone?.name || 'Unknown Gem'}</div>
+              <div>${(auction.currentBid || auction.startingPrice)?.toLocaleString()}</div>
+              <div>{getStatusBadge(auction.status?.charAt(0).toUpperCase() + auction.status?.slice(1).toLowerCase())}</div>
               <div style={{ fontSize: '0.75rem' }}>
                 <div>Start: {new Date(auction.startTime).toLocaleString()}</div>
                 <div>End: {new Date(auction.endTime).toLocaleString()}</div>
