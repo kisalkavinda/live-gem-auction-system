@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
+import { useAlert } from '../../context/AlertContext'
 import { createAuction, deleteAuction, endAuctionEarly } from '../../services/adminService'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
 export default function AdminAuctionsPage() {
   const navigate = useNavigate()
+  const { showAlert } = useAlert()
   const { auctions, gems, addAuctionState, deleteAuctionState, updateAuctionState } = useDashboard()
 
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -58,7 +60,11 @@ export default function AdminAuctionsPage() {
       setIsModalOpen(false)
     } catch (err) {
       console.error(err)
-      alert(err.response?.data?.message || 'Failed to create auction. Please check your inputs.')
+      showAlert({
+        type: 'error',
+        title: 'Validation Error',
+        message: err.response?.data?.message || 'Failed to create auction. Please check your inputs.'
+      })
     } finally {
       setIsSubmitting(false)
     }
