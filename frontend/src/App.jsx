@@ -1,121 +1,336 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import {
+  useState,
+  useEffect,
+  useCallback,
+} from 'react'
 
-function App() {
-  const [count, setCount] = useState(0)
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom'
+
+import {
+  useLenis,
+} from './hooks/useLenis'
+
+import Preloader from './components/Preloader'
+import Navbar from './components/Navbar'
+import TunnelScrollHero from './components/TunnelScrollHero'
+import GemHistory from './components/GemHistory'
+import FeaturesSection from './components/FeaturesSection'
+import AuctionsSection from './components/AuctionsSection'
+import HowItWorks from './components/HowItWorks'
+import CTABand from './components/CTABand'
+import Footer from './components/Footer'
+
+import ShopPage from './pages/ShopPage'
+import GemDetailPage from './pages/GemDetailPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+
+import AuctionListPage from './pages/AuctionListPage'
+import AuctionRoomPage from './pages/AuctionRoomPage'
+import LandListingPage from './pages/LandListingPage'
+import LandDetailPage from './pages/LandDetailPage'
+import KnowledgeHubPage from './pages/KnowledgeHubPage'
+import ArticleDetailPage from './pages/ArticleDetailPage'
+
+import RegisterPage from './pages/RegisterPage'
+import LoginPage from './pages/LoginPage'
+import VerifyEmailPendingPage from './pages/VerifyEmailPendingPage'
+import VerifyEmailConfirmPage from './pages/VerifyEmailConfirmPage'
+import MyAccountPage from './pages/MyAccountPage'
+
+import {
+  CartProvider,
+} from './context/CartContext'
+
+import {
+  AlertProvider,
+} from './context/AlertContext'
+
+import {
+  DashboardProvider,
+} from './context/DashboardContext'
+
+import AdminOverviewPage from './pages/admin/AdminOverviewPage'
+import AdminInventoryPage from './pages/admin/AdminInventoryPage'
+import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
+import AdminLandPage from './pages/admin/AdminLandPage'
+import AdminBuyersPage from './pages/admin/AdminBuyersPage'
+
+
+function LandingPage() {
+  const [
+    ready,
+    setReady,
+  ] = useState(false)
+
+  useLenis()
+
+  const handlePreloaderDone =
+    useCallback(() => {
+      setReady(true)
+    }, [])
 
   return (
     <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      {!ready && (
+        <Preloader
+          onComplete={
+            handlePreloaderDone
+          }
+        />
+      )}
 
-      <div className="ticks"></div>
+      <div
+        style={{
+          opacity:
+            ready ? 1 : 0,
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+          transition:
+            'opacity 0.5s',
+        }}
+      >
+        <Navbar
+          visible={ready}
+        />
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
+        <TunnelScrollHero />
+
+        <GemHistory />
+
+        <FeaturesSection />
+
+        <AuctionsSection />
+
+        <HowItWorks />
+
+        <CTABand />
+
+        <Footer />
+      </div>
     </>
   )
 }
 
-export default App
+
+function AppRoutes() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      if (location.pathname === '/login') {
+        return
+      }
+
+      navigate('/login', {
+        replace: true,
+        state: {
+          from: location.pathname + location.search,
+        },
+      })
+    }
+
+    window.addEventListener(
+      'gemhaven-auth-unauthorized',
+      handleUnauthorized
+    )
+
+    return () => {
+      window.removeEventListener(
+        'gemhaven-auth-unauthorized',
+        handleUnauthorized
+      )
+    }
+  }, [navigate, location.pathname, location.search])
+
+  return (
+    <Routes>
+
+      {/* HOME */}
+
+      <Route
+        path="/"
+        element={
+          <LandingPage />
+        }
+      />
+
+      {/* SHOP */}
+
+      <Route
+        path="/shop"
+        element={
+          <ShopPage />
+        }
+      />
+
+      <Route
+        path="/shop/:id"
+        element={
+          <GemDetailPage />
+        }
+      />
+
+      {/* CART */}
+
+      <Route
+        path="/cart"
+        element={
+          <CartPage />
+        }
+      />
+
+      {/* CHECKOUT */}
+
+      <Route
+        path="/checkout"
+        element={
+          <CheckoutPage />
+        }
+      />
+
+      {/* AUCTIONS */}
+
+      <Route
+        path="/auctions"
+        element={
+          <AuctionListPage />
+        }
+      />
+
+      <Route
+        path="/auctions/:id"
+        element={
+          <AuctionRoomPage />
+        }
+      />
+
+      {/* LAND */}
+
+      <Route
+        path="/land"
+        element={
+          <LandListingPage />
+        }
+      />
+
+      <Route
+        path="/land/:id"
+        element={
+          <LandDetailPage />
+        }
+      />
+
+      {/* KNOWLEDGE HUB */}
+
+      <Route
+        path="/knowledge-hub"
+        element={
+          <KnowledgeHubPage />
+        }
+      />
+
+      <Route
+        path="/knowledge-hub/:slug"
+        element={
+          <ArticleDetailPage />
+        }
+      />
+
+      {/* AUTH */}
+
+      <Route
+        path="/register"
+        element={
+          <RegisterPage />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          <LoginPage />
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          <VerifyEmailPendingPage />
+        }
+      />
+
+      <Route
+        path="/verify-email/:token"
+        element={
+          <VerifyEmailConfirmPage />
+        }
+      />
+
+      <Route
+        path="/account"
+        element={
+          <MyAccountPage />
+        }
+      />
+
+      {/* ADMIN */}
+
+      <Route
+        path="/admin"
+        element={
+          <AdminOverviewPage />
+        }
+      />
+
+      <Route
+        path="/admin/inventory"
+        element={
+          <AdminInventoryPage />
+        }
+      />
+
+      <Route
+        path="/admin/auctions"
+        element={
+          <AdminAuctionsPage />
+        }
+      />
+
+      <Route
+        path="/admin/land"
+        element={
+          <AdminLandPage />
+        }
+      />
+
+      <Route
+        path="/admin/buyers"
+        element={
+          <AdminBuyersPage />
+        }
+      />
+
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
+    <DashboardProvider>
+      <BrowserRouter>
+        <AlertProvider>
+          <CartProvider>
+            <AppRoutes />
+          </CartProvider>
+        </AlertProvider>
+      </BrowserRouter>
+    </DashboardProvider>
+  )
+}

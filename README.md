@@ -44,17 +44,26 @@ npm run dev
 Runs at `http://localhost:5173`
 
 ### Backend
-Configure your database in `backend/src/main/resources/application.properties`:
+The backend uses environment variables for configuration. To avoid conflicting credentials among the team, each developer must create their own local properties file.
+
+1. Go to `backend/src/main/resources/`
+2. Create a file named `application-local.properties` (this file is ignored by git).
+3. Add your specific local database credentials:
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/gemhaven
-spring.datasource.username=your_username
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
+spring.datasource.url=jdbc:postgresql://localhost:5432/gemhaven_db
+spring.datasource.username=postgres
+spring.datasource.password=YOUR_LOCAL_PASSWORD
 ```
-Then run:
+
+Then run the backend using the `local` profile:
 ```bash
 cd backend
-./mvnw spring-boot:run
+
+# On Windows (PowerShell/CMD):
+.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+
+# On Mac/Linux:
+./mvnw spring-boot:run "-Dspring-boot.run.profiles=local"
 ```
 Runs at `http://localhost:8080`
 
@@ -93,8 +102,13 @@ git push origin feature/your-feature-name
 | Member | Role |
 |--------|------|
 | Kisal Kavinda | Project Lead / Full Stack |
-| Avishka Hashara | Full Stack Developer |
+| Avishka Hashara | Full Stack  Developer |
 | Wandana Gunasekara | Backend Developer |
 | Chamindu Shenal | Frontend Developer |
 | Isuri Pathirana | Frontend Developer |
 | HKP Pamuditha | Database / QA |
+
+
+
+Email: admin@gemhaven.com
+Password: admin123

@@ -11,3 +11,5 @@ backend/.mvn/
 .vscode/
 .idea/
 .DS_Store
+node_modules/
+frontend/public/tunnel-frames
