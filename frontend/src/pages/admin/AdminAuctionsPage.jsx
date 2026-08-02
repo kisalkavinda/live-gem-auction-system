@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
 import { createAuction, deleteAuction, endAuctionEarly } from '../../services/adminService'
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
 
 export default function AdminAuctionsPage() {
   const navigate = useNavigate()
@@ -16,8 +18,8 @@ export default function AdminAuctionsPage() {
     gemId: '',
     startingBid: '',
     minIncrement: '',
-    startTime: '',
-    endTime: ''
+    startTime: null,
+    endTime: null
   })
 
   const openCreateModal = () => {
@@ -26,8 +28,8 @@ export default function AdminAuctionsPage() {
       gemId: publishedGems[0]?.id || '',
       startingBid: '',
       minIncrement: '',
-      startTime: '',
-      endTime: ''
+      startTime: null,
+      endTime: null
     })
     setIsModalOpen(true)
   }
@@ -222,11 +224,33 @@ export default function AdminAuctionsPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Start Time</label>
-                  <input required type="datetime-local" value={formData.startTime} onChange={e => setFormData({...formData, startTime: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                  <DatePicker
+                    selected={formData.startTime}
+                    onChange={(date) => setFormData({ ...formData, startTime: date })}
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    timeCaption="Time"
+                    dateFormat="MMMM d, yyyy h:mm aa"
+                    className="custom-datepicker"
+                    required
+                    placeholderText="Select start date & time"
+                  />
                 </div>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>End Time</label>
-                  <input required type="datetime-local" value={formData.endTime} onChange={e => setFormData({...formData, endTime: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
+                  <DatePicker
+                    selected={formData.endTime}
+                    onChange={(date) => setFormData({ ...formData, endTime: date })}
+                    showTimeSelect
+                    timeFormat="HH:mm"
+                    timeIntervals={15}
+                    timeCaption="Time"
+                    dateFormat="MMMM d, yyyy h:mm aa"
+                    className="custom-datepicker"
+                    required
+                    placeholderText="Select end date & time"
+                  />
                 </div>
               </div>
 
@@ -250,6 +274,78 @@ export default function AdminAuctionsPage() {
         @keyframes ripple {
           0% { transform: scale(1); opacity: 1; }
           100% { transform: scale(3); opacity: 0; }
+        }
+        
+        /* React DatePicker Custom Dark Theme Styles */
+        .custom-datepicker {
+          width: 100%;
+          background: transparent;
+          border: 1px solid rgba(255,255,255,0.1);
+          padding: 0.75rem;
+          color: #fff;
+          border-radius: 2px;
+          font-family: inherit;
+          font-size: 0.85rem;
+          outline: none;
+        }
+        .custom-datepicker:focus {
+          border-color: rgba(201,168,76,0.5);
+        }
+        .react-datepicker {
+          background-color: #050508 !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
+          color: #fff !important;
+          font-family: inherit !important;
+          border-radius: 4px !important;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        }
+        .react-datepicker__header {
+          background-color: #0A0A0D !important;
+          border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+          padding-top: 0.5rem !important;
+        }
+        .react-datepicker__current-month, .react-datepicker-time__header, .react-datepicker-year-header {
+          color: #fff !important;
+          font-weight: 500 !important;
+        }
+        .react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name {
+          color: rgba(255,255,255,0.65) !important;
+        }
+        .react-datepicker__day:hover, .react-datepicker__month-text:hover, .react-datepicker__quarter-text:hover, .react-datepicker__year-text:hover {
+          background-color: rgba(201,168,76,0.2) !important;
+          color: #fff !important;
+        }
+        .react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__quarter-text--selected, .react-datepicker__year-text--selected {
+          background-color: #C9A84C !important;
+          color: #050508 !important;
+          font-weight: 600 !important;
+        }
+        .react-datepicker__day--keyboard-selected {
+          background-color: rgba(201,168,76,0.3) !important;
+          color: #fff !important;
+        }
+        .react-datepicker__time-container {
+          border-left: 1px solid rgba(255,255,255,0.1) !important;
+        }
+        .react-datepicker__time-list-item {
+          background-color: #050508 !important;
+          color: rgba(255,255,255,0.65) !important;
+        }
+        .react-datepicker__time-list-item:hover {
+          background-color: rgba(201,168,76,0.2) !important;
+          color: #fff !important;
+        }
+        .react-datepicker__time-list-item--selected {
+          background-color: #C9A84C !important;
+          color: #050508 !important;
+          font-weight: 600 !important;
+        }
+        .react-datepicker__input-container {
+           display: block !important;
+        }
+        .react-datepicker-wrapper {
+           display: block !important;
+           width: 100% !important;
         }
       `}</style>
 
