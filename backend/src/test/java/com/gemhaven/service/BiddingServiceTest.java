@@ -30,6 +30,7 @@ import static org.mockito.Mockito.*;
  * Uses Mockito — no Spring context loaded, no real DB.
  */
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("null")
 class BiddingServiceTest {
 
     @Mock private BidRepository bidRepository;
