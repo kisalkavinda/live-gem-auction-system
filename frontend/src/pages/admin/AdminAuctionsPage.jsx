@@ -58,6 +58,7 @@ export default function AdminAuctionsPage() {
       setIsModalOpen(false)
     } catch (err) {
       console.error(err)
+      alert(err.response?.data?.message || 'Failed to create auction. Please check your inputs.')
     } finally {
       setIsSubmitting(false)
     }
