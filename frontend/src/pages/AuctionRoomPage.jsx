@@ -4,6 +4,7 @@ import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuctionSocket } from '../hooks/useAuctionSocket'
+import { getAuctionStatus, parseDatePossible } from '../utils/auctionStatus'
 import { useAlert } from '../context/AlertContext'
 import { isLoggedIn } from '../services/authService'
 
@@ -180,8 +181,15 @@ export default function AuctionRoomPage() {
   );
 
   const minNextBid = currentBid + auction.minIncrement;
-  const isUrgent = timeRemaining < 30 && timeRemaining > 0;
-  const isFinished = timeRemaining === 0 || winner;
+  const status = getAuctionStatus(auction);
+  const isUpcoming = status === 'UPCOMING';
+  const isLive = status === 'LIVE';
+  const isFinished = status === 'ENDED' || Boolean(winner);
+  const isUrgent = isLive && timeRemaining < 30 && timeRemaining > 0;
+
+  // Compute a countdown target depending on status: if upcoming, count to start; if live, count to end
+  const startDate = parseDatePossible(auction.startTime || auction.startsAt || auction.start);
+  const upcomingSeconds = startDate ? Math.max(0, Math.floor((new Date(startDate).getTime() - Date.now()) / 1000)) : 0;
 
   return (
     <div style={{ background: '#050508', minHeight: '100vh', color: '#fff', position: 'relative' }}>
@@ -373,14 +381,14 @@ export default function AuctionRoomPage() {
               <div>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.3rem 0.6rem', background: isFinished ? 'rgba(201,168,76,0.1)' : 'rgba(185,28,28,0.2)',
-                  border: `1px solid ${isFinished ? 'rgba(201,168,76,0.3)' : '#B91C1C60'}`, 
+                  padding: '0.3rem 0.6rem', background: isFinished ? 'rgba(201,168,76,0.1)' : (isUpcoming ? 'rgba(255,255,255,0.05)' : 'rgba(185,28,28,0.2)'),
+                  border: `1px solid ${isFinished ? 'rgba(201,168,76,0.3)' : (isUpcoming ? 'rgba(255,255,255,0.15)' : '#B91C1C60')}`, 
                   borderRadius: '2px', backdropFilter: 'blur(8px)',
                   display: 'inline-flex', marginBottom: '0.5rem'
                 }}>
-                  {!isFinished && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', animation: 'pulseDot 1.5s ease-in-out infinite' }} />}
-                  <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: isFinished ? '#C9A84C' : '#EF4444' }}>
-                    {isFinished ? 'Auction Ended' : 'Live Bidding'}
+                  {!isFinished && isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', animation: 'pulseDot 1.5s ease-in-out infinite' }} />}
+                  <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: isFinished ? '#C9A84C' : (isUpcoming ? 'rgba(255,255,255,0.6)' : '#EF4444') }}>
+                    {isFinished ? 'Auction Ended' : (isUpcoming ? 'Upcoming' : 'Live Bidding')}
                   </span>
                 </div>
               </div>
@@ -396,7 +404,7 @@ export default function AuctionRoomPage() {
                   fontVariantNumeric: 'tabular-nums',
                   lineHeight: 1
                 }}>
-                  {formatTime(timeRemaining)}
+                  {isUpcoming ? formatTime(upcomingSeconds) : formatTime(timeRemaining)}
                 </div>
               </div>
             </div>
@@ -437,6 +445,21 @@ export default function AuctionRoomPage() {
                     {winner?.bidder}
                   </p>
                 </div>
+              ) : isUpcoming ? (
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  borderRadius: '4px',
+                  padding: '1.5rem',
+                  textAlign: 'center'
+                }}>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.25rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
+                    This auction has not started yet.
+                  </h3>
+                  <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
+                    Bidding will be available when the auction goes live.
+                  </p>
+                </div>
               ) : (
                 <form onSubmit={submitBid} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   <div>
@@ -463,7 +486,7 @@ export default function AuctionRoomPage() {
                       />
                       <button
                         type="submit"
-                        disabled={parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr}
+                        disabled={!isLive || parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr}
                         style={{
                           background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
                           color: '#0A0A0D', border: 'none', borderRadius: '2px',
@@ -471,7 +494,7 @@ export default function AuctionRoomPage() {
                           fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase',
                           fontWeight: 700, cursor: 'pointer',
                           transition: 'opacity 0.25s',
-                          opacity: (parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr) ? 0.5 : 1,
+                          opacity: (!isLive || parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr) ? 0.5 : 1,
                         }}
                       >
                         Place Bid
