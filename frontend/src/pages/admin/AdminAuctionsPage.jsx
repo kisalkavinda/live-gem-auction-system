@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
 import { useAlert } from '../../context/AlertContext'
-import { createAuction, deleteAuction, endAuctionEarly } from '../../services/adminService'
+import { createAuction, deleteAuction, endAuctionEarly, updateAuction } from '../../services/adminService'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 
@@ -25,6 +25,7 @@ export default function AdminAuctionsPage() {
   })
 
   const openCreateModal = () => {
+    setEditingAuctionId(null)
     const publishedGems = gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED')
     setFormData({
       gemId: publishedGems[0]?.id || '',
@@ -36,6 +37,18 @@ export default function AdminAuctionsPage() {
     setIsModalOpen(true)
   }
 
+  const openEditModal = (auction) => {
+    setEditingAuctionId(auction.id)
+    setFormData({
+      gemId: auction.gemstone.id,
+      startingBid: auction.startingPrice,
+      minIncrement: auction.minIncrement,
+      startTime: new Date(auction.startTime),
+      endTime: new Date(auction.endTime)
+    })
+    setIsModalOpen(true)
+  }
+
   const formatLocal = (date) => {
     if (!date) return null;
     const d = new Date(date);
@@ -43,11 +56,11 @@ export default function AdminAuctionsPage() {
     return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
   }
 
-  const handleCreate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
     try {
-      const selectedGem = gems.find(g => g.id === formData.gemId)
+      const selectedGem = gems.find(g => g.id === formData.gemId) || gems.find(g => g.id === Number(formData.gemId))
       const newAuctionData = {
         gemstoneId: Number(formData.gemId),
         startingPrice: Number(formData.startingBid),
@@ -55,9 +68,15 @@ export default function AdminAuctionsPage() {
         startTime: formatLocal(formData.startTime),
         endTime: formatLocal(formData.endTime)
       }
-      const res = await createAuction(newAuctionData)
-      addAuctionState(res.auction)
+      if (editingAuctionId) {
+        const res = await updateAuction(editingAuctionId, newAuctionData)
+        updateAuctionState(editingAuctionId, res.auction)
+      } else {
+        const res = await createAuction(newAuctionData)
+        addAuctionState(res.auction)
+      }
       setIsModalOpen(false)
+      setEditingAuctionId(null)
     } catch (err) {
       console.error(err)
       showAlert({
@@ -176,7 +195,18 @@ export default function AdminAuctionsPage() {
                 >
                   View Room
                 </button>
-                {auction.status === 'Live' && (
+                {auction.status?.toUpperCase() === 'SCHEDULED' && (
+                  <button
+                    onClick={() => openEditModal(auction)}
+                    style={{
+                      background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '2px', color: '#fff',
+                      padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
+                    }}
+                  >
+                    Edit
+                  </button>
+                )}
+                {auction.status?.toUpperCase() === 'LIVE' && (
                   <button
                     onClick={() => handleEndEarly(auction.id)}
                     style={{
@@ -207,19 +237,21 @@ export default function AdminAuctionsPage() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(5px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ width: '100%', maxWidth: '560px', background: '#050508', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '4px', padding: '2rem', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', fontWeight: 300, margin: 0 }}>Create Auction</h2>
+              <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.8rem', fontWeight: 300, margin: 0 }}>
+                {editingAuctionId ? 'Edit Auction' : 'Create Auction'}
+              </h2>
               <button onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
             </div>
             
-            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Select Gemstone</label>
-                <select required value={formData.gemId} onChange={e => setFormData({...formData, gemId: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED').map(g => (
+                <select required disabled={!!editingAuctionId} value={formData.gemId} onChange={e => setFormData({...formData, gemId: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px', opacity: editingAuctionId ? 0.6 : 1 }}>
+                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED' || g.id === Number(formData.gemId)).map(g => (
                     <option key={g.id} value={g.id} style={{ background: '#050508' }}>{g.name} - ${g.price?.toLocaleString()}</option>
                   ))}
-                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED').length === 0 && (
-                    <option value="" disabled style={{ background: '#050508' }}>No published gems available.</option>
+                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED' || g.id === Number(formData.gemId)).length === 0 && (
+                    <option value="" disabled style={{ background: '#050508' }}>No available gems.</option>
                   )}
                 </select>
               </div>
@@ -271,7 +303,7 @@ export default function AdminAuctionsPage() {
               <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
                 <button type="button" onClick={() => setIsModalOpen(false)} style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', color: '#fff', padding: '0.75rem 2rem', fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', borderRadius: '2px' }}>Cancel</button>
                 <button type="submit" disabled={isSubmitting} style={{ background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)', border: 'none', color: '#0A0A0D', padding: '0.75rem 2rem', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: isSubmitting ? 'not-allowed' : 'pointer', borderRadius: '2px', opacity: isSubmitting ? 0.7 : 1 }}>
-                  {isSubmitting ? 'Saving...' : 'Create Auction'}
+                  {isSubmitting ? 'Saving...' : (editingAuctionId ? 'Update Auction' : 'Create Auction')}
                 </button>
               </div>
             </form>
