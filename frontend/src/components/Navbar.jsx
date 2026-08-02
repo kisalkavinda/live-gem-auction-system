@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: 'Shop', to: '/shop' },
   { label: 'Land', to: '/land' },
   { label: 'Education', to: '/knowledge-hub' },
-  { label: 'About', to: '/#about' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 function MagneticItem({

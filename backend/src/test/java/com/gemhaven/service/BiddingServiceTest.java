@@ -127,7 +127,7 @@ class BiddingServiceTest {
 
     @Test
     void testBidOnClosedAuctionIsRejected() {
-        auction.setStatus(Auction.AuctionStatus.CLOSED);
+        auction.setStatus(Auction.AuctionStatus.ENDED);
         when(auctionRepository.findByIdWithPessimisticLock(1L)).thenReturn(Optional.of(auction));
 
         assertThatThrownBy(() -> biddingService.placeNewBid(bidderA, 1L, new BigDecimal("110")))

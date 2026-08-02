@@ -37,6 +37,7 @@ import LandListingPage from './pages/LandListingPage'
 import LandDetailPage from './pages/LandDetailPage'
 import KnowledgeHubPage from './pages/KnowledgeHubPage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
+import ContactPage from './pages/ContactPage'
 
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -240,6 +241,15 @@ function AppRoutes() {
         path="/knowledge-hub/:slug"
         element={
           <ArticleDetailPage />
+        }
+      />
+
+      {/* CONTACT */}
+
+      <Route
+        path="/contact"
+        element={
+          <ContactPage />
         }
       />
 

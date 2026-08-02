@@ -6,21 +6,21 @@ const steps = [
     num: '01',
     title: 'Register & Verify',
     desc: 'Create your account. Our team verifies identity before you bid  protecting every transaction on the platform.',
-    accent: '#ef4444', // Ruby Red
+    accent: '#C9A84C', // Gold instead of Ruby Red
     detail: 'KYC · AML Compliant · Encrypted Storage',
   },
   {
     num: '02',
     title: 'Browse Certified Gems',
     desc: 'Every stone comes with GIA certification, geological origin, carat weight, and 4K imaging.',
-    accent: '#3b82f6', // Sapphire Blue
+    accent: '#D4B86A', // Lighter Gold instead of Sapphire Blue
     detail: 'GIA · AGL · Gübelin Certified',
   },
   {
     num: '03',
     title: 'Bid in Real Time',
     desc: 'Live auctions with instant updates. Win, pay via escrow, and receive your gem fully insured.',
-    accent: '#10b981', // Emerald Green
+    accent: '#E8E0D0', // Champagne instead of Emerald Green
     detail: 'Escrow · Insured Transit · Digital Certificate',
   },
 ]
@@ -36,9 +36,12 @@ export default function HowItWorks() {
     const track = trackRef.current
     if (!section || !track) return
 
-    const totalWidth = track.scrollWidth - window.innerWidth
-
     const ctx = gsap.context(() => {
+      const totalWidth = track.scrollWidth - window.innerWidth
+      
+      // Calculate a longer scroll distance to make the scrolling feel much slower and more controlled
+      const scrollDistance = totalWidth * 2.5 + window.innerWidth;
+
       // 1. Heading entrance
       gsap.fromTo(
         headingRef.current,
@@ -56,8 +59,8 @@ export default function HowItWorks() {
         scrollTrigger: {
           trigger: section,
           start: 'top top',
-          end: () => `+=${totalWidth + window.innerWidth}`,
-          scrub: 1,
+          end: () => `+=${scrollDistance}`,
+          scrub: 1.5, // Added more inertia for smoother feeling
           pin: true,
           anticipatePin: 1,
           invalidateOnRefresh: true,
@@ -118,7 +121,7 @@ export default function HowItWorks() {
               trigger: conduit,
               start: 'left 90%',
               end: 'right 30%',
-              scrub: 0.8,
+              scrub: 1, // Smoothed conduit animation
               containerAnimation: scrollTween,
             }
           }
@@ -134,10 +137,10 @@ export default function HowItWorks() {
       ref={sectionRef}
       id="how-it-works"
       style={{
-        background: '#070503', // Matching main dark design
+        background: '#070503', 
         overflow: 'hidden',
         position: 'relative',
-        padding: '10rem 0 6rem 0', // Adjusted padding for pin layout
+        padding: '10rem 0 6rem 0',
       }}
     >
       <div style={{ padding: '0 6vw', position: 'relative', zIndex: 1 }}>
