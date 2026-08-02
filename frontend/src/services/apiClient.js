@@ -51,6 +51,9 @@ apiClient.interceptors.response.use(
       console.warn(
         'Authentication required or authorization failed.'
       )
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.dispatchEvent(new Event('gemhaven-auth-updated'))
       dispatchUnauthorizedEvent()
     }
 

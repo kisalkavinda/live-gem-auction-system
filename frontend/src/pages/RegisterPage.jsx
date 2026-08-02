@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { registerUser } from '../services/authService'
+import { registerUser, isLoggedIn } from '../services/authService'
 import Navbar from '../components/Navbar'
 
 // Helpers
@@ -32,13 +32,18 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState('')
 
   useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/account', { replace: true })
+      return
+    }
+
     if (cardRef.current) {
       gsap.fromTo(cardRef.current,
         { opacity: 0, y: 40 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
       )
     }
-  }, [])
+  }, [navigate])
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))

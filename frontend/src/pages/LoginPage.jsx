@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
 } from 'react'
 
 import {
@@ -9,6 +10,7 @@ import {
 
 import {
   loginUser,
+  isLoggedIn,
 } from '../services/authService'
 
 import Navbar from '../components/Navbar'
@@ -20,6 +22,12 @@ export default function LoginPage() {
 
   const location =
     useLocation()
+
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/account', { replace: true })
+    }
+  }, [navigate])
 
   const [
     email,
