@@ -42,6 +42,18 @@ function UpcomingBadge() {
   );
 }
 
+function EndedBadge() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '0.4rem',
+      padding: '0.3rem 0.6rem', background: 'rgba(201,168,76,0.1)',
+      border: '1px solid rgba(201,168,76,0.3)', borderRadius: '2px', backdropFilter: 'blur(8px)',
+    }}>
+      <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', fontWeight: 600 }}>ENDED</span>
+    </div>
+  );
+}
+
 function AuctionCard({ auction, index }) {
   const cardRef = useRef(null);
   const navigate = useNavigate();
@@ -141,7 +153,7 @@ function AuctionCard({ auction, index }) {
 
         {/* Badges */}
         <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem' }}>
-          {displayStatus === 'LIVE' ? <LiveBadge /> : <UpcomingBadge />}
+          {displayStatus === 'LIVE' ? <LiveBadge /> : (displayStatus === 'ENDED' ? <EndedBadge /> : <UpcomingBadge />)}
         </div>
         <div style={{
           position: 'absolute', top: '0.75rem', right: '0.75rem',
@@ -174,7 +186,7 @@ function AuctionCard({ auction, index }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
             <div>
               <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {displayStatus === 'LIVE' ? 'Current Bid' : 'Starting Bid'}
+                {displayStatus === 'LIVE' || displayStatus === 'ENDED' ? 'Winning Bid' : 'Starting Bid'}
               </div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 600 }}>
                 {LKR(auction.startingBid)} {/* Mock displays starting bid as base for list */}
@@ -183,10 +195,10 @@ function AuctionCard({ auction, index }) {
             
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.55rem', color: isUrgent ? '#EF4444' : 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {displayStatus === 'LIVE' ? 'Ends In' : 'Starts In'}
+                {displayStatus === 'ENDED' ? 'Status' : (displayStatus === 'LIVE' ? 'Ends In' : 'Starts In')}
               </div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: isUrgent ? '#EF4444' : '#fff', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                {timeLeft > 0 ? formatTime(timeLeft) : 'Ended'}
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: (displayStatus === 'ENDED' ? '#C9A84C' : (isUrgent ? '#EF4444' : '#fff')), fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                {displayStatus === 'ENDED' ? 'Concluded' : (timeLeft > 0 ? formatTime(timeLeft) : 'Ended')}
               </div>
             </div>
           </div>
