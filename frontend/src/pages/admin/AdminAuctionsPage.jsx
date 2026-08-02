@@ -21,8 +21,9 @@ export default function AdminAuctionsPage() {
   })
 
   const openCreateModal = () => {
+    const publishedGems = gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED')
     setFormData({
-      gemId: gems[0]?.id || '',
+      gemId: publishedGems[0]?.id || '',
       startingBid: '',
       minIncrement: '',
       startTime: '',
@@ -198,10 +199,10 @@ export default function AdminAuctionsPage() {
               <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Select Gemstone</label>
                 <select required value={formData.gemId} onChange={e => setFormData({...formData, gemId: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  {gems.filter(g => g.status === 'Published').map(g => (
+                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED').map(g => (
                     <option key={g.id} value={g.id} style={{ background: '#050508' }}>{g.name} - ${g.price?.toLocaleString()}</option>
                   ))}
-                  {gems.filter(g => g.status === 'Published').length === 0 && (
+                  {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED').length === 0 && (
                     <option value="" disabled style={{ background: '#050508' }}>No published gems available.</option>
                   )}
                 </select>
