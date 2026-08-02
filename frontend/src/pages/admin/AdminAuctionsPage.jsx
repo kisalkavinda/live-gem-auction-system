@@ -6,6 +6,7 @@ import { useAlert } from '../../context/AlertContext'
 import { createAuction, deleteAuction, endAuctionEarly, updateAuction } from '../../services/adminService'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
+import ConfirmModal from '../../components/ConfirmModal'
 
 export default function AdminAuctionsPage() {
   const navigate = useNavigate()
@@ -15,6 +16,8 @@ export default function AdminAuctionsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [editingAuctionId, setEditingAuctionId] = useState(null)
+  
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, type: null, id: null, title: '', message: '', confirmText: '', confirmColor: '' })
   
   // Create Auction Form Data
   const [formData, setFormData] = useState({
@@ -99,52 +102,49 @@ export default function AdminAuctionsPage() {
     }
   }
 
-  const handleEndEarly = (id) => {
-    showAlert({
-      type: 'info',
-      title: 'Confirm End Early',
+  const handleEndEarlyClick = (id) => {
+    setConfirmConfig({
+      isOpen: true,
+      type: 'END_EARLY',
+      id: id,
+      title: 'End Auction Early',
       message: 'Are you sure you want to end this auction early?',
-      actions: [
-        {
-          label: 'Yes, End Early',
-          primary: true,
-          onClick: async () => {
-            try {
-              const res = await endAuctionEarly(id)
-              updateAuctionState(id, res.auction)
-            } catch (err) {
-              console.error(err)
-              showAlert({ type: 'error', title: 'Error', message: 'Failed to end auction early.' })
-            }
-          }
-        },
-        { label: 'Cancel' }
-      ]
+      confirmText: 'End Early',
+      confirmColor: '#C9A84C'
     })
   }
 
-  const handleDelete = (id) => {
-    showAlert({
-      type: 'info',
-      title: 'Confirm Delete',
-      message: 'Are you sure you want to delete this auction?',
-      actions: [
-        {
-          label: 'Yes, Delete',
-          primary: true,
-          onClick: async () => {
-            try {
-              await deleteAuction(id)
-              deleteAuctionState(id)
-            } catch (err) {
-              console.error(err)
-              showAlert({ type: 'error', title: 'Error', message: 'Failed to delete auction.' })
-            }
-          }
-        },
-        { label: 'Cancel' }
-      ]
+  const handleDeleteClick = (auction) => {
+    setConfirmConfig({
+      isOpen: true,
+      type: 'DELETE',
+      id: auction.id,
+      title: 'Confirm Deletion',
+      message: `Are you sure you want to delete the auction for <strong>${auction.gemstone?.name || 'Unknown Gem'}</strong>? This action cannot be undone.`,
+      confirmText: 'Delete',
+      confirmColor: '#EF4444'
     })
+  }
+
+  const handleConfirmAction = async () => {
+    const { type, id } = confirmConfig;
+    if (!id) return;
+    setIsSubmitting(true);
+    try {
+      if (type === 'END_EARLY') {
+        const res = await endAuctionEarly(id)
+        updateAuctionState(id, res.auction)
+      } else if (type === 'DELETE') {
+        await deleteAuction(id)
+        deleteAuctionState(id)
+      }
+      setConfirmConfig({ isOpen: false, type: null, id: null, title: '', message: '', confirmText: '', confirmColor: '' })
+    } catch (err) {
+      console.error(err)
+      showAlert({ type: 'error', title: 'Error', message: 'Action failed.' })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const getStatusBadge = (status) => {
@@ -246,7 +246,7 @@ export default function AdminAuctionsPage() {
                 )}
                 {auction.status?.toUpperCase() === 'LIVE' && (
                   <button
-                    onClick={() => handleEndEarly(auction.id)}
+                    onClick={() => handleEndEarlyClick(auction.id)}
                     style={{
                       background: 'transparent', border: '1px solid rgba(201,168,76,0.3)', borderRadius: '2px', color: '#C9A84C',
                       padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
@@ -256,9 +256,9 @@ export default function AdminAuctionsPage() {
                   </button>
                 )}
                 <button
-                  onClick={() => handleDelete(auction.id)}
+                  onClick={() => handleDeleteClick(auction)}
                   style={{
-                    background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '2px', color: '#EF4444',
+                    background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '2px', color: '#EF4444',
                     padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
                   }}
                 >
@@ -348,6 +348,17 @@ export default function AdminAuctionsPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        confirmColor={confirmConfig.confirmColor}
+        isSubmitting={isSubmitting}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
 
       <style>{`
         @keyframes pulse {
