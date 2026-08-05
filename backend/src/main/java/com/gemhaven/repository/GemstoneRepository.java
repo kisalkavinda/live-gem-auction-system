@@ -14,15 +14,15 @@ import java.util.Optional;
 @Repository
 public interface GemstoneRepository extends JpaRepository<Gemstone, Long> {
 
-    List<Gemstone> findByReservationStatus(Gemstone.ReservationStatus status);
+    List<Gemstone> findByStatus(Gemstone.GemStatus status);
 
     List<Gemstone> findByType(String type);
 
-    List<Gemstone> findByReservationStatusAndType(Gemstone.ReservationStatus status, String type);
+    List<Gemstone> findByStatusAndType(Gemstone.GemStatus status, String type);
 
     /**
      * Pessimistic write lock — prevents concurrent reservation/purchase of the same gem.
-     * Essential for atomic status transitions (PUBLISHED → SOLD).
+     * Essential for atomic status transitions (PUBLISHED → RESERVED → SOLD).
      */
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT g FROM Gemstone g WHERE g.id = :id")

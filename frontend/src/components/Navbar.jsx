@@ -8,7 +8,7 @@ const NAV_LINKS = [
   { label: 'Shop', to: '/shop' },
   { label: 'Land', to: '/land' },
   { label: 'Education', to: '/knowledge-hub' },
-  { label: 'About', to: '/#about' },
+  { label: 'Contact', to: '/contact' },
 ]
 
 function MagneticItem({
@@ -243,7 +243,7 @@ export default function Navbar({ visible }) {
                 fontWeight: 300,
               }}
             >
-              GEMHAVEN
+              THENNAKOON GEMS
             </span>
           </Link>
         </MagneticItem>

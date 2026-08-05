@@ -4,6 +4,7 @@ import { gsap } from '../utils/gsap'
 import { fetchLandPlotById, submitSiteVisitBooking } from '../services/landService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import { useAlert } from '../context/AlertContext'
 
 // ─── Shared Styles ────────────────────────────────────────────────────────
 const labelStyle = {
@@ -39,6 +40,8 @@ export default function LandDetailPage() {
   const [formErrors, setFormErrors] = useState({})
   const [bookingStatus, setBookingStatus] = useState('idle') // idle, submitting, success
   const [bookingRef, setBookingRef] = useState('')
+
+  const { showAlert } = useAlert()
 
   const contentRef = useRef(null)
   const formRef = useRef(null)
@@ -101,7 +104,11 @@ export default function LandDetailPage() {
       setBookingStatus('success')
     } catch (err) {
       setBookingStatus('idle')
-      alert("Failed to submit booking. Please check your connection or log in.")
+      showAlert({
+        type: 'error',
+        title: 'Booking failed',
+        message: 'Failed to submit booking. Please check your connection or log in.',
+      })
     }
   }
 

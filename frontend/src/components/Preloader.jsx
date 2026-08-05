@@ -70,7 +70,7 @@ export default function Preloader({ onComplete }) {
             color: '#fff',
             fontWeight: 300,
           }}>
-            GEMHAVEN
+            THENNAKOON GEMS
           </span>
         </div>
       </div>

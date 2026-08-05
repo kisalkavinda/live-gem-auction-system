@@ -65,9 +65,17 @@ public class Gemstone {
     @Column(name = "image_url")
     private String imageUrl;
 
+    /**
+     * Unified gem lifecycle status.
+     * DB column name kept as "reservation_status" to avoid schema migration.
+     * DRAFT     — not yet available for auction
+     * PUBLISHED — available to be listed in an auction
+     * RESERVED  — currently in an active/scheduled auction
+     * SOLD      — auction closed with a winner; awaiting offline payment & collection
+     */
     @Enumerated(EnumType.STRING)
     @Column(name = "reservation_status", length = 50)
-    private ReservationStatus reservationStatus = ReservationStatus.DRAFT;
+    private GemStatus status = GemStatus.DRAFT;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
@@ -76,8 +84,8 @@ public class Gemstone {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public enum ReservationStatus {
-        DRAFT, PUBLISHED, SOLD
+    public enum GemStatus {
+        DRAFT, PUBLISHED, RESERVED, SOLD
     }
 
     public Gemstone() {}
@@ -129,8 +137,8 @@ public class Gemstone {
     public String getImageUrl() { return imageUrl; }
     public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public ReservationStatus getReservationStatus() { return reservationStatus; }
-    public void setReservationStatus(ReservationStatus reservationStatus) { this.reservationStatus = reservationStatus; }
+    public GemStatus getStatus() { return status; }
+    public void setStatus(GemStatus status) { this.status = status; }
 
     public User getOwner() { return owner; }
     public void setOwner(User owner) { this.owner = owner; }

@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
 import { useCart } from '../context/CartContext'
+import { useAlert } from '../context/AlertContext'
 
 import {
   PROVINCES,
@@ -46,6 +47,8 @@ export default function CheckoutPage() {
     cartItems = [],
     removeFromCart,
   } = useCart()
+
+  const { showAlert } = useAlert()
 
 
   // ====================================================
@@ -336,9 +339,11 @@ export default function CheckoutPage() {
         checkoutItems.length === 0
       ) {
 
-        alert(
-          'There are no items to checkout.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'No items selected',
+        message: 'There are no items to checkout.',
+      })
 
         return
       }
@@ -350,9 +355,11 @@ export default function CheckoutPage() {
 
       if (!fullName.trim()) {
 
-        alert(
-          'Please enter your full name.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please enter your full name.',
+      })
 
         return
       }
@@ -360,9 +367,11 @@ export default function CheckoutPage() {
 
       if (!phone.trim()) {
 
-        alert(
-          'Please enter your phone number.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please enter your phone number.',
+      })
 
         return
       }
@@ -370,9 +379,11 @@ export default function CheckoutPage() {
 
       if (!address.trim()) {
 
-        alert(
-          'Please enter your delivery address.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please enter your delivery address.',
+      })
 
         return
       }
@@ -380,9 +391,11 @@ export default function CheckoutPage() {
 
       if (!city.trim()) {
 
-        alert(
-          'Please enter your city.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please enter your city.',
+      })
 
         return
       }
@@ -390,9 +403,11 @@ export default function CheckoutPage() {
 
       if (!postalCode.trim()) {
 
-        alert(
-          'Please enter your postal code.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please enter your postal code.',
+      })
 
         return
       }
@@ -400,9 +415,11 @@ export default function CheckoutPage() {
 
       if (!province) {
 
-        alert(
-          'Please select your province.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please select your province.',
+      })
 
         return
       }
@@ -410,9 +427,11 @@ export default function CheckoutPage() {
 
       if (!district) {
 
-        alert(
-          'Please select your district.'
-        )
+showAlert({
+        type: 'warning',
+        title: 'Missing information',
+        message: 'Please select your district.',
+      })
 
         return
       }
@@ -485,9 +504,11 @@ export default function CheckoutPage() {
          */
 
 
-        alert(
-          'Checkout information is valid. Order API will be connected next.'
-        )
+        showAlert({
+          type: 'success',
+          title: 'Order ready',
+          message: 'Checkout information is valid. Order API will be connected next.',
+        })
 
 
       } catch (error) {
@@ -497,9 +518,11 @@ export default function CheckoutPage() {
           error
         )
 
-        alert(
-          'Something went wrong while processing your order.'
-        )
+        showAlert({
+          type: 'error',
+          title: 'Checkout failed',
+          message: 'Something went wrong while processing your order.',
+        })
 
       } finally {
 

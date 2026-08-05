@@ -59,7 +59,7 @@ const ERAS = [
   },
   {
     period: '2024',
-    era: 'GemHaven',
+    era: 'THENNAKOON GEMS',
     headline: 'Live. Certified. Transparent.',
     body: 'Real-time auctions with full geological provenance, GIA certification, and conflict-free sourcing  the entire gem trade legacy, distilled into one platform.',
     side: 'right',
@@ -417,7 +417,7 @@ export default function GemHistory() {
   return (
     <section
       ref={sectionRef}
-      style={{ background: '#080604', padding: '120px 0 140px', position: 'relative', overflow: 'hidden' }}
+      style={{ background: 'var(--bg)', padding: '120px 0 140px', position: 'relative', overflow: 'hidden' }}
     >
       {/* HTML5 Canvas Particle System - Floating Gem Dust */}
       <canvas 
@@ -472,21 +472,21 @@ export default function GemHistory() {
       <div style={{ textAlign: 'center', marginBottom: '88px', padding: '0 2rem' }}>
         <div style={{
           fontSize: '0.58rem', letterSpacing: '0.38em', textTransform: 'uppercase',
-          color: '#C9A84C', marginBottom: '1.25rem',
+          color: 'var(--gold)', marginBottom: '1.25rem',
         }}>
           Est. Ancient Trade Routes
         </div>
         <h2 style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontSize: 'clamp(2.4rem, 5vw, 4.2rem)',
-          fontWeight: 400, color: '#E8E0D0',
+          fontWeight: 400, color: 'var(--gold-light)',
           letterSpacing: '-0.02em', lineHeight: 1.1, margin: 0,
         }}>
           The Legacy Behind<br />Every Stone
         </h2>
         <div style={{
           width: 56, height: 1,
-          background: 'linear-gradient(to right, transparent, #C9A84C, transparent)',
+          background: 'linear-gradient(to right, transparent, var(--gold), transparent)',
           margin: '2rem auto 0',
         }} />
       </div>

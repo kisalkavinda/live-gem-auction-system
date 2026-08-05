@@ -17,6 +17,13 @@ export async function registerUser(formData) {
     };
     
     const response = await apiClient.post('/auth/register', payload);
+    const { token, user } = response.data;
+    
+    if (token) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+    
     return response.data; // { token, user: { name, email, role, ... } }
   } catch (error) {
     console.error("Registration error:", error);
@@ -48,6 +55,13 @@ export async function loginUser(credentials) {
     }
     throw new Error('Invalid email or password.');
   }
+}
+
+export function isLoggedIn() {
+  const token = localStorage.getItem('token');
+  const user = localStorage.getItem('user');
+
+  return Boolean(token && user);
 }
 
 export function logoutUser() {

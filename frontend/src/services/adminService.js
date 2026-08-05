@@ -55,27 +55,43 @@ export async function deleteGem(id) {
 }
 
 export async function createAuction(auctionData) {
-  await delay(700);
-  console.log('Mock API: Create Auction', auctionData);
-  return {
-    success: true,
-    auction: {
-      ...auctionData,
-      id: `new-auction-${Date.now()}`
-    }
-  };
+  try {
+    const response = await apiClient.post('/auctions', auctionData);
+    return { success: true, auction: response.data };
+  } catch (error) {
+    console.error("Error creating auction:", error);
+    throw error;
+  }
+}
+
+export async function updateAuction(id, auctionData) {
+  try {
+    const response = await apiClient.put(`/auctions/${id}`, auctionData);
+    return { success: true, auction: response.data };
+  } catch (error) {
+    console.error(`Error updating auction ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function endAuctionEarly(id) {
-  await delay(500);
-  console.log(`Mock API: End Auction Early ${id}`);
-  return { success: true };
+  try {
+    const response = await apiClient.post(`/auctions/${id}/end-early`);
+    return { success: true, auction: response.data };
+  } catch (error) {
+    console.error(`Error ending auction early ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function deleteAuction(id) {
-  await delay(500);
-  console.log(`Mock API: Delete Auction ${id}`);
-  return { success: true };
+  try {
+    await apiClient.delete(`/auctions/${id}`);
+    return { success: true };
+  } catch (error) {
+    console.error(`Error deleting auction ${id}:`, error);
+    throw error;
+  }
 }
 
 export async function addLandListing(landData) {

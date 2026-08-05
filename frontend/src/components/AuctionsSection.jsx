@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
+import { getAuctionStatus } from '../utils/auctionStatus'
 
 function formatEndsIn(endTimeStr, status) {
   if (status === 'ENDED') return 'Ended';
@@ -78,6 +79,7 @@ function GemCard({ gem, index }) {
   }, [index])
 
   const isLive = gem.status === 'LIVE'
+  const isEnded = gem.status === 'ENDED'
 
   return (
     <div
@@ -164,8 +166,8 @@ function GemCard({ gem, index }) {
           alignItems: 'center',
           gap: '0.4rem',
           padding: '0.3rem 0.6rem',
-          background: isLive ? 'rgba(185,28,28,0.2)' : 'rgba(255,255,255,0.05)',
-          border: `1px solid ${isLive ? '#B91C1C60' : 'rgba(255,255,255,0.1)'}`,
+          background: isLive ? 'rgba(185,28,28,0.2)' : (isEnded ? 'rgba(201,168,76,0.1)' : 'rgba(255,255,255,0.05)'),
+          border: `1px solid ${isLive ? '#B91C1C60' : (isEnded ? 'rgba(201,168,76,0.3)' : 'rgba(255,255,255,0.1)')}`,
           borderRadius: '2px',
           backdropFilter: 'blur(8px)',
         }}>
@@ -183,7 +185,8 @@ function GemCard({ gem, index }) {
             fontSize: '0.6rem',
             letterSpacing: '0.15em',
             textTransform: 'uppercase',
-            color: isLive ? '#EF4444' : 'rgba(255,255,255,0.5)',
+            color: isLive ? '#EF4444' : (isEnded ? '#C9A84C' : 'rgba(255,255,255,0.5)'),
+            fontWeight: isEnded ? 600 : 'normal'
           }}>
             {gem.status}
           </span>
@@ -304,19 +307,23 @@ export default function AuctionsSection() {
         return res.json();
       })
       .then(data => {
-        const mapped = data.slice(0, 4).map(a => ({
-          id: a.id,
-          name: a.gemstone?.name || 'Unknown Gem',
-          carat: a.gemstone?.caratWeight || 0,
-          cut: a.gemstone?.cut || '',
-          color: a.gemstone?.color || '#FFFFFF',
-          colorName: a.gemstone?.colorName || '',
-          imageUrl: a.gemstone?.imageUrl || null,
-          status: a.status === 'SCHEDULED' ? 'UPCOMING' : a.status,
-          currentBid: a.currentBid || a.startingPrice || null,
-          endsIn: formatEndsIn(a.endTime, a.status),
-          bids: 0 
-        }));
+        const mapped = data.slice(0, 4).map(a => {
+          const status = getAuctionStatus(a);
+          const endField = a.endTime || a.endsAt || a.end;
+          return {
+            id: a.id,
+            name: a.gemstone?.name || 'Unknown Gem',
+            carat: a.gemstone?.caratWeight || 0,
+            cut: a.gemstone?.cut || '',
+            color: a.gemstone?.color || '#FFFFFF',
+            colorName: a.gemstone?.colorName || '',
+            imageUrl: a.gemstone?.imageUrl || null,
+            status: status,
+            currentBid: a.currentBid || a.startingPrice || null,
+            endsIn: formatEndsIn(endField, status),
+            bids: 0 
+          };
+        });
         setGems(mapped);
       })
       .catch(console.error)

@@ -2,14 +2,19 @@ import { useState } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
 import { addLandListing, deleteLandListing, updateBookingStatus, uploadImage } from '../../services/adminService'
+import ConfirmModal from '../../components/ConfirmModal'
+import { useAlert } from '../../context/AlertContext'
 
 export default function AdminLandPage() {
   const { lands, bookings, addLandState, deleteLandState, updateBookingStatusState } = useDashboard()
+  const { showAlert } = useAlert()
   const [activeTab, setActiveTab] = useState('listings') // 'listings' | 'bookings'
 
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [selectedFile, setSelectedFile] = useState(null)
+  
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, id: null, title: '', message: '', confirmText: '', confirmColor: '' })
   
   // Land form data
   const [formData, setFormData] = useState({
@@ -70,13 +75,29 @@ export default function AdminLandPage() {
     }
   }
 
-  const handleDeleteLand = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this land listing?")) return;
+  const handleDeleteClick = (land) => {
+    setConfirmConfig({
+      isOpen: true,
+      id: land.id,
+      title: 'Confirm Deletion',
+      message: `Are you sure you want to delete <strong>${land.name}</strong>? This action cannot be undone.`,
+      confirmText: 'Delete',
+      confirmColor: '#EF4444'
+    })
+  }
+
+  const handleConfirmDelete = async () => {
+    const { id } = confirmConfig;
+    if (!id) return;
+    setIsSubmitting(true);
     try {
       await deleteLandListing(id)
       deleteLandState(id)
+      setConfirmConfig({ isOpen: false, id: null, title: '', message: '', confirmText: '', confirmColor: '' })
     } catch (err) {
       console.error(err)
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -194,7 +215,7 @@ export default function AdminLandPage() {
               <div>{getStatusBadge(land.status === 'UNDER_SURVEY' ? 'Under Survey' : land.status === 'RESERVED' ? 'Reserved' : 'Available')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 <button
-                  onClick={() => handleDeleteLand(land.id)}
+                  onClick={() => handleDeleteClick(land)}
                   style={{
                     background: 'transparent', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '2px', color: '#EF4444',
                     padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
@@ -324,6 +345,17 @@ export default function AdminLandPage() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        confirmColor={confirmConfig.confirmColor}
+        isSubmitting={isSubmitting}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
 
     </DashboardLayout>
   )

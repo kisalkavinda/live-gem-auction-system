@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
 } from 'react'
 
 import {
@@ -7,7 +8,10 @@ import {
   useNavigate,
 } from 'react-router-dom'
 
-import apiClient from '../services/apiClient'
+import {
+  loginUser,
+  isLoggedIn,
+} from '../services/authService'
 
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
@@ -18,6 +22,12 @@ export default function LoginPage() {
 
   const location =
     useLocation()
+
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/account', { replace: true })
+    }
+  }, [navigate])
 
   const [
     email,
@@ -66,48 +76,25 @@ export default function LoginPage() {
       }
 
       try {
-        setLoading(true)
+          setLoading(true)
 
         const response =
-          await apiClient.post(
-            '/auth/login',
-            {
-              email:
-                email.trim(),
-              password,
-            }
-          )
+          await loginUser({
+            email: email.trim(),
+            password,
+          })
 
         console.log(
           'Login response:',
-          response.data
+          response
         )
 
         const token =
-          response.data.token
-
-        const user =
-          response.data.user
+          response.token
 
         if (!token) {
           throw new Error(
             'Login response did not contain a token.'
-          )
-        }
-
-        // -----------------------------------------
-        // SAVE LOGIN
-        // -----------------------------------------
-
-        localStorage.setItem(
-          'token',
-          token
-        )
-
-        if (user) {
-          localStorage.setItem(
-            'user',
-            JSON.stringify(user)
           )
         }
 
@@ -260,7 +247,7 @@ export default function LoginPage() {
                   '0.7rem',
               }}
             >
-              ◆ GemHaven
+              ◆ THENNAKOON GEMS
             </div>
 
             <h1
