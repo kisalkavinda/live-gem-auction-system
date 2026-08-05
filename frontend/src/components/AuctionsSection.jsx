@@ -308,20 +308,20 @@ export default function AuctionsSection() {
         const mapped = data.slice(0, 4).map(a => {
           const status = getAuctionStatus(a);
           const endField = a.endTime || a.endsAt || a.end;
-          return ({
-          id: a.id,
-          name: a.gemstone?.name || 'Unknown Gem',
-          carat: a.gemstone?.caratWeight || 0,
-          cut: a.gemstone?.cut || '',
-          color: a.gemstone?.color || '#FFFFFF',
-          colorName: a.gemstone?.colorName || '',
-          imageUrl: a.gemstone?.imageUrl || null,
-          status: status,
-          currentBid: a.currentBid || a.startingPrice || null,
-          endsIn: formatEndsIn(endField, status),
-          bids: 0 
-        })
-        );
+          return {
+            id: a.id,
+            name: a.gemstone?.name || 'Unknown Gem',
+            carat: a.gemstone?.caratWeight || 0,
+            cut: a.gemstone?.cut || '',
+            color: a.gemstone?.color || '#FFFFFF',
+            colorName: a.gemstone?.colorName || '',
+            imageUrl: a.gemstone?.imageUrl || null,
+            status: status,
+            currentBid: a.currentBid || a.startingPrice || null,
+            endsIn: formatEndsIn(endField, status),
+            bids: 0,
+          };
+        });
         setGems(mapped);
       })
       .catch(console.error)
