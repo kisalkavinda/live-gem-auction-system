@@ -142,7 +142,7 @@ public class AuctionService {
     }
 
     /**
-     * Deletes an auction. Only allowed while status = SCHEDULED.
+     * Deletes an auction. Allowed for SCHEDULED or ENDED auctions.
      * Reverts gemstone.status back to PUBLISHED so it can be relisted.
      */
     @Transactional
@@ -150,9 +150,12 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + id));
 
-        if (auction.getStatus() != Auction.AuctionStatus.SCHEDULED) {
-            throw new IllegalStateException("Only SCHEDULED auctions can be deleted.");
+        if (auction.getStatus() == Auction.AuctionStatus.LIVE) {
+            throw new IllegalStateException("LIVE auctions cannot be deleted. End them early instead.");
         }
+
+        // Delete all bids for this auction first to prevent foreign key constraint violations
+        bidRepository.deleteByAuctionId(id);
 
         // Revert gem back to PUBLISHED so it can be relisted
         Gemstone gem = auction.getGemstone();

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.Modifying;
 
 @Repository
 public interface BidRepository extends JpaRepository<Bid, Long> {
@@ -26,6 +27,10 @@ public interface BidRepository extends JpaRepository<Bid, Long> {
 
     /** Count of bids for a specific auction — for concurrency test assertions */
     long countByAuction_Id(Long auctionId);
+
+    @Modifying
+    @Query("DELETE FROM Bid b WHERE b.auction.id = :auctionId")
+    void deleteByAuctionId(@Param("auctionId") Long auctionId);
 
     /**
      * Find bids for an auction ordered by amount descending.

@@ -82,7 +82,7 @@ export default function HowItWorks() {
       <div className="hw-content" style={{ width: '100%', padding: '0 6vw' }}>
         
         {/* Header */}
-        <div className="hw-header" style={{ marginBottom: '4rem', textAlign: 'center' }}>
+        <div className="hw-header" style={{ marginBottom: '4rem', textAlign: 'left' }}>
           <span style={{
             display: 'inline-block',
             fontSize: '0.75rem',
@@ -103,7 +103,7 @@ export default function HowItWorks() {
           }}>
             How It Works
           </h2>
-          <p style={{ color: 'rgba(232,224,208,0.6)', maxWidth: '600px', margin: '1rem auto 0', lineHeight: 1.6 }}>
+          <p style={{ color: 'rgba(232,224,208,0.6)', maxWidth: '600px', margin: '1rem 0 0', lineHeight: 1.6 }}>
             Experience a seamless, secure, and transparent auction process designed for elite gemstone collectors globally.
           </p>
         </div>
