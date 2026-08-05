@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { useAuctionSocket } from '../hooks/useAuctionSocket';
+import { useAuctionSocket } from '../hooks/useAuctionSocket'
+import { getAuctionStatus, parseDatePossible } from '../utils/auctionStatus'
+import { useAlert } from '../context/AlertContext'
+import { isLoggedIn } from '../services/authService'
 
 const LKR = (n) => 'LKR ' + n?.toLocaleString('en-LK');
 
@@ -28,6 +31,7 @@ const SPEC_ROWS = [
 export default function AuctionRoomPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const {
     auction,
@@ -38,6 +42,30 @@ export default function AuctionRoomPage() {
     winner,
     placeBid
   } = useAuctionSocket(id);
+
+  const { showAlert } = useAlert()
+
+  const goToLogin = () => {
+    showAlert({
+      type: 'login',
+      title: 'Login required',
+      message: 'Please log in to place a bid.',
+      actions: [
+        {
+          label: 'Login',
+          primary: true,
+          onClick: () => navigate('/login', {
+            state: {
+              from: location.pathname,
+            },
+          }),
+        },
+        {
+          label: 'Cancel',
+        },
+      ],
+    })
+  }
 
   const [bidAmountStr, setBidAmountStr] = useState('');
   const [toast, setToast] = useState(null);
@@ -55,13 +83,11 @@ export default function AuctionRoomPage() {
     
     // Initial entry animations
     const tl = gsap.timeline({ delay: 0.1 });
-    tl.fromTo(gemVisualRef.current,
-      { opacity: 0, scale: 0.85 },
-      { opacity: 1, scale: 1, duration: 0.9, ease: 'power3.out' }
+    tl.from(gemVisualRef.current,
+      { opacity: 0, scale: 0.85, duration: 0.9, ease: 'power3.out' }
     );
-    tl.fromTo(infoRef.current?.querySelectorAll('.detail-row') ?? [],
-      { opacity: 0, x: 24 },
-      { opacity: 1, x: 0, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
+    tl.from(infoRef.current?.querySelectorAll('.detail-row') ?? [],
+      { opacity: 0, x: 24, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
       '-=0.5'
     );
   }, [auction]);
@@ -92,6 +118,12 @@ export default function AuctionRoomPage() {
 
   const submitBid = (e) => {
     e.preventDefault();
+
+    if (!isLoggedIn()) {
+      goToLogin();
+      return;
+    }
+
     const amount = parseInt(bidAmountStr, 10);
     if (isNaN(amount)) return;
 
@@ -147,8 +179,18 @@ export default function AuctionRoomPage() {
   );
 
   const minNextBid = currentBid + auction.minIncrement;
-  const isUrgent = timeRemaining < 30 && timeRemaining > 0;
-  const isFinished = timeRemaining === 0 || winner;
+  const status = getAuctionStatus(auction);
+  const isUpcoming = status === 'UPCOMING';
+  const isLive = status === 'LIVE';
+  const isFinished = status === 'ENDED' || Boolean(winner);
+  const isUrgent = isLive && timeRemaining < 30 && timeRemaining > 0;
+
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const isWinner = isFinished && currentUser && auction.highestBidderId === currentUser.id;
+
+  // Compute a countdown target depending on status: if upcoming, count to start; if live, count to end
+  const startDate = parseDatePossible(auction.startTime || auction.startsAt || auction.start);
+  const upcomingSeconds = startDate ? Math.max(0, Math.floor((new Date(startDate).getTime() - Date.now()) / 1000)) : 0;
 
   return (
     <div style={{ background: '#050508', minHeight: '100vh', color: '#fff', position: 'relative' }}>
@@ -208,7 +250,7 @@ export default function AuctionRoomPage() {
         }}>
 
           {/* LEFT — Visual & Specs */}
-          <div ref={gemVisualRef} style={{ opacity: 0 }}>
+          <div ref={gemVisualRef}>
             {/* Main gem display */}
             <div style={{
               background: `radial-gradient(ellipse at 38% 35%, ${auction.color}30, rgba(5,5,8,0.95))`,
@@ -340,14 +382,14 @@ export default function AuctionRoomPage() {
               <div>
                 <div style={{
                   display: 'flex', alignItems: 'center', gap: '0.4rem',
-                  padding: '0.3rem 0.6rem', background: isFinished ? 'rgba(201,168,76,0.1)' : 'rgba(185,28,28,0.2)',
-                  border: `1px solid ${isFinished ? 'rgba(201,168,76,0.3)' : '#B91C1C60'}`, 
+                  padding: '0.3rem 0.6rem', background: isFinished ? 'rgba(201,168,76,0.1)' : (isUpcoming ? 'rgba(255,255,255,0.05)' : 'rgba(185,28,28,0.2)'),
+                  border: `1px solid ${isFinished ? 'rgba(201,168,76,0.3)' : (isUpcoming ? 'rgba(255,255,255,0.15)' : '#B91C1C60')}`, 
                   borderRadius: '2px', backdropFilter: 'blur(8px)',
                   display: 'inline-flex', marginBottom: '0.5rem'
                 }}>
-                  {!isFinished && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', animation: 'pulseDot 1.5s ease-in-out infinite' }} />}
-                  <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: isFinished ? '#C9A84C' : '#EF4444' }}>
-                    {isFinished ? 'Auction Ended' : 'Live Bidding'}
+                  {!isFinished && isLive && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#EF4444', animation: 'pulseDot 1.5s ease-in-out infinite' }} />}
+                  <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: isFinished ? '#C9A84C' : (isUpcoming ? 'rgba(255,255,255,0.6)' : '#EF4444') }}>
+                    {isFinished ? 'Auction Ended' : (isUpcoming ? 'Upcoming' : 'Live Bidding')}
                   </span>
                 </div>
               </div>
@@ -363,7 +405,7 @@ export default function AuctionRoomPage() {
                   fontVariantNumeric: 'tabular-nums',
                   lineHeight: 1
                 }}>
-                  {formatTime(timeRemaining)}
+                  {isUpcoming ? formatTime(upcomingSeconds) : formatTime(timeRemaining)}
                 </div>
               </div>
             </div>
@@ -387,21 +429,50 @@ export default function AuctionRoomPage() {
             {/* Input / Winner state */}
             <div className="detail-row">
               {isFinished ? (
+                isWinner ? (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.02))',
+                    border: '1px solid rgba(201,168,76,0.4)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#C9A84C', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      You won this auction!
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                      Congratulations! We will contact you shortly with next steps.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      Auction Ended
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                      This auction has been concluded.
+                    </p>
+                  </div>
+                )
+              ) : isUpcoming ? (
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.02))',
-                  border: '1px solid rgba(201,168,76,0.3)',
+                  background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
+                  border: '1px solid rgba(255,255,255,0.06)',
                   borderRadius: '4px',
-                  padding: '2rem 1.5rem',
+                  padding: '1.5rem',
                   textAlign: 'center'
                 }}>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
-                    Auction Won
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.25rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
+                    This auction has not started yet.
                   </h3>
-                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>
-                    Congratulations to
-                  </p>
-                  <p style={{ fontSize: '1.1rem', color: '#C9A84C', letterSpacing: '0.05em' }}>
-                    {winner?.bidder}
+                  <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>
+                    Bidding will be available when the auction goes live.
                   </p>
                 </div>
               ) : (
@@ -430,7 +501,7 @@ export default function AuctionRoomPage() {
                       />
                       <button
                         type="submit"
-                        disabled={parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr}
+                        disabled={!isLive || parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr}
                         style={{
                           background: 'linear-gradient(135deg, #C9A84C, #E8D5A3)',
                           color: '#0A0A0D', border: 'none', borderRadius: '2px',
@@ -438,7 +509,7 @@ export default function AuctionRoomPage() {
                           fontSize: '0.72rem', letterSpacing: '0.15em', textTransform: 'uppercase',
                           fontWeight: 700, cursor: 'pointer',
                           transition: 'opacity 0.25s',
-                          opacity: (parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr) ? 0.5 : 1,
+                          opacity: (!isLive || parseInt(bidAmountStr, 10) < minNextBid || !bidAmountStr) ? 0.5 : 1,
                         }}
                       >
                         Place Bid

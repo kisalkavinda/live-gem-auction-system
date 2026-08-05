@@ -17,8 +17,11 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
 
     List<Auction> findByStatus(Auction.AuctionStatus status);
 
-    /** Used by AuctionScheduler to find expired auctions that haven't been closed yet */
-    List<Auction> findByEndTimeBeforeAndStatusNot(LocalDateTime now, Auction.AuctionStatus status);
+    /** Used by scheduler to find SCHEDULED auctions whose startTime has arrived */
+    List<Auction> findByStatusAndStartTimeLessThanEqual(Auction.AuctionStatus status, LocalDateTime now);
+
+    /** Used by scheduler to find LIVE auctions whose endTime has passed */
+    List<Auction> findByStatusAndEndTimeLessThanEqual(Auction.AuctionStatus status, LocalDateTime now);
 
     /** Count of active (LIVE or SCHEDULED) auctions — for admin overview stats */
     long countByStatusIn(List<Auction.AuctionStatus> statuses);

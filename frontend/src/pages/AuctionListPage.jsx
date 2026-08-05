@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { gsap } from '../utils/gsap';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { MOCK_AUCTIONS } from '../hooks/useAuctionSocket';
+import apiClient from '../services/apiClient';
+import { getAuctionStatus } from '../utils/auctionStatus';
 
 const LKR = (n) => 'LKR ' + n.toLocaleString('en-LK');
 
@@ -37,6 +38,18 @@ function UpcomingBadge() {
     }}>
       <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'rgba(255,255,255,0.6)' }} />
       <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.6)', fontWeight: 600 }}>UPCOMING</span>
+    </div>
+  );
+}
+
+function EndedBadge() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', gap: '0.4rem',
+      padding: '0.3rem 0.6rem', background: 'rgba(201,168,76,0.1)',
+      border: '1px solid rgba(201,168,76,0.3)', borderRadius: '2px', backdropFilter: 'blur(8px)',
+    }}>
+      <span style={{ fontSize: '0.6rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#C9A84C', fontWeight: 600 }}>ENDED</span>
     </div>
   );
 }
@@ -76,15 +89,16 @@ function AuctionCard({ auction, index }) {
   useEffect(() => {
     const tick = () => {
       const now = new Date().getTime();
-      const end = new Date(auction.endsAt).getTime();
+      const end = new Date(auction.endsAt || auction.endTime || auction.end || 0).getTime();
       setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
     };
     tick();
     const timer = setInterval(tick, 1000);
     return () => clearInterval(timer);
-  }, [auction.endsAt]);
+  }, [auction.endsAt, auction.endTime, auction.end]);
 
-  const isUrgent = auction.status === 'LIVE' && timeLeft < 60 && timeLeft > 0;
+  const displayStatus = getAuctionStatus(auction);
+  const isUrgent = displayStatus === 'LIVE' && timeLeft < 60 && timeLeft > 0;
 
   return (
     <div
@@ -139,7 +153,7 @@ function AuctionCard({ auction, index }) {
 
         {/* Badges */}
         <div style={{ position: 'absolute', top: '0.75rem', left: '0.75rem' }}>
-          {auction.status === 'LIVE' ? <LiveBadge /> : <UpcomingBadge />}
+          {displayStatus === 'LIVE' ? <LiveBadge /> : (displayStatus === 'ENDED' ? <EndedBadge /> : <UpcomingBadge />)}
         </div>
         <div style={{
           position: 'absolute', top: '0.75rem', right: '0.75rem',
@@ -172,7 +186,7 @@ function AuctionCard({ auction, index }) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem' }}>
             <div>
               <div style={{ fontSize: '0.55rem', color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {auction.status === 'LIVE' ? 'Current Bid' : 'Starting Bid'}
+                {displayStatus === 'LIVE' || displayStatus === 'ENDED' ? 'Winning Bid' : 'Starting Bid'}
               </div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.3rem', color: '#fff', fontWeight: 600 }}>
                 {LKR(auction.startingBid)} {/* Mock displays starting bid as base for list */}
@@ -181,15 +195,15 @@ function AuctionCard({ auction, index }) {
             
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.55rem', color: isUrgent ? '#EF4444' : 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.15rem' }}>
-                {auction.status === 'LIVE' ? 'Ends In' : 'Starts In'}
+                {displayStatus === 'ENDED' ? 'Status' : (displayStatus === 'LIVE' ? 'Ends In' : 'Starts In')}
               </div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: isUrgent ? '#EF4444' : '#fff', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
-                {timeLeft > 0 ? formatTime(timeLeft) : 'Ended'}
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem', color: (displayStatus === 'ENDED' ? '#C9A84C' : (isUrgent ? '#EF4444' : '#fff')), fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>
+                {displayStatus === 'ENDED' ? 'Concluded' : (timeLeft > 0 ? formatTime(timeLeft) : 'Ended')}
               </div>
             </div>
           </div>
 
-          <button
+              <button
             onClick={e => { e.stopPropagation(); navigate(`/auctions/${auction.id}`); }}
             style={{
               width: '100%', padding: '0.75rem',
@@ -215,8 +229,8 @@ function AuctionCard({ auction, index }) {
                 e.currentTarget.style.background = 'transparent';
               }
             }}
-          >
-            {auction.status === 'LIVE' ? 'Enter Auction Room' : 'View Details'}
+              >
+            {displayStatus === 'LIVE' ? 'Enter Auction Room' : 'View Details'}
           </button>
         </div>
       </div>
@@ -226,6 +240,26 @@ function AuctionCard({ auction, index }) {
 
 export default function AuctionListPage() {
   const headingRef = useRef(null);
+  const [auctions, setAuctions] = useState([]);
+
+  useEffect(() => {
+    apiClient.get('/auctions')
+      .then(res => {
+        const mapped = res.data.map(a => ({
+          id: a.id,
+          name: a.gemstone?.name || 'Unknown Gem',
+          color: a.gemstone?.color || '#FFFFFF',
+          colorName: a.gemstone?.colorName || '',
+          imageUrl: a.gemstone?.imageUrl || null,
+          certAuthority: a.gemstone?.certAuthority || 'GIA',
+          startingBid: a.currentBid || a.startingPrice || 0,
+          endsAt: a.endTime,
+          status: a.status
+        }));
+        setAuctions(mapped);
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     if (!headingRef.current) return;
@@ -284,7 +318,7 @@ export default function AuctionListPage() {
             gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
             gap: '1.25rem',
           }}>
-            {MOCK_AUCTIONS.map((auction, i) => (
+            {auctions.map((auction, i) => (
               <AuctionCard key={auction.id} auction={auction} index={i} />
             ))}
           </div>

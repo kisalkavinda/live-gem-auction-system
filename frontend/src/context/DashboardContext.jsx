@@ -11,50 +11,37 @@ export function DashboardProvider({ children }) {
   useEffect(() => {
     fetchGems({ status: 'ALL' }).then(data => setGems(data));
     
-    // Fetch live lands and bookings for the admin dashboard
+    // Fetch auctions and lands for everyone
     apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
-    apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
+    apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
+
+    // Only fetch admin-specific data if the user is an ADMIN
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isAdmin = user && user.role === 'ADMIN';
+
+    if (isAdmin) {
+      apiClient.get('/admin/stats/overview').then(res => setStats(res.data)).catch(console.error);
+      apiClient.get('/admin/activity').then(res => setRecentActivity(res.data)).catch(console.error);
+      apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
+      apiClient.get('/admin/buyers').then(res => {
+        const mapped = res.data.map(b => ({
+          ...b,
+          name: b.fullName,
+          joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
+        }));
+        setBuyers(mapped);
+      }).catch(console.error);
+    }
   }, []);
   
-  // Since we don't have a separate mockAuctions file, we derive initial mock auctions 
-  // from the mockGems that have auction data (e.g., currentBid).
-  // For the dashboard, we want an isolated list of auctions.
-  const [auctions, setAuctions] = useState([
-    {
-      id: 'a1',
-      gemId: 'g1',
-      gemName: 'The Crimson Heart',
-      currentBid: 1250000,
-      status: 'Live',
-      startTime: '2024-06-01T10:00:00Z',
-      endTime: '2024-06-15T10:00:00Z',
-      biddersCount: 14
-    },
-    {
-      id: 'a2',
-      gemId: 'g2',
-      gemName: 'Midnight Star Sapphire',
-      currentBid: 850000,
-      status: 'Scheduled',
-      startTime: '2024-07-01T10:00:00Z',
-      endTime: '2024-07-15T10:00:00Z',
-      biddersCount: 0
-    },
-    {
-      id: 'a3',
-      gemId: 'g3',
-      gemName: 'Royal Emerald Cut',
-      currentBid: 3200000,
-      status: 'Ended',
-      startTime: '2024-05-01T10:00:00Z',
-      endTime: '2024-05-15T10:00:00Z',
-      biddersCount: 42
-    }
-  ]);
+  const [auctions, setAuctions] = useState([]);
   
   const [lands, setLands] = useState([]);
-  const [buyers, setBuyers] = useState(mockBuyers);
+  const [buyers, setBuyers] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
 
   // Expose updater functions to be called after adminService resolves
   const addGemState = (gem) => setGems(prev => [gem, ...prev]);
@@ -77,7 +64,8 @@ export function DashboardProvider({ children }) {
       auctions, addAuctionState, updateAuctionState, deleteAuctionState,
       lands, addLandState, deleteLandState,
       buyers, updateBuyerStatusState,
-      bookings, updateBookingStatusState
+      bookings, updateBookingStatusState,
+      stats, recentActivity
     }}>
       {children}
     </DashboardContext.Provider>

@@ -33,4 +33,4 @@ $env:DB_PASSWORD="your_local_password"
 Using the Local Profile with Maven: If they chose Approach B (created application-local.properties), they can run it like this:
 
 bash
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+./mvnw spring-boot:run -D"spring-boot.run.profiles=local"

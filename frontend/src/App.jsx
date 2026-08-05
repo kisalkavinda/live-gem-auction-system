@@ -1,6 +1,21 @@
-import { useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { useLenis } from './hooks/useLenis'
+import {
+  useState,
+  useEffect,
+  useCallback,
+} from 'react'
+
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+} from 'react-router-dom'
+
+import {
+  useLenis,
+} from './hooks/useLenis'
+
 import Preloader from './components/Preloader'
 import Navbar from './components/Navbar'
 import TunnelScrollHero from './components/TunnelScrollHero'
@@ -10,51 +25,308 @@ import AuctionsSection from './components/AuctionsSection'
 import HowItWorks from './components/HowItWorks'
 import CTABand from './components/CTABand'
 import Footer from './components/Footer'
+
 import ShopPage from './pages/ShopPage'
 import GemDetailPage from './pages/GemDetailPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
+
 import AuctionListPage from './pages/AuctionListPage'
 import AuctionRoomPage from './pages/AuctionRoomPage'
 import LandListingPage from './pages/LandListingPage'
 import LandDetailPage from './pages/LandDetailPage'
 import KnowledgeHubPage from './pages/KnowledgeHubPage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
+import ContactPage from './pages/ContactPage'
+
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
 import VerifyEmailPendingPage from './pages/VerifyEmailPendingPage'
 import VerifyEmailConfirmPage from './pages/VerifyEmailConfirmPage'
 import MyAccountPage from './pages/MyAccountPage'
 
-// Dashboard Pages
-import { DashboardProvider } from './context/DashboardContext'
+import {
+  CartProvider,
+} from './context/CartContext'
+
+import {
+  AlertProvider,
+} from './context/AlertContext'
+
+import {
+  DashboardProvider,
+} from './context/DashboardContext'
+
 import AdminOverviewPage from './pages/admin/AdminOverviewPage'
 import AdminInventoryPage from './pages/admin/AdminInventoryPage'
 import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
 import AdminLandPage from './pages/admin/AdminLandPage'
 import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 
-// Landing page keeps its own Preloader + Lenis scroll setup
+
 function LandingPage() {
-  const [ready, setReady] = useState(false)
+  const [ready, setReady] = useState(() => {
+    return sessionStorage.getItem('gemhaven_preloader_done') === 'true'
+  })
+
   useLenis()
 
   const handlePreloaderDone = useCallback(() => {
+    sessionStorage.setItem('gemhaven_preloader_done', 'true')
     setReady(true)
   }, [])
 
   return (
     <>
-      {!ready && <Preloader onComplete={handlePreloaderDone} />}
-      <div style={{ opacity: ready ? 1 : 0, transition: 'opacity 0.5s' }}>
-        <Navbar visible={ready} />
+      {!ready && (
+        <Preloader
+          onComplete={
+            handlePreloaderDone
+          }
+        />
+      )}
+
+      <div
+        style={{
+          opacity:
+            ready ? 1 : 0,
+
+          transition:
+            'opacity 0.5s',
+        }}
+      >
+        <Navbar
+          visible={ready}
+        />
+
         <TunnelScrollHero />
+
         <GemHistory />
+
         <FeaturesSection />
+
         <AuctionsSection />
+
         <HowItWorks />
+
         <CTABand />
+
         <Footer />
       </div>
     </>
+  )
+}
+
+
+function AppRoutes() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const handleUnauthorized = () => {
+      if (location.pathname === '/login') {
+        return
+      }
+
+      navigate('/login', {
+        replace: true,
+        state: {
+          from: location.pathname + location.search,
+        },
+      })
+    }
+
+    window.addEventListener(
+      'gemhaven-auth-unauthorized',
+      handleUnauthorized
+    )
+
+    return () => {
+      window.removeEventListener(
+        'gemhaven-auth-unauthorized',
+        handleUnauthorized
+      )
+    }
+  }, [navigate, location.pathname, location.search])
+
+  return (
+    <Routes>
+
+      {/* HOME */}
+
+      <Route
+        path="/"
+        element={
+          <LandingPage />
+        }
+      />
+
+      {/* SHOP */}
+
+      <Route
+        path="/shop"
+        element={
+          <ShopPage />
+        }
+      />
+
+      <Route
+        path="/shop/:id"
+        element={
+          <GemDetailPage />
+        }
+      />
+
+      {/* CART */}
+
+      <Route
+        path="/cart"
+        element={
+          <CartPage />
+        }
+      />
+
+      {/* CHECKOUT */}
+
+      <Route
+        path="/checkout"
+        element={
+          <CheckoutPage />
+        }
+      />
+
+      {/* AUCTIONS */}
+
+      <Route
+        path="/auctions"
+        element={
+          <AuctionListPage />
+        }
+      />
+
+      <Route
+        path="/auctions/:id"
+        element={
+          <AuctionRoomPage />
+        }
+      />
+
+      {/* LAND */}
+
+      <Route
+        path="/land"
+        element={
+          <LandListingPage />
+        }
+      />
+
+      <Route
+        path="/land/:id"
+        element={
+          <LandDetailPage />
+        }
+      />
+
+      {/* KNOWLEDGE HUB */}
+
+      <Route
+        path="/knowledge-hub"
+        element={
+          <KnowledgeHubPage />
+        }
+      />
+
+      <Route
+        path="/knowledge-hub/:slug"
+        element={
+          <ArticleDetailPage />
+        }
+      />
+
+      {/* CONTACT */}
+
+      <Route
+        path="/contact"
+        element={
+          <ContactPage />
+        }
+      />
+
+      {/* AUTH */}
+
+      <Route
+        path="/register"
+        element={
+          <RegisterPage />
+        }
+      />
+
+      <Route
+        path="/login"
+        element={
+          <LoginPage />
+        }
+      />
+
+      <Route
+        path="/verify-email"
+        element={
+          <VerifyEmailPendingPage />
+        }
+      />
+
+      <Route
+        path="/verify-email/:token"
+        element={
+          <VerifyEmailConfirmPage />
+        }
+      />
+
+      <Route
+        path="/account"
+        element={
+          <MyAccountPage />
+        }
+      />
+
+      {/* ADMIN */}
+
+      <Route
+        path="/admin"
+        element={
+          <AdminOverviewPage />
+        }
+      />
+
+      <Route
+        path="/admin/inventory"
+        element={
+          <AdminInventoryPage />
+        }
+      />
+
+      <Route
+        path="/admin/auctions"
+        element={
+          <AdminAuctionsPage />
+        }
+      />
+
+      <Route
+        path="/admin/land"
+        element={
+          <AdminLandPage />
+        }
+      />
+
+      <Route
+        path="/admin/buyers"
+        element={
+          <AdminBuyersPage />
+        }
+      />
+
+    </Routes>
   )
 }
 
@@ -62,29 +334,11 @@ export default function App() {
   return (
     <DashboardProvider>
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/shop" element={<ShopPage />} />
-          <Route path="/shop/:id" element={<GemDetailPage />} />
-          <Route path="/auctions" element={<AuctionListPage />} />
-          <Route path="/auctions/:id" element={<AuctionRoomPage />} />
-          <Route path="/land" element={<LandListingPage />} />
-          <Route path="/land/:id" element={<LandDetailPage />} />
-          <Route path="/knowledge-hub" element={<KnowledgeHubPage />} />
-          <Route path="/knowledge-hub/:slug" element={<ArticleDetailPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/verify-email" element={<VerifyEmailPendingPage />} />
-          <Route path="/verify-email/:token" element={<VerifyEmailConfirmPage />} />
-          <Route path="/account" element={<MyAccountPage />} />
-          
-          {/* Admin Dashboard Routes */}
-          <Route path="/admin" element={<AdminOverviewPage />} />
-          <Route path="/admin/inventory" element={<AdminInventoryPage />} />
-          <Route path="/admin/auctions" element={<AdminAuctionsPage />} />
-          <Route path="/admin/land" element={<AdminLandPage />} />
-          <Route path="/admin/buyers" element={<AdminBuyersPage />} />
-        </Routes>
+        <AlertProvider>
+          <CartProvider>
+            <AppRoutes />
+          </CartProvider>
+        </AlertProvider>
       </BrowserRouter>
     </DashboardProvider>
   )

@@ -451,12 +451,12 @@ export default function TunnelScrollHero() {
           position: 'absolute', inset: 0, zIndex: 5,
           display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
-          padding: '80px 2rem 5rem',
+          padding: '110px 2rem 5rem',
         }}>
 
           {/* Eyebrow */}
           <div ref={eyebrowWrapRef} style={{ willChange: 'transform, opacity' }}>
-            <div ref={eyebrowRef} style={{ opacity: 0, marginBottom: '2.8rem' }}>
+            <div ref={eyebrowRef} style={{ opacity: 0, marginBottom: 'clamp(1rem, 2.5vh, 2rem)' }}>
               <span style={{
                 display: 'inline-flex', alignItems: 'center', gap: '0.85rem',
                 fontSize: '0.58rem', letterSpacing: '0.36em',
@@ -479,7 +479,7 @@ export default function TunnelScrollHero() {
           <div style={{
             textAlign: 'center',
             perspective: '900px',
-            marginBottom: '2.4rem',
+            marginBottom: 'clamp(0.8rem, 2vh, 1.8rem)',
           }}>
             <div ref={line1WrapRef} style={{ willChange: 'transform, opacity' }}>
               <div ref={line1Ref} style={{
@@ -513,7 +513,7 @@ export default function TunnelScrollHero() {
           </div>
 
           {/* Subtitle */}
-          <div ref={subtitleWrapRef} style={{ willChange: 'transform, opacity', marginBottom: '2.8rem' }}>
+          <div ref={subtitleWrapRef} style={{ willChange: 'transform, opacity', marginBottom: 'clamp(1rem, 2.5vh, 2.2rem)' }}>
             <p ref={subtitleRef} style={{
               opacity: 0,
               margin: '0',
@@ -531,7 +531,7 @@ export default function TunnelScrollHero() {
           </div>
 
           {/* Stats */}
-          <div ref={statsWrapRef} style={{ willChange: 'transform, opacity', marginBottom: '2.8rem' }}>
+          <div ref={statsWrapRef} style={{ willChange: 'transform, opacity', marginBottom: 'clamp(1.5rem, 3.5vh, 2.8rem)' }}>
             <div ref={statsRef} style={{
               display: 'flex', gap: '2.8rem', flexWrap: 'wrap',
               justifyContent: 'center',
@@ -596,20 +596,20 @@ export default function TunnelScrollHero() {
 
         {/* Scroll cue */}
         <div ref={scrollCueWrapRef} style={{
-          position: 'absolute', bottom: '1.75rem', left: '50%',
+          position: 'absolute', bottom: '0.25rem', left: '50%',
           transform: 'translateX(-50%)', zIndex: 5, pointerEvents: 'none',
           willChange: 'opacity'
         }}>
           <div ref={scrollCueRef} aria-hidden="true" style={{
             opacity: 0,
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.45rem',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem',
           }}>
             <span style={{
-              fontSize: '0.46rem', letterSpacing: '0.3em', textTransform: 'uppercase',
+              fontSize: '0.42rem', letterSpacing: '0.3em', textTransform: 'uppercase',
               color: 'rgba(255,255,255,0.22)',
             }}>Enter the mine</span>
             <div style={{
-              width: 1, height: 36,
+              width: 1, height: 24,
               background: 'linear-gradient(to bottom, rgba(201,168,76,0.5), transparent)',
               animation: 'scrollPulse 1.8s ease-in-out infinite',
             }} />
