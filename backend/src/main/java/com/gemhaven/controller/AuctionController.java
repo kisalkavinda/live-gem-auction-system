@@ -71,7 +71,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.update(id, request));
     }
 
-    /** DELETE /api/auctions/{id} — ADMIN only, only while SCHEDULED; reverts gem to PUBLISHED */
+    /** DELETE /api/auctions/{id} — ADMIN only, allowed for SCHEDULED or ENDED; reverts gem to PUBLISHED */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Long id) {
         auctionService.delete(id);
