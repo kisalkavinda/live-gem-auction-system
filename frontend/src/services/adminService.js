@@ -94,6 +94,36 @@ export async function deleteAuction(id) {
   }
 }
 
+export async function exportAuctionLog(auctionId) {
+  try {
+    const response = await apiClient.get(`/auctions/${auctionId}/export-log`, {
+      responseType: 'blob', // Important for downloading files
+    });
+    
+    // Create a temporary link element to trigger the download
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    // Extract filename from headers if possible, otherwise use default
+    const contentDisposition = response.headers['content-disposition'];
+    let fileName = `auction_${auctionId}_log.csv`;
+    if (contentDisposition) {
+      const fileNameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (fileNameMatch && fileNameMatch.length === 2)
+        fileName = fileNameMatch[1];
+    }
+    link.setAttribute('download', fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode.removeChild(link);
+    
+    return { success: true };
+  } catch (error) {
+    console.error(`Error exporting auction log ${auctionId}:`, error);
+    throw error;
+  }
+}
+
 export async function addLandListing(landData) {
   try {
     const response = await apiClient.post('/land', landData);

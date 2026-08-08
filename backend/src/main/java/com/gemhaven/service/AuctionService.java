@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @SuppressWarnings("null")
@@ -220,5 +221,36 @@ public class AuctionService {
                 auction.getHighestBidderId(),
                 message
         );
+    }
+
+    /**
+     * Generates a CSV log of an auction and all its bids.
+     */
+    public byte[] exportAuctionLog(Long auctionId) {
+        Auction auction = auctionRepository.findById(auctionId)
+                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
+
+        List<Bid> bids = bidRepository.findByAuction_IdOrderByTimestampDesc(auctionId, Pageable.unpaged()).getContent();
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Auction ID,").append(auction.getId()).append("\n");
+        sb.append("Gemstone,").append(auction.getGemstone().getName().replace(",", " ")).append("\n");
+        sb.append("Status,").append(auction.getStatus()).append("\n");
+        sb.append("Start Time,").append(auction.getStartTime()).append("\n");
+        sb.append("End Time,").append(auction.getEndTime()).append("\n");
+        sb.append("Winning Bid,").append(auction.getCurrentBid() != null ? auction.getCurrentBid() : "None").append("\n");
+        sb.append("Winner ID,").append(auction.getHighestBidderId() != null ? auction.getHighestBidderId() : "None").append("\n");
+        sb.append("\n");
+
+        sb.append("Bid ID,User ID,User Email,Amount,Timestamp\n");
+        for (Bid b : bids) {
+            sb.append(b.getId()).append(",")
+              .append(b.getUser().getId()).append(",")
+              .append(b.getUser().getEmail()).append(",")
+              .append(b.getAmount()).append(",")
+              .append(b.getTimestamp() != null ? b.getTimestamp() : "N/A").append("\n");
+        }
+
+        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

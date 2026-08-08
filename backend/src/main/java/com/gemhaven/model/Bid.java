@@ -28,8 +28,8 @@ public class Bid {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "timestamp", insertable = false, updatable = false)
-    private LocalDateTime timestamp;
+    @Column(name = "timestamp", nullable = false, updatable = false)
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     public Bid() {}
 
