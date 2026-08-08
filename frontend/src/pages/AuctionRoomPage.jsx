@@ -457,6 +457,12 @@ export default function AuctionRoomPage() {
                     </h3>
                     <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
                       This auction has been concluded.
+                      {winner?.bidder && winner.bidder !== 'None' && (
+                        <>
+                          <br />
+                          <span style={{ color: '#C9A84C' }}>Winner: {winner.bidder}</span>
+                        </>
+                      )}
                     </p>
                   </div>
                 )
@@ -515,7 +521,54 @@ export default function AuctionRoomPage() {
                         Place Bid
                       </button>
                     </div>
-                    <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.5rem', letterSpacing: '0.05em' }}>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {[auction.minIncrement, auction.minIncrement * 2, auction.minIncrement * 5].map(inc => (
+                        <button
+                          key={inc}
+                          type="button"
+                          onClick={() => {
+                            const base = parseInt(bidAmountStr, 10) || currentBid;
+                            setBidAmountStr(String(base + inc));
+                          }}
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '2px',
+                            padding: '0.4rem 0.8rem',
+                            color: '#fff',
+                            fontSize: '0.65rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.15)'; e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#C9A84C' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
+                        >
+                          + {LKR(inc).replace('LKR ', '')}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setBidAmountStr(String(minNextBid))}
+                        style={{
+                          background: 'rgba(201,168,76,0.1)',
+                          border: '1px solid rgba(201,168,76,0.3)',
+                          borderRadius: '2px',
+                          padding: '0.4rem 0.8rem',
+                          color: '#C9A84C',
+                          fontSize: '0.65rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          marginLeft: 'auto'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.2)'; e.currentTarget.style.borderColor = '#C9A84C' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.1)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)' }}
+                      >
+                        Min Bid
+                      </button>
+                    </div>
+
+                    <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.75rem', letterSpacing: '0.05em' }}>
                       Minimum next bid: <span style={{ color: '#C9A84C' }}>{LKR(minNextBid)}</span>
                     </div>
                   </div>
