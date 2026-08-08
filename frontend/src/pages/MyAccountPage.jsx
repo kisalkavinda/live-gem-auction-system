@@ -101,6 +101,33 @@ export default function MyAccountPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem' }}>
             
+            {/* Account Details */}
+            {(() => {
+              const userStr = localStorage.getItem('user');
+              const user = userStr ? JSON.parse(userStr) : null;
+              
+              if (!user) return null;
+
+              return (
+                <section>
+                  <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontWeight: 300, marginBottom: '1.25rem' }}>Account Details</h2>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '4px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.75rem' }}>
+                      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)' }}>Full Name</span>
+                      <span style={{ fontSize: '0.9rem', color: '#fff' }}>{user.fullName || 'N/A'}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.25rem' }}>
+                      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.4)' }}>Email Address</span>
+                      <span style={{ fontSize: '0.9rem', color: '#fff' }}>{user.email || 'N/A'}</span>
+                    </div>
+
+                  </div>
+                </section>
+              );
+            })()}
+
             {/* My Bids */}
             <section>
               <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontWeight: 300, marginBottom: '1.25rem' }}>My Bids</h2>
