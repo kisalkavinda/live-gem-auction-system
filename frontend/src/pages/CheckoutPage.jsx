@@ -95,7 +95,7 @@ export default function CheckoutPage() {
     useState('')
 
   const [paymentMethod, setPaymentMethod] =
-    useState('CASH_ON_DELIVERY')
+    useState('IN_STORE_PICKUP')
 
   const [placingOrder, setPlacingOrder] =
     useState(false)
@@ -208,34 +208,13 @@ export default function CheckoutPage() {
 
 
   // ====================================================
-  // SHIPPING
+  // SHIPPING / FULFILMENT
   // ====================================================
 
   const shipping = useMemo(() => {
-
-    try {
-
-      return Number(
-        calculateShipping(
-          province,
-          district
-        ) || 0
-      )
-
-    } catch (error) {
-
-      console.error(
-        'Shipping calculation error:',
-        error
-      )
-
-      return 0
-    }
-
-  }, [
-    province,
-    district,
-  ])
+    // In-store pickup / reservation is free of charge
+    return 0
+  }, [])
 
 
   // ====================================================
@@ -382,7 +361,7 @@ showAlert({
 showAlert({
         type: 'warning',
         title: 'Missing information',
-        message: 'Please enter your delivery address.',
+        message: 'Please enter your contact address.',
       })
 
         return
@@ -476,38 +455,24 @@ showAlert({
 
           subtotal,
 
-          shipping,
+          shipping: 0,
 
-          total,
+          total: subtotal,
 
-          paymentMethod,
+          paymentMethod: 'IN_STORE_PICKUP',
         }
 
 
         console.log(
-          'ORDER DATA:',
+          'RESERVATION DATA:',
           orderData
         )
 
 
-        /*
-         * ------------------------------------------------
-         * IMPORTANT
-         * ------------------------------------------------
-         *
-         * Your backend order API can be connected here.
-         *
-         * For now this only confirms that all information
-         * is valid.
-         *
-         * ------------------------------------------------
-         */
-
-
         showAlert({
           type: 'success',
-          title: 'Order ready',
-          message: 'Checkout information is valid. Order API will be connected next.',
+          title: 'Reservation Confirmed',
+          message: 'Your gemstone reservation is confirmed. Please visit our showroom to inspect and complete your purchase.',
         })
 
 
@@ -945,7 +910,7 @@ showAlert({
 
 
                 {/* ==================================
-                    DELIVERY
+                    RESERVATION CONTACT INFO
                 ================================== */}
 
                 <section
@@ -959,8 +924,24 @@ showAlert({
                 >
 
                   <SectionTitle>
-                    Delivery Information
+                    Reservation Contact Details
                   </SectionTitle>
+
+
+                  <div
+                    style={{
+                      padding: '0.85rem 1rem',
+                      marginBottom: '1.25rem',
+                      background: 'rgba(201,168,76,0.08)',
+                      border: '1px solid rgba(201,168,76,0.25)',
+                      color: '#E8D5A3',
+                      fontSize: '0.68rem',
+                      lineHeight: 1.5,
+                      borderRadius: '2px',
+                    }}
+                  >
+                    ◆ <strong>In-Store Pickup & Inspection:</strong> All gemstones must be inspected and collected in person at our Sri Lanka showroom. Completing this form reserves your selected stone(s).
+                  </div>
 
 
                   <div
@@ -1005,7 +986,7 @@ showAlert({
                     >
 
                       <Input
-                        label="Delivery Address"
+                        label="Contact Address"
                         value={
                           address
                         }
@@ -1104,7 +1085,7 @@ showAlert({
 
 
                 {/* ==================================
-                    PAYMENT
+                    PAYMENT & COLLECTION
                 ================================== */}
 
                 <section
@@ -1119,7 +1100,7 @@ showAlert({
                 >
 
                   <SectionTitle>
-                    Payment Method
+                    Collection & Payment Method
                   </SectionTitle>
 
 
@@ -1130,7 +1111,8 @@ showAlert({
                       gap: '0.75rem',
                       padding: '1rem',
                       border:
-                        '1px solid rgba(201,168,76,0.3)',
+                        '1px solid rgba(201,168,76,0.4)',
+                      background: 'rgba(201,168,76,0.04)',
                       cursor: 'pointer',
                     }}
                   >
@@ -1139,11 +1121,11 @@ showAlert({
                       type="radio"
                       checked={
                         paymentMethod ===
-                        'CASH_ON_DELIVERY'
+                        'IN_STORE_PICKUP'
                       }
                       onChange={() =>
                         setPaymentMethod(
-                          'CASH_ON_DELIVERY'
+                          'IN_STORE_PICKUP'
                         )
                       }
                     />
@@ -1153,23 +1135,26 @@ showAlert({
 
                       <div
                         style={{
-                          fontSize: '0.72rem',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          color: '#C9A84C',
                         }}
                       >
-                        Cash on Delivery
+                        In-Store Inspection & Payment (Reserve Online)
                       </div>
 
 
                       <div
                         style={{
-                          fontSize: '0.6rem',
+                          fontSize: '0.62rem',
                           color:
-                            'rgba(255,255,255,0.3)',
+                            'rgba(255,255,255,0.45)',
                           marginTop:
                             '0.25rem',
+                          lineHeight: 1.4,
                         }}
                       >
-                        Pay when your order is delivered
+                        Reserve your gemstone online now. Visit our showroom to inspect the stone in person and complete payment upon collection.
                       </div>
 
                     </div>
@@ -1198,7 +1183,7 @@ showAlert({
               >
 
                 <SectionTitle>
-                  Order Summary
+                  Reservation Summary
                 </SectionTitle>
 
 
@@ -1274,44 +1259,15 @@ showAlert({
 
 
                 <SummaryRow
-                  label="Shipping"
-                  value={
-                    province &&
-                    district
-                      ? LKR(
-                          shipping
-                        )
-                      : 'Select address'
-                  }
+                  label="Fulfilment"
+                  value="In-Store Pickup"
                 />
 
 
-                {province &&
-                  district && (
-
-                    <div
-                      style={{
-                        fontSize: '0.55rem',
-                        color:
-                          'rgba(255,255,255,0.25)',
-                        marginTop:
-                          '-0.4rem',
-                        marginBottom:
-                          '1rem',
-                      }}
-                    >
-
-                      Delivery to{' '}
-
-                      {getDistrictLabel(
-                        district
-                      )}
-
-                      , {province}
-
-                    </div>
-
-                  )}
+                <SummaryRow
+                  label="Pickup Fee"
+                  value="Free"
+                />
 
 
                 {/* TOTAL */}
@@ -1331,7 +1287,7 @@ showAlert({
                 >
 
                   <span>
-                    Total
+                    Total Amount Due
                   </span>
 
 
@@ -1381,8 +1337,8 @@ showAlert({
                 >
 
                   {placingOrder
-                    ? 'Processing...'
-                    : 'Place Order'}
+                    ? 'Reserving...'
+                    : 'Confirm Online Reservation'}
 
                 </button>
 

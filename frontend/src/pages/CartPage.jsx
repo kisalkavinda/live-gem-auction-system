@@ -345,16 +345,16 @@ export default function CartPage() {
                     color: 'rgba(255,255,255,0.45)',
                   }}
                 >
-                  Shipping
+                  Fulfilment
                 </span>
 
                 <span
                   style={{
                     fontSize: '0.75rem',
-                    color: 'rgba(255,255,255,0.4)',
+                    color: '#C9A84C',
                   }}
                 >
-                  Calculated at checkout
+                  In-Store Inspection & Pickup
                 </span>
               </div>
 
