@@ -136,17 +136,21 @@ function FeatureCard({ feature, index }) {
       ref={cardRef}
       style={{
         position: 'relative',
-        padding: '3rem 2.5rem',
-        background: hovered ? 'rgba(255,255,255,0.015)' : 'rgba(255,255,255,0.005)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.04)',
-        borderRadius: '8px',
+        padding: '3.5rem 2.5rem',
+        background: hovered 
+          ? 'linear-gradient(160deg, rgba(30,30,30,0.8) 0%, rgba(10,10,10,0.9) 100%)' 
+          : 'linear-gradient(160deg, rgba(20,20,20,0.5) 0%, rgba(5,5,5,0.7) 100%)',
+        backdropFilter: 'blur(24px)',
+        border: hovered ? `1px solid ${feature.accent}40` : '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '24px',
         cursor: 'default',
         willChange: 'transform',
         transformStyle: 'preserve-3d',
         overflow: 'hidden',
-        transition: 'background 0.5s ease, border 0.5s ease',
-        boxShadow: hovered ? `0 25px 60px -25px ${feature.accent}30` : 'none',
+        transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+        boxShadow: hovered 
+          ? `0 30px 60px -20px ${feature.accent}50, inset 0 1px 0 rgba(255,255,255,0.15)` 
+          : '0 15px 35px -15px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}
     >
       {/* 1. Dynamic Refractive Facet Overlay (moves with mouse, mimics reflection) */}
@@ -182,11 +186,11 @@ function FeatureCard({ feature, index }) {
         style={{
           position: 'absolute',
           inset: 0,
-          borderRadius: '8px',
-          padding: '1.5px',
+          borderRadius: '24px',
+          padding: '1px',
           background: hovered 
-            ? `conic-gradient(from ${timeToAngle(coords.x, coords.y)}deg, transparent, ${feature.accent}dd, transparent 40%, transparent)` 
-            : 'linear-gradient(135deg, rgba(255,255,255,0.04), transparent, rgba(255,255,255,0.02))',
+            ? `conic-gradient(from ${timeToAngle(coords.x, coords.y)}deg, transparent, ${feature.accent}dd, transparent 30%, transparent)` 
+            : 'linear-gradient(135deg, rgba(255,255,255,0.08), transparent, rgba(255,255,255,0.02))',
           WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
           WebkitMaskComposite: 'xor',
           maskComposite: 'exclude',
@@ -211,20 +215,20 @@ function FeatureCard({ feature, index }) {
 
         <h3 style={{
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: '1.5rem',
-          fontWeight: 400,
+          fontSize: '1.75rem',
+          fontWeight: 500,
           color: hovered ? '#fff' : '#E8E0D0',
-          marginBottom: '0.85rem',
-          letterSpacing: '0.01em',
+          marginBottom: '1rem',
+          letterSpacing: '0.02em',
           transition: 'color 0.3s ease',
         }}>
           {feature.title}
         </h3>
 
         <p style={{
-          fontSize: '0.88rem',
-          color: hovered ? 'rgba(232,224,208,0.72)' : 'rgba(232,224,208,0.45)',
-          lineHeight: 1.8,
+          fontSize: '0.95rem',
+          color: hovered ? 'rgba(232,224,208,0.85)' : 'rgba(232,224,208,0.55)',
+          lineHeight: 1.7,
           fontWeight: 300,
           transition: 'color 0.3s ease',
         }}>

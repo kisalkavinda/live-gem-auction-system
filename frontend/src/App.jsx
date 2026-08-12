@@ -64,6 +64,9 @@ import AdminLandPage from './pages/admin/AdminLandPage'
 import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 
 
+import ProtectedRoute from './components/ProtectedRoute'
+
+
 function LandingPage() {
   const [ready, setReady] = useState(() => {
     return sessionStorage.getItem('gemhaven_preloader_done') === 'true'
@@ -166,14 +169,18 @@ function AppRoutes() {
       <Route
         path="/shop"
         element={
-          <ShopPage />
+          <ProtectedRoute>
+            <ShopPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/shop/:id"
         element={
-          <GemDetailPage />
+          <ProtectedRoute>
+            <GemDetailPage />
+          </ProtectedRoute>
         }
       />
 
@@ -182,7 +189,9 @@ function AppRoutes() {
       <Route
         path="/cart"
         element={
-          <CartPage />
+          <ProtectedRoute>
+            <CartPage />
+          </ProtectedRoute>
         }
       />
 
@@ -191,7 +200,9 @@ function AppRoutes() {
       <Route
         path="/checkout"
         element={
-          <CheckoutPage />
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
         }
       />
 
@@ -200,14 +211,18 @@ function AppRoutes() {
       <Route
         path="/auctions"
         element={
-          <AuctionListPage />
+          <ProtectedRoute>
+            <AuctionListPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/auctions/:id"
         element={
-          <AuctionRoomPage />
+          <ProtectedRoute>
+            <AuctionRoomPage />
+          </ProtectedRoute>
         }
       />
 
@@ -216,14 +231,18 @@ function AppRoutes() {
       <Route
         path="/land"
         element={
-          <LandListingPage />
+          <ProtectedRoute>
+            <LandListingPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/land/:id"
         element={
-          <LandDetailPage />
+          <ProtectedRoute>
+            <LandDetailPage />
+          </ProtectedRoute>
         }
       />
 
@@ -285,7 +304,9 @@ function AppRoutes() {
       <Route
         path="/account"
         element={
-          <MyAccountPage />
+          <ProtectedRoute>
+            <MyAccountPage />
+          </ProtectedRoute>
         }
       />
 
@@ -294,35 +315,45 @@ function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <AdminOverviewPage />
+          <ProtectedRoute>
+            <AdminOverviewPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/admin/inventory"
         element={
-          <AdminInventoryPage />
+          <ProtectedRoute>
+            <AdminInventoryPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/admin/auctions"
         element={
-          <AdminAuctionsPage />
+          <ProtectedRoute>
+            <AdminAuctionsPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/admin/land"
         element={
-          <AdminLandPage />
+          <ProtectedRoute>
+            <AdminLandPage />
+          </ProtectedRoute>
         }
       />
 
       <Route
         path="/admin/buyers"
         element={
-          <AdminBuyersPage />
+          <ProtectedRoute>
+            <AdminBuyersPage />
+          </ProtectedRoute>
         }
       />
 

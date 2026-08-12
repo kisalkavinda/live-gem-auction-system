@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { fetchGems } from '../services/gemService';
 import apiClient from '../services/apiClient';
 import { mockBuyers } from '../data/mockBuyers';
@@ -7,7 +7,17 @@ const DashboardContext = createContext();
 
 export function DashboardProvider({ children }) {
   const [gems, setGems] = useState([]);
+  const [auctions, setAuctions] = useState([]);
+  const [lands, setLands] = useState([]);
+  const [buyers, setBuyers] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
   
+  const [isWsConnected, setIsWsConnected] = useState(false);
+  const stompClient = useRef(null);
+  const subscriptions = useRef({});
+
   useEffect(() => {
     fetchGems({ status: 'ALL' }).then(data => setGems(data));
     
@@ -32,16 +42,65 @@ export function DashboardProvider({ children }) {
         }));
         setBuyers(mapped);
       }).catch(console.error);
+
+      // Connect STOMP for live auction updates
+      const token = localStorage.getItem('token') || '';
+      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
+      
+      Promise.all([
+        import('@stomp/stompjs'),
+        import('sockjs-client')
+      ]).then(([stompjs, sockjs]) => {
+        const client = new stompjs.Client({
+          webSocketFactory: () => new sockjs.default(`${baseUrl}/ws?token=${token}`),
+          reconnectDelay: 5000,
+        });
+
+        client.onConnect = () => {
+          stompClient.current = client;
+          setIsWsConnected(true);
+        };
+
+        client.onWebSocketClose = () => {
+          setIsWsConnected(false);
+          subscriptions.current = {};
+        };
+
+        client.activate();
+      });
+      
+      return () => {
+        if (stompClient.current) {
+          stompClient.current.deactivate();
+        }
+      };
     }
   }, []);
-  
-  const [auctions, setAuctions] = useState([]);
-  
-  const [lands, setLands] = useState([]);
-  const [buyers, setBuyers] = useState([]);
-  const [bookings, setBookings] = useState([]);
-  const [stats, setStats] = useState(null);
-  const [recentActivity, setRecentActivity] = useState([]);
+
+  // Dynamically subscribe to any auction that is LIVE
+  useEffect(() => {
+    if (!isWsConnected || !stompClient.current) return;
+
+    const liveAuctions = auctions.filter(a => a.status?.toUpperCase() === 'LIVE');
+    liveAuctions.forEach(a => {
+      if (!subscriptions.current[a.id]) {
+        subscriptions.current[a.id] = stompClient.current.subscribe(`/topic/auctions/${a.id}`, (message) => {
+          if (message.body) {
+            const update = JSON.parse(message.body);
+            if (update.type === 'BID_PLACED') {
+              setAuctions(prev => prev.map(auc => 
+                auc.id === update.auctionId ? { ...auc, currentBid: update.currentBid, endTime: update.endTime || auc.endTime } : auc
+              ));
+            } else if (update.type === 'AUCTION_ENDED') {
+              setAuctions(prev => prev.map(auc => 
+                auc.id === update.auctionId ? { ...auc, status: 'ENDED', currentBid: update.winningBid, highestBidderId: update.winnerId } : auc
+              ));
+            }
+          }
+        });
+      }
+    });
+  }, [auctions, isWsConnected]);
 
   // Expose updater functions to be called after adminService resolves
   const addGemState = (gem) => setGems(prev => [gem, ...prev]);

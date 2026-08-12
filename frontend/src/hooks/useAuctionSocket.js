@@ -14,6 +14,7 @@ export function useAuctionSocket(auctionId) {
   const stompClient = useRef(null);
   const timerRef = useRef(null);
   const isAuctionEnded = useRef(false);
+  const latestBidderName = useRef('None');
 
   // Initialize auction from backend
   useEffect(() => {
@@ -66,6 +67,18 @@ export function useAuctionSocket(auctionId) {
           message: 'Auction started at'
         });
         
+        if (mappedHistory.length > 1) {
+          latestBidderName.current = mappedHistory[0].bidder;
+        }
+
+        if (data.status === 'ENDED' || data.status === 'SOLD') {
+            if (mappedHistory.length > 1) { // > 1 because of 'start' event
+              setWinner({ bidder: mappedHistory[0].bidder, amount: data.currentBid });
+            } else {
+              setWinner({ bidder: 'None', amount: 0 });
+            }
+        }
+
         setBidHistory(mappedHistory);
         
       } catch (err) {
@@ -110,6 +123,7 @@ export function useAuctionSocket(auctionId) {
         if (message.body) {
           const update = JSON.parse(message.body);
           if (update.type === 'BID_PLACED') {
+             latestBidderName.current = update.bidder || 'Bidder';
              setCurrentBid(update.currentBid);
              
              // If endTime was extended, update the local auction state
@@ -129,14 +143,15 @@ export function useAuctionSocket(auctionId) {
           } else if (update.type === 'AUCTION_ENDED') {
              isAuctionEnded.current = true;
              setConnectionStatus('DISCONNECTED');
-             setWinner({ bidder: 'Highest Bidder', amount: update.winningBid });
+             setAuction(prev => prev ? { ...prev, status: 'ENDED', currentBid: update.winningBid, highestBidderId: update.winnerId } : prev);
+             setWinner({ bidder: latestBidderName.current, amount: update.winningBid });
              setBidHistory(prev => [{
                id: 'end',
                bidder: 'System',
                amount: update.winningBid || 0,
                timestamp: new Date().toISOString(),
                isSystem: true,
-               message: update.message || 'Auction ended.'
+               message: latestBidderName.current !== 'None' ? `Winner: ${latestBidderName.current}. ${update.message || ''}` : update.message || 'Auction ended.'
              }, ...prev]);
              client.deactivate();
           }

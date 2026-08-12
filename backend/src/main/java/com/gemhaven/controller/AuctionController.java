@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -71,7 +72,7 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.update(id, request));
     }
 
-    /** DELETE /api/auctions/{id} — ADMIN only, only while SCHEDULED; reverts gem to PUBLISHED */
+    /** DELETE /api/auctions/{id} — ADMIN only, allowed for SCHEDULED or ENDED; reverts gem to PUBLISHED */
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Boolean>> delete(@PathVariable Long id) {
         auctionService.delete(id);
@@ -82,5 +83,14 @@ public class AuctionController {
     @PostMapping("/{id}/end-early")
     public ResponseEntity<Auction> endEarly(@PathVariable Long id) {
         return ResponseEntity.ok(auctionService.endEarly(id));
+    }
+
+    /** GET /api/auctions/{id}/export-log — ADMIN only, downloads the auction history as CSV */
+    @GetMapping(value = "/{id}/export-log", produces = "text/csv")
+    public ResponseEntity<byte[]> exportAuctionLog(@PathVariable Long id) {
+        byte[] csvData = auctionService.exportAuctionLog(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"auction_" + id + "_log.csv\"")
+                .body(csvData);
     }
 }
