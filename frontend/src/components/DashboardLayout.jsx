@@ -44,7 +44,7 @@ export default function DashboardLayout({ children }) {
               letterSpacing: '0.22em',
               color: '#fff',
               fontWeight: 300,
-            }}>GEMHAVEN</span>
+            }}>THENNAKOON GEMS</span>
           </Link>
           <div style={{
             marginTop: '0.75rem', fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)',

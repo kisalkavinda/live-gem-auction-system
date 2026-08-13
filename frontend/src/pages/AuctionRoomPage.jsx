@@ -83,13 +83,11 @@ export default function AuctionRoomPage() {
     
     // Initial entry animations
     const tl = gsap.timeline({ delay: 0.1 });
-    tl.fromTo(gemVisualRef.current,
-      { opacity: 0, scale: 0.85 },
-      { opacity: 1, scale: 1, duration: 0.9, ease: 'power3.out' }
+    tl.from(gemVisualRef.current,
+      { opacity: 0, scale: 0.85, duration: 0.9, ease: 'power3.out' }
     );
-    tl.fromTo(infoRef.current?.querySelectorAll('.detail-row') ?? [],
-      { opacity: 0, x: 24 },
-      { opacity: 1, x: 0, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
+    tl.from(infoRef.current?.querySelectorAll('.detail-row') ?? [],
+      { opacity: 0, x: 24, stagger: 0.07, duration: 0.5, ease: 'power3.out' },
       '-=0.5'
     );
   }, [auction]);
@@ -187,6 +185,9 @@ export default function AuctionRoomPage() {
   const isFinished = status === 'ENDED' || Boolean(winner);
   const isUrgent = isLive && timeRemaining < 30 && timeRemaining > 0;
 
+  const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const isWinner = isFinished && currentUser && auction.highestBidderId === currentUser.id;
+
   // Compute a countdown target depending on status: if upcoming, count to start; if live, count to end
   const startDate = parseDatePossible(auction.startTime || auction.startsAt || auction.start);
   const upcomingSeconds = startDate ? Math.max(0, Math.floor((new Date(startDate).getTime() - Date.now()) / 1000)) : 0;
@@ -249,7 +250,7 @@ export default function AuctionRoomPage() {
         }}>
 
           {/* LEFT — Visual & Specs */}
-          <div ref={gemVisualRef} style={{ opacity: 0 }}>
+          <div ref={gemVisualRef}>
             {/* Main gem display */}
             <div style={{
               background: `radial-gradient(ellipse at 38% 35%, ${auction.color}30, rgba(5,5,8,0.95))`,
@@ -428,23 +429,43 @@ export default function AuctionRoomPage() {
             {/* Input / Winner state */}
             <div className="detail-row">
               {isFinished ? (
-                <div style={{
-                  background: 'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.02))',
-                  border: '1px solid rgba(201,168,76,0.3)',
-                  borderRadius: '4px',
-                  padding: '2rem 1.5rem',
-                  textAlign: 'center'
-                }}>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
-                    Auction Won
-                  </h3>
-                  <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.6)', marginBottom: '0.5rem' }}>
-                    Congratulations to
-                  </p>
-                  <p style={{ fontSize: '1.1rem', color: '#C9A84C', letterSpacing: '0.05em' }}>
-                    {winner?.bidder}
-                  </p>
-                </div>
+                isWinner ? (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.02))',
+                    border: '1px solid rgba(201,168,76,0.4)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem', color: '#C9A84C', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      You won this auction!
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
+                      Congratulations! We will contact you shortly with next steps.
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '4px',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center'
+                  }}>
+                    <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#fff', fontWeight: 300, marginBottom: '0.5rem' }}>
+                      Auction Ended
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)' }}>
+                      This auction has been concluded.
+                      {winner?.bidder && winner.bidder !== 'None' && (
+                        <>
+                          <br />
+                          <span style={{ color: '#C9A84C' }}>Winner: {winner.bidder}</span>
+                        </>
+                      )}
+                    </p>
+                  </div>
+                )
               ) : isUpcoming ? (
                 <div style={{
                   background: 'linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))',
@@ -500,7 +521,54 @@ export default function AuctionRoomPage() {
                         Place Bid
                       </button>
                     </div>
-                    <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.5rem', letterSpacing: '0.05em' }}>
+                    
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                      {[auction.minIncrement, auction.minIncrement * 2, auction.minIncrement * 5].map(inc => (
+                        <button
+                          key={inc}
+                          type="button"
+                          onClick={() => {
+                            const base = parseInt(bidAmountStr, 10) || currentBid;
+                            setBidAmountStr(String(base + inc));
+                          }}
+                          style={{
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '2px',
+                            padding: '0.4rem 0.8rem',
+                            color: '#fff',
+                            fontSize: '0.65rem',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.15)'; e.currentTarget.style.borderColor = '#C9A84C'; e.currentTarget.style.color = '#C9A84C' }}
+                          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff' }}
+                        >
+                          + {LKR(inc).replace('LKR ', '')}
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setBidAmountStr(String(minNextBid))}
+                        style={{
+                          background: 'rgba(201,168,76,0.1)',
+                          border: '1px solid rgba(201,168,76,0.3)',
+                          borderRadius: '2px',
+                          padding: '0.4rem 0.8rem',
+                          color: '#C9A84C',
+                          fontSize: '0.65rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s',
+                          marginLeft: 'auto'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.2)'; e.currentTarget.style.borderColor = '#C9A84C' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'rgba(201,168,76,0.1)'; e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)' }}
+                      >
+                        Min Bid
+                      </button>
+                    </div>
+
+                    <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.75rem', letterSpacing: '0.05em' }}>
                       Minimum next bid: <span style={{ color: '#C9A84C' }}>{LKR(minNextBid)}</span>
                     </div>
                   </div>

@@ -101,7 +101,7 @@ export default function OrderSuccessPage() {
           >
             Your order has been received.
             This frontend confirmation will
-            later be connected to the GemHaven
+            later be connected to THENNAKOON GEMS
             order system.
           </p>
 

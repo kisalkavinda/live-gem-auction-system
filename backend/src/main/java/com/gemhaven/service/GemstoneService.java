@@ -27,11 +27,11 @@ public class GemstoneService {
                 gems = gemstoneRepository.findAll();
             }
         } else {
-            Gemstone.ReservationStatus resStatus = Gemstone.ReservationStatus.valueOf(status.toUpperCase());
+            Gemstone.GemStatus gemStatus = Gemstone.GemStatus.valueOf(status.toUpperCase());
             if (type != null && !type.isBlank()) {
-                gems = gemstoneRepository.findByReservationStatusAndType(resStatus, type);
+                gems = gemstoneRepository.findByStatusAndType(gemStatus, type);
             } else {
-                gems = gemstoneRepository.findByReservationStatus(resStatus);
+                gems = gemstoneRepository.findByStatus(gemStatus);
             }
         }
 
@@ -62,8 +62,8 @@ public class GemstoneService {
     }
 
     public Gemstone create(Gemstone gemstone) {
-        if (gemstone.getReservationStatus() == null) {
-            gemstone.setReservationStatus(Gemstone.ReservationStatus.DRAFT);
+        if (gemstone.getStatus() == null) {
+            gemstone.setStatus(Gemstone.GemStatus.DRAFT);
         }
         return gemstoneRepository.save(gemstone);
     }
@@ -84,8 +84,8 @@ public class GemstoneService {
         existing.setPrice(updated.getPrice());
         existing.setDescription(updated.getDescription());
         existing.setImageUrl(updated.getImageUrl());
-        if (updated.getReservationStatus() != null) {
-            existing.setReservationStatus(updated.getReservationStatus());
+        if (updated.getStatus() != null) {
+            existing.setStatus(updated.getStatus());
         }
         return gemstoneRepository.save(existing);
     }
@@ -100,10 +100,10 @@ public class GemstoneService {
     public Gemstone publish(Long id) {
         Gemstone gem = gemstoneRepository.findByIdWithPessimisticLock(id)
                 .orElseThrow(() -> new IllegalArgumentException("Gemstone not found: " + id));
-        if (gem.getReservationStatus() != Gemstone.ReservationStatus.DRAFT) {
+        if (gem.getStatus() != Gemstone.GemStatus.DRAFT) {
             throw new IllegalStateException("Only DRAFT gems can be published.");
         }
-        gem.setReservationStatus(Gemstone.ReservationStatus.PUBLISHED);
+        gem.setStatus(Gemstone.GemStatus.PUBLISHED);
         return gemstoneRepository.save(gem);
     }
 
@@ -111,10 +111,10 @@ public class GemstoneService {
     public Gemstone purchase(Long id, User buyer) {
         Gemstone gem = gemstoneRepository.findByIdWithPessimisticLock(id)
                 .orElseThrow(() -> new IllegalArgumentException("Gemstone not found: " + id));
-        if (gem.getReservationStatus() != Gemstone.ReservationStatus.PUBLISHED) {
+        if (gem.getStatus() != Gemstone.GemStatus.PUBLISHED) {
             throw new IllegalStateException("Gemstone is not available for purchase.");
         }
-        gem.setReservationStatus(Gemstone.ReservationStatus.SOLD);
+        gem.setStatus(Gemstone.GemStatus.SOLD);
         gem.setOwner(buyer);
         return gemstoneRepository.save(gem);
     }

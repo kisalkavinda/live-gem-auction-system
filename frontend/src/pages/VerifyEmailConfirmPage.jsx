@@ -95,7 +95,7 @@ export default function VerifyEmailConfirmPage() {
                 Email Verified
               </h1>
               <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: '2rem' }}>
-                Thank you for verifying your email address. Your GemHaven account is now fully active.
+                Thank you for verifying your email address. Your THENNAKOON GEMS account is now fully active.
               </p>
               <button
                 onClick={() => navigate('/')}
@@ -116,7 +116,7 @@ export default function VerifyEmailConfirmPage() {
                 onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.opacity = '0.9' }}
                 onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.opacity = '1' }}
               >
-                Continue to GemHaven
+                Continue to THENNAKOON GEMS
               </button>
             </div>
           )}

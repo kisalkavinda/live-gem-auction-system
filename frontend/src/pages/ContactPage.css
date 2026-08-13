@@ -1,0 +1,118 @@
+.contact-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 3rem;
+  margin-top: 3rem;
+}
+
+.contact-card {
+  padding: 3.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), box-shadow 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), background 0.4s ease, border-color 0.4s ease;
+  will-change: transform, opacity;
+}
+
+.contact-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6), 0 0 40px rgba(201, 168, 76, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(201, 168, 76, 0.3);
+}
+
+.contact-input {
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.contact-input:focus {
+  border-color: #C9A84C;
+  background: rgba(0, 0, 0, 0.7);
+  box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.15);
+}
+
+.contact-input::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.contact-btn {
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #C9A84C, #E8D5A3);
+  color: #0A0A0D;
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.contact-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(135deg, #E8D5A3, #C9A84C);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.contact-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(201, 168, 76, 0.3);
+}
+
+.contact-btn:hover::before {
+  opacity: 1;
+}
+
+.contact-btn:active {
+  transform: translateY(1px);
+}
+
+.contact-info-block {
+  margin-bottom: 2.5rem;
+  position: relative;
+  padding-left: 1.5rem;
+  border-left: 2px solid rgba(255, 255, 255, 0.1);
+  transition: border-color 0.3s ease;
+}
+
+.contact-card:hover .contact-info-block {
+  border-left-color: rgba(201, 168, 76, 0.4);
+}
+
+.contact-info-block h4 {
+  color: #E8E0D0;
+  font-size: 0.85rem;
+  margin-bottom: 0.8rem;
+  letter-spacing: 0.15em;
+  font-weight: 600;
+}
+
+.contact-info-block p {
+  color: rgba(232, 224, 208, 0.6);
+  font-size: 0.95rem;
+  line-height: 1.8;
+  transition: color 0.3s ease;
+}
+
+.contact-card:hover .contact-info-block p {
+  color: rgba(232, 224, 208, 0.9);
+}

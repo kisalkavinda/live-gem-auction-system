@@ -31,14 +31,20 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     @NonNull FilterChain filterChain)
             throws ServletException, IOException {
 
-        final String authHeader = request.getHeader("Authorization");
+        String authHeader = request.getHeader("Authorization");
+        String token = null;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            token = authHeader.substring(7);
+        } else {
+            // Support token in query parameter for WebSocket/SockJS connections
+            token = request.getParameter("token");
+        }
+
+        if (token == null || token.isEmpty()) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        final String token = authHeader.substring(7);
 
         try {
             final String email = jwtUtil.extractEmail(token);
@@ -55,8 +61,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 }
             }
         } catch (Exception e) {
-            // Invalid token — let the request continue unauthenticated
-            // (SecurityConfig will reject it if the route requires auth)
+            // Invalid or expired token — return 401 immediately so frontend can log out
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\": \"Unauthorized\", \"message\": \"Token is invalid or expired.\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);

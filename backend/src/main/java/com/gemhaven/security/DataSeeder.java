@@ -123,10 +123,10 @@ public class DataSeeder implements CommandLineRunner {
             if (auctionRepository.count() == 0) {
                 System.out.println("[INFO] Seeding initial auctions...");
                 List<Auction> auctions = new ArrayList<>();
-                auctions.add(createAuction(gems.get(0), 1200000, 50000, LocalDateTime.now().plusHours(2), Auction.AuctionStatus.LIVE, 1240000.0));
-                auctions.add(createAuction(gems.get(1), 2500000, 100000, LocalDateTime.now().plusHours(4), Auction.AuctionStatus.LIVE, 2890000.0));
-                auctions.add(createAuction(gems.get(2), 2000000, 50000, LocalDateTime.now().plusDays(1), Auction.AuctionStatus.SCHEDULED, null));
-                auctions.add(createAuction(gems.get(3), 4000000, 150000, LocalDateTime.now().plusHours(1), Auction.AuctionStatus.LIVE, 4150000.0));
+                auctions.add(createAuction(gems.get(0), 1200000, 50000, LocalDateTime.now().minusHours(1), LocalDateTime.now().plusHours(2), Auction.AuctionStatus.LIVE, 1240000.0));
+                auctions.add(createAuction(gems.get(1), 2500000, 100000, LocalDateTime.now().minusHours(2), LocalDateTime.now().plusHours(4), Auction.AuctionStatus.LIVE, 2890000.0));
+                auctions.add(createAuction(gems.get(2), 2000000, 50000, LocalDateTime.now().plusHours(23), LocalDateTime.now().plusDays(1), Auction.AuctionStatus.SCHEDULED, null));
+                auctions.add(createAuction(gems.get(3), 4000000, 150000, LocalDateTime.now().minusMinutes(30), LocalDateTime.now().plusHours(1), Auction.AuctionStatus.LIVE, 4150000.0));
                 auctionRepository.saveAll(auctions);
                 System.out.println("[INFO] " + auctions.size() + " auctions seeded successfully.");
             }
@@ -150,15 +150,18 @@ public class DataSeeder implements CommandLineRunner {
         g.setColorName(colorName);
         g.setDescription(desc);
         g.setImageUrl(img);
-        g.setReservationStatus(Gemstone.ReservationStatus.PUBLISHED); // Set to PUBLISHED so they appear in Shop
+        g.setStatus(Gemstone.GemStatus.PUBLISHED); // Set to PUBLISHED so they appear in Shop
         return g;
     }
 
-    private Auction createAuction(Gemstone gem, double startingPrice, double minIncrement, LocalDateTime endTime, Auction.AuctionStatus status, Double currentBid) {
+    private Auction createAuction(Gemstone gem, double startingPrice, double minIncrement,
+                                   LocalDateTime startTime, LocalDateTime endTime,
+                                   Auction.AuctionStatus status, Double currentBid) {
         Auction a = new Auction();
         a.setGemstone(gem);
         a.setStartingPrice(BigDecimal.valueOf(startingPrice));
         a.setMinIncrement(BigDecimal.valueOf(minIncrement));
+        a.setStartTime(startTime);
         a.setEndTime(endTime);
         a.setStatus(status);
         if (currentBid != null && currentBid > 0) {

@@ -1,5 +1,6 @@
 import {
   useState,
+  useEffect,
 } from 'react'
 
 import {
@@ -9,6 +10,7 @@ import {
 
 import {
   loginUser,
+  isLoggedIn,
 } from '../services/authService'
 
 import Navbar from '../components/Navbar'
@@ -20,6 +22,12 @@ export default function LoginPage() {
 
   const location =
     useLocation()
+
+  useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/account', { replace: true })
+    }
+  }, [navigate])
 
   const [
     email,
@@ -239,7 +247,7 @@ export default function LoginPage() {
                   '0.7rem',
               }}
             >
-              ◆ GemHaven
+              ◆ THENNAKOON GEMS
             </div>
 
             <h1

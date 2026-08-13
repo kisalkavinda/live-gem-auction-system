@@ -40,14 +40,9 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setRole(User.Role.BUYER);
-        user.setEmailVerified(false);
-        user.setVerificationToken(UUID.randomUUID().toString());
+        user.setEmailVerified(true);
 
         userRepository.save(user);
-
-        // NOTE: In production, send this token via email (SMTP/SendGrid — out of scope).
-        // For development, the token is logged and returned in the response for testing.
-        System.out.println("[DEV] Email verification token for " + user.getEmail() + ": " + user.getVerificationToken());
 
         String jwt = jwtUtil.generateToken(user.getEmail());
         AuthResponse.UserInfo userInfo = new AuthResponse.UserInfo(

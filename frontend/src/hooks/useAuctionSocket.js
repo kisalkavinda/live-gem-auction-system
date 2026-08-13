@@ -1,113 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-// MOCK DATA
-export const MOCK_AUCTIONS = [
-  {
-    id: 'a1',
-    name: 'Kashmiri Blue Sapphire',
-    type: 'Sapphire',
-    caratWeight: 4.05,
-    certAuthority: 'GIA',
-    certNumber: 'GIA-2022-031187',
-    clarity: 'VS2',
-    cut: 'Cushion',
-    origin: 'Kashmir, India',
-    description: 'The holy grail of sapphires — a Kashmir origin cushion cut with the legendary velvety cornflower blue. GIA certified, unheated.',
-    color: '#1E40AF',
-    colorName: 'Kashmir Cornflower Blue',
-    imageUrl: '/images/gems/sapphire.png',
-    startingBid: 8500000,
-    minIncrement: 50000,
-    status: 'LIVE',
-    endsAt: new Date(Date.now() + 5 * 60000).toISOString(), // 5 mins from now
-  },
-  {
-    id: 'a2',
-    name: 'Burmese Pigeon Blood Ruby',
-    type: 'Ruby',
-    caratWeight: 3.21,
-    certAuthority: 'GIA',
-    certNumber: 'GIA-2024-087431',
-    clarity: 'VS1',
-    cut: 'Oval',
-    origin: 'Mogok, Myanmar',
-    description: 'An exceptional Burmese ruby of the finest pigeon blood hue, sourced from the legendary Mogok valley. GIA certified with no heat treatment.',
-    color: '#B91C1C',
-    colorName: 'Pigeon Blood Red',
-    imageUrl: '/images/gems/ruby.png',
-    startingBid: 1500000,
-    minIncrement: 25000,
-    status: 'LIVE',
-    endsAt: new Date(Date.now() + 15 * 60000).toISOString(), // 15 mins from now
-  },
-  {
-    id: 'a3',
-    name: 'Colombian Vivid Green Emerald',
-    type: 'Emerald',
-    caratWeight: 2.87,
-    certAuthority: 'CDTEC',
-    certNumber: 'CDTEC-2024-005512',
-    clarity: 'SI1',
-    cut: 'Emerald',
-    origin: 'Muzo, Colombia',
-    description: 'Muzo origin vivid green emerald exhibiting the classic warm saturation unique to Colombian stones.',
-    color: '#15803D',
-    colorName: 'Vivid Green',
-    imageUrl: '/images/gems/emerald.png',
-    startingBid: 2100000,
-    minIncrement: 30000,
-    status: 'UPCOMING',
-    endsAt: new Date(Date.now() + 2 * 3600000).toISOString(), // 2 hours from now
-  },
-  {
-    id: 'a4',
-    name: 'Padparadscha Sapphire',
-    type: 'Sapphire',
-    caratWeight: 1.92,
-    certAuthority: 'GIA',
-    certNumber: 'GIA-2024-054209',
-    clarity: 'VVS1',
-    cut: 'Oval',
-    origin: 'Ratnapura, Sri Lanka',
-    description: 'An exceptionally rare Padparadscha sapphire exhibiting the delicate salmon-pink hue reminiscent of a lotus blossom.',
-    color: '#EA580C',
-    colorName: 'Lotus Pink-Orange',
-    imageUrl: '/images/gems/topaz.png',
-    startingBid: 4200000,
-    minIncrement: 40000,
-    status: 'LIVE',
-    endsAt: new Date(Date.now() + 45 * 1000).toISOString(), // 45 seconds from now (for testing urgency state)
-  }
-];
-
-const MOCK_BIDDERS = ['Bidder ****42', 'Bidder ****91', 'Bidder ****07', 'Bidder ****88', 'Bidder ****33'];
-
-/**
- * -----------------------------------------------------------------------------
- * TODO: REAL WEBSOCKET INTEGRATION
- * When the backend is ready, replace this mock implementation with a real
- * WebSocket client (e.g., native WebSocket API).
- * 
- * Example Native WebSocket approach:
- * 
- * const ws = useRef(null);
- * useEffect(() => {
- *   ws.current = new WebSocket(`wss://api.gemhaven.com/auctions/${auctionId}`);
- *   ws.current.onopen = () => setConnectionStatus('CONNECTED');
- *   ws.current.onmessage = (event) => {
- *     const data = JSON.parse(event.data);
- *     if (data.type === 'NEW_BID') handleNewBid(data.payload);
- *     if (data.type === 'AUCTION_END') handleAuctionEnd(data.payload);
- *   };
- *   ws.current.onclose = () => setConnectionStatus('DISCONNECTED');
- *   return () => ws.current.close();
- * }, [auctionId]);
- * 
- * const placeBid = (amount) => {
- *   ws.current.send(JSON.stringify({ type: 'PLACE_BID', payload: { amount } }));
- * };
- * -----------------------------------------------------------------------------
- */
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import apiClient from '../services/apiClient';
 
 export function useAuctionSocket(auctionId) {
   const [auction, setAuction] = useState(null);
@@ -117,42 +11,200 @@ export function useAuctionSocket(auctionId) {
   const [connectionStatus, setConnectionStatus] = useState('CONNECTING');
   const [winner, setWinner] = useState(null);
   
+  const stompClient = useRef(null);
   const timerRef = useRef(null);
-  const botBidRef = useRef(null);
   const isAuctionEnded = useRef(false);
+  const latestBidderName = useRef('None');
 
-  // Initialize mock auction
+  // Initialize auction from backend
   useEffect(() => {
     if (!auctionId) return;
     
-    // Simulate connection delay
-    const initTimer = setTimeout(() => {
-      const found = MOCK_AUCTIONS.find(a => a.id === auctionId);
-      if (found) {
-        setAuction(found);
-        setCurrentBid(found.startingBid);
-        setConnectionStatus('CONNECTED');
+    let isMounted = true;
+    
+    const fetchAuctionData = async () => {
+      try {
+        const { data } = await apiClient.get(`/auctions/${auctionId}`);
+        if (!isMounted) return;
         
-        // Initial bid history (just the starting bid placeholder)
-        setBidHistory([{
-          id: 'initial',
+        const mappedAuction = {
+          ...data,
+          ...data.gemstone,
+          id: data.id,
+          endsAt: data.endTime,
+          startsAt: data.startTime,
+        };
+        
+        setAuction(mappedAuction);
+        setCurrentBid(data.currentBid || data.startingPrice);
+        
+        if (data.status === 'ENDED' || data.status === 'SOLD') {
+            isAuctionEnded.current = true;
+        }
+
+        // Fetch real bid history
+        const historyRes = await apiClient.get(`/auctions/${auctionId}/bids`);
+        if (!isMounted) return;
+        
+        const bids = historyRes.data.content || [];
+        
+        const mappedHistory = bids.map(b => ({
+          id: b.id?.toString() || Math.random().toString(36).substr(2, 9),
+          bidder: b.user ? `Bidder ****${b.user.email.substring(0, Math.max(0, b.user.email.indexOf('@') - 2))}` : 'Bidder',
+          amount: b.amount,
+          timestamp: b.timestamp,
+          isSystem: false,
+          isUser: false 
+        }));
+        
+        // Add start event at the end of the list (oldest)
+        mappedHistory.push({
+          id: 'start',
           bidder: 'System',
-          amount: found.startingBid,
-          timestamp: new Date().toISOString(),
+          amount: data.startingPrice,
+          timestamp: data.startTime,
           isSystem: true,
           message: 'Auction started at'
-        }]);
-      } else {
-        setConnectionStatus('DISCONNECTED');
-      }
-    }, 800);
+        });
+        
+        if (mappedHistory.length > 1) {
+          latestBidderName.current = mappedHistory[0].bidder;
+        }
 
-    return () => clearTimeout(initTimer);
+        if (data.status === 'ENDED' || data.status === 'SOLD') {
+            if (mappedHistory.length > 1) { // > 1 because of 'start' event
+              setWinner({ bidder: mappedHistory[0].bidder, amount: data.currentBid });
+            } else {
+              setWinner({ bidder: 'None', amount: 0 });
+            }
+        }
+
+        setBidHistory(mappedHistory);
+        
+      } catch (err) {
+        if (!isMounted) return;
+        console.error("Failed to fetch auction:", err);
+      }
+    };
+
+    fetchAuctionData();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [auctionId]);
+
+  // Connect STOMP WebSocket
+  useEffect(() => {
+    if (!auctionId || isAuctionEnded.current) return;
+    
+    // Get token to pass via URL for backend JwtAuthFilter
+    const token = localStorage.getItem('token') || '';
+    // Use the backend base URL or fallback to localhost
+    const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
+    
+    const client = new Client({
+      // We must pass the token as a query param because browser WebSockets don't support custom headers on connection
+      webSocketFactory: () => new SockJS(`${baseUrl}/ws?token=${token}`),
+      debug: function () {
+        // console.log('[STOMP] ' + str);
+      },
+      reconnectDelay: 5000,
+      heartbeatIncoming: 4000,
+      heartbeatOutgoing: 4000,
+    });
+
+    client.onConnect = () => {
+      console.log('[STOMP] Connected to Auction WS');
+      setConnectionStatus('CONNECTED');
+      
+      // Subscribe to auction updates (global broadcasts)
+      client.subscribe(`/topic/auctions/${auctionId}`, (message) => {
+        if (message.body) {
+          const update = JSON.parse(message.body);
+          if (update.type === 'BID_PLACED') {
+             latestBidderName.current = update.bidder || 'Bidder';
+             setCurrentBid(update.currentBid);
+             
+             // If endTime was extended, update the local auction state
+             if (update.endTime) {
+                 setAuction(prev => prev ? { ...prev, endsAt: update.endTime } : prev);
+             }
+
+             setBidHistory(prev => [{
+               id: Math.random().toString(36).substr(2, 9),
+               bidder: update.bidder || 'Bidder',
+               amount: update.currentBid,
+               timestamp: update.timestamp || new Date().toISOString(),
+               isSystem: false,
+               isUser: false
+             }, ...prev]);
+             
+          } else if (update.type === 'AUCTION_ENDED') {
+             isAuctionEnded.current = true;
+             setConnectionStatus('DISCONNECTED');
+             setAuction(prev => prev ? { ...prev, status: 'ENDED', currentBid: update.winningBid, highestBidderId: update.winnerId } : prev);
+             setWinner({ bidder: latestBidderName.current, amount: update.winningBid });
+             setBidHistory(prev => [{
+               id: 'end',
+               bidder: 'System',
+               amount: update.winningBid || 0,
+               timestamp: new Date().toISOString(),
+               isSystem: true,
+               message: latestBidderName.current !== 'None' ? `Winner: ${latestBidderName.current}. ${update.message || ''}` : update.message || 'Auction ended.'
+             }, ...prev]);
+             client.deactivate();
+          }
+        }
+      });
+      
+      // Subscribe to personal errors
+      client.subscribe(`/user/queue/errors`, (message) => {
+         if (message.body) {
+           const err = JSON.parse(message.body);
+           if (err.auctionId === parseInt(auctionId, 10)) {
+             console.error('[STOMP] Bidding error:', err.message);
+             alert(`Bid Failed: ${err.message}`);
+           }
+         }
+      });
+
+      // Subscribe to outbid notifications
+      client.subscribe(`/user/queue/outbid`, (message) => {
+        if (message.body) {
+          const data = JSON.parse(message.body);
+          if (data.auctionId === parseInt(auctionId, 10)) {
+            // Can be used to show a toast notification
+            console.log('You have been outbid!', data.newHighestBid);
+          }
+        }
+     });
+    };
+
+    client.onStompError = (frame) => {
+      console.error('[STOMP] Broker reported error: ' + frame.headers['message']);
+      console.error('[STOMP] Additional details: ' + frame.body);
+      setConnectionStatus('DISCONNECTED');
+    };
+
+    client.onWebSocketClose = () => {
+      console.log('[STOMP] WebSocket closed');
+      setConnectionStatus('DISCONNECTED');
+    };
+    
+    client.activate();
+    stompClient.current = client;
+
+    return () => {
+      if (stompClient.current) {
+        stompClient.current.deactivate();
+      }
+    };
   }, [auctionId]);
 
   // Countdown timer loop
   useEffect(() => {
-    if (connectionStatus !== 'CONNECTED' || !auction || isAuctionEnded.current) return;
+    if (!auction || isAuctionEnded.current) return;
 
     const tick = () => {
       const now = new Date().getTime();
@@ -163,34 +215,7 @@ export function useAuctionSocket(auctionId) {
       
       if (diff <= 0) {
         clearInterval(timerRef.current);
-        clearTimeout(botBidRef.current);
         isAuctionEnded.current = true;
-        
-        // Declare winner
-        setBidHistory(prev => {
-          const highestBid = prev.find(b => !b.isSystem);
-          if (highestBid) {
-            setWinner({ bidder: highestBid.bidder, amount: highestBid.amount });
-            return [{
-              id: 'end',
-              bidder: 'System',
-              amount: highestBid.amount,
-              timestamp: new Date().toISOString(),
-              isSystem: true,
-              message: `Auction won by ${highestBid.bidder} for`
-            }, ...prev];
-          } else {
-            setWinner({ bidder: 'No Bids', amount: 0 });
-            return [{
-              id: 'end',
-              bidder: 'System',
-              amount: auction.startingBid,
-              timestamp: new Date().toISOString(),
-              isSystem: true,
-              message: 'Auction ended with no bids.'
-            }, ...prev];
-          }
-        });
       }
     };
 
@@ -198,70 +223,26 @@ export function useAuctionSocket(auctionId) {
     timerRef.current = setInterval(tick, 1000);
 
     return () => clearInterval(timerRef.current);
-  }, [auction, connectionStatus]);
-
-  // Automated mock bids
-  useEffect(() => {
-    if (connectionStatus !== 'CONNECTED' || !auction || isAuctionEnded.current || auction.status !== 'LIVE') return;
-
-    const scheduleNextBid = () => {
-      if (isAuctionEnded.current) return;
-      
-      // Random delay between 4s and 12s
-      const delay = Math.floor(Math.random() * 8000) + 4000;
-      
-      botBidRef.current = setTimeout(() => {
-        if (isAuctionEnded.current) return;
-        
-        const bidder = MOCK_BIDDERS[Math.floor(Math.random() * MOCK_BIDDERS.length)];
-        // Add 1 to 3 increments
-        const increments = Math.floor(Math.random() * 3) + 1;
-        
-        setCurrentBid(prev => {
-          const nextBid = prev + (auction.minIncrement * increments);
-          
-          setBidHistory(history => [{
-            id: Math.random().toString(36).substr(2, 9),
-            bidder,
-            amount: nextBid,
-            timestamp: new Date().toISOString(),
-            isSystem: false
-          }, ...history]);
-          
-          return nextBid;
-        });
-        
-        scheduleNextBid();
-      }, delay);
-    };
-
-    scheduleNextBid();
-
-    return () => clearTimeout(botBidRef.current);
-  }, [auction, connectionStatus]);
+  }, [auction]);
 
   // Function to place a manual bid
   const placeBid = useCallback((amount) => {
-    if (isAuctionEnded.current || connectionStatus !== 'CONNECTED' || !auction) {
-      return { success: false, message: 'Auction is not active.' };
+    if (isAuctionEnded.current || connectionStatus !== 'CONNECTED' || !stompClient.current) {
+      return { success: false, message: 'Auction is not active or connection lost.' };
     }
     
-    if (amount < currentBid + auction.minIncrement) {
-      return { success: false, message: `Bid must be at least LKR ${(currentBid + auction.minIncrement).toLocaleString('en-LK')}` };
+    if (amount < currentBid + (auction?.minIncrement || 0)) {
+      return { success: false, message: `Bid must be at least LKR ${(currentBid + (auction?.minIncrement || 0)).toLocaleString('en-LK')}` };
     }
 
-    setCurrentBid(amount);
-    setBidHistory(history => [{
-      id: Math.random().toString(36).substr(2, 9),
-      bidder: 'You (Bidder ****MY)',
-      amount: amount,
-      timestamp: new Date().toISOString(),
-      isSystem: false,
-      isUser: true
-    }, ...history]);
-
+    // Send bid to backend via STOMP
+    stompClient.current.publish({
+      destination: `/app/auctions/${auctionId}/bid`,
+      body: JSON.stringify({ amount })
+    });
+    
     return { success: true };
-  }, [currentBid, auction, connectionStatus]);
+  }, [auctionId, currentBid, auction, connectionStatus]);
 
   return {
     auction,

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { fetchGems } from '../services/gemService';
 import apiClient from '../services/apiClient';
 import { mockBuyers } from '../data/mockBuyers';
@@ -7,54 +7,100 @@ const DashboardContext = createContext();
 
 export function DashboardProvider({ children }) {
   const [gems, setGems] = useState([]);
+  const [auctions, setAuctions] = useState([]);
+  const [lands, setLands] = useState([]);
+  const [buyers, setBuyers] = useState([]);
+  const [bookings, setBookings] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [recentActivity, setRecentActivity] = useState([]);
   
+  const [isWsConnected, setIsWsConnected] = useState(false);
+  const stompClient = useRef(null);
+  const subscriptions = useRef({});
+
   useEffect(() => {
     fetchGems({ status: 'ALL' }).then(data => setGems(data));
     
-    // Fetch live lands and bookings for the admin dashboard
+    // Fetch auctions and lands for everyone
     apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
-    apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
-  }, []);
-  
-  // Since we don't have a separate mockAuctions file, we derive initial mock auctions 
-  // from the mockGems that have auction data (e.g., currentBid).
-  // For the dashboard, we want an isolated list of auctions.
-  const [auctions, setAuctions] = useState([
-    {
-      id: 'a1',
-      gemId: 'g1',
-      gemName: 'The Crimson Heart',
-      currentBid: 1250000,
-      status: 'Live',
-      startTime: '2024-06-01T10:00:00Z',
-      endTime: '2024-06-15T10:00:00Z',
-      biddersCount: 14
-    },
-    {
-      id: 'a2',
-      gemId: 'g2',
-      gemName: 'Midnight Star Sapphire',
-      currentBid: 850000,
-      status: 'Scheduled',
-      startTime: '2024-07-01T10:00:00Z',
-      endTime: '2024-07-15T10:00:00Z',
-      biddersCount: 0
-    },
-    {
-      id: 'a3',
-      gemId: 'g3',
-      gemName: 'Royal Emerald Cut',
-      currentBid: 3200000,
-      status: 'Ended',
-      startTime: '2024-05-01T10:00:00Z',
-      endTime: '2024-05-15T10:00:00Z',
-      biddersCount: 42
+    apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
+
+    // Only fetch admin-specific data if the user is an ADMIN
+    const userStr = localStorage.getItem('user');
+    const user = userStr ? JSON.parse(userStr) : null;
+    const isAdmin = user && user.role === 'ADMIN';
+
+    if (isAdmin) {
+      apiClient.get('/admin/stats/overview').then(res => setStats(res.data)).catch(console.error);
+      apiClient.get('/admin/activity').then(res => setRecentActivity(res.data)).catch(console.error);
+      apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
+      apiClient.get('/admin/buyers').then(res => {
+        const mapped = res.data.map(b => ({
+          ...b,
+          name: b.fullName,
+          joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
+        }));
+        setBuyers(mapped);
+      }).catch(console.error);
+
+      // Connect STOMP for live auction updates
+      const token = localStorage.getItem('token') || '';
+      const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
+      
+      Promise.all([
+        import('@stomp/stompjs'),
+        import('sockjs-client')
+      ]).then(([stompjs, sockjs]) => {
+        const client = new stompjs.Client({
+          webSocketFactory: () => new sockjs.default(`${baseUrl}/ws?token=${token}`),
+          reconnectDelay: 5000,
+        });
+
+        client.onConnect = () => {
+          stompClient.current = client;
+          setIsWsConnected(true);
+        };
+
+        client.onWebSocketClose = () => {
+          setIsWsConnected(false);
+          subscriptions.current = {};
+        };
+
+        client.activate();
+      });
+      
+      return () => {
+        if (stompClient.current) {
+          stompClient.current.deactivate();
+        }
+      };
     }
-  ]);
-  
-  const [lands, setLands] = useState([]);
-  const [buyers, setBuyers] = useState(mockBuyers);
-  const [bookings, setBookings] = useState([]);
+  }, []);
+
+  // Dynamically subscribe to any auction that is LIVE
+  useEffect(() => {
+    if (!isWsConnected || !stompClient.current) return;
+
+    const liveAuctions = auctions.filter(a => a.status?.toUpperCase() === 'LIVE');
+    liveAuctions.forEach(a => {
+      if (!subscriptions.current[a.id]) {
+        subscriptions.current[a.id] = stompClient.current.subscribe(`/topic/auctions/${a.id}`, (message) => {
+          if (message.body) {
+            const update = JSON.parse(message.body);
+            if (update.type === 'BID_PLACED') {
+              setAuctions(prev => prev.map(auc => 
+                auc.id === update.auctionId ? { ...auc, currentBid: update.currentBid, endTime: update.endTime || auc.endTime } : auc
+              ));
+            } else if (update.type === 'AUCTION_ENDED') {
+              setAuctions(prev => prev.map(auc => 
+                auc.id === update.auctionId ? { ...auc, status: 'ENDED', currentBid: update.winningBid, highestBidderId: update.winnerId } : auc
+              ));
+            }
+          }
+        });
+      }
+    });
+  }, [auctions, isWsConnected]);
 
   // Expose updater functions to be called after adminService resolves
   const addGemState = (gem) => setGems(prev => [gem, ...prev]);
@@ -77,7 +123,8 @@ export function DashboardProvider({ children }) {
       auctions, addAuctionState, updateAuctionState, deleteAuctionState,
       lands, addLandState, deleteLandState,
       buyers, updateBuyerStatusState,
-      bookings, updateBookingStatusState
+      bookings, updateBookingStatusState,
+      stats, recentActivity
     }}>
       {children}
     </DashboardContext.Provider>

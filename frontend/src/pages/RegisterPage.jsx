@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { registerUser } from '../services/authService'
+import { registerUser, isLoggedIn } from '../services/authService'
 import Navbar from '../components/Navbar'
 
 // Helpers
@@ -32,13 +32,18 @@ export default function RegisterPage() {
   const [serverError, setServerError] = useState('')
 
   useEffect(() => {
+    if (isLoggedIn()) {
+      navigate('/account', { replace: true })
+      return
+    }
+
     if (cardRef.current) {
       gsap.fromTo(cardRef.current,
         { opacity: 0, y: 40 },
         { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
       )
     }
-  }, [])
+  }, [navigate])
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
@@ -72,8 +77,12 @@ export default function RegisterPage() {
     setIsSubmitting(true)
     try {
       await registerUser({ ...formData, role: 'buyer' })
-      // On success, redirect to verify email page, passing the email via state
-      navigate('/verify-email', { state: { email: formData.email } })
+      
+      // Dispatch event so Navbar/AuthContext can update
+      window.dispatchEvent(new Event('gemhaven-auth-updated'))
+      
+      // On success, redirect to home (or account)
+      navigate('/')
     } catch (err) {
       setServerError(err.message || 'Registration failed. Please try again.')
     } finally {
@@ -110,7 +119,7 @@ export default function RegisterPage() {
               Create Your Account
             </span>
             <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.5rem', fontWeight: 300, color: '#fff', letterSpacing: '-0.02em', margin: 0 }}>
-              Join GemHaven
+              Join THENNAKOON GEMS
             </h1>
           </div>
 
