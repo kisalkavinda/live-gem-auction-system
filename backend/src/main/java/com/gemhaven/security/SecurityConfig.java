@@ -54,6 +54,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/articles", "/api/articles/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/uploads", "/uploads/**").permitAll()
 
+                // Buyer-required actions (booking + gem purchase override)
+                .requestMatchers(HttpMethod.POST, "/api/land/*/bookings").hasRole("BUYER")
+                .requestMatchers(HttpMethod.POST, "/api/gems/*/purchase").hasRole("BUYER")
+
                 // Admin-only — full management
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST,   "/api/upload").hasRole("ADMIN")
@@ -69,10 +73,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST,   "/api/articles", "/api/articles/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT,    "/api/articles", "/api/articles/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/articles", "/api/articles/**").hasRole("ADMIN")
-
-                // Buyer-required actions (booking + gem purchase override)
-                .requestMatchers("/api/land/*/bookings").hasRole("BUYER")
-                .requestMatchers("/api/gems/*/purchase").hasRole("BUYER")
 
                 // Anything else requires authentication
                 .anyRequest().authenticated()
