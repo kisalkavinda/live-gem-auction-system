@@ -62,6 +62,7 @@ import AdminInventoryPage from './pages/admin/AdminInventoryPage'
 import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
 import AdminLandPage from './pages/admin/AdminLandPage'
 import AdminBuyersPage from './pages/admin/AdminBuyersPage'
+import AdminReservationsPage from './pages/admin/AdminReservationsPage'
 
 
 import ProtectedRoute from './components/ProtectedRoute'
@@ -353,6 +354,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdminBuyersPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/reservations"
+        element={
+          <ProtectedRoute>
+            <AdminReservationsPage />
           </ProtectedRoute>
         }
       />

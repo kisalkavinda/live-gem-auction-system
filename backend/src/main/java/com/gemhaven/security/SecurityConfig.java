@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/land/*/bookings").hasAnyRole("BUYER", "ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/land/my-bookings").authenticated()
                 .requestMatchers(HttpMethod.POST, "/api/gems/*/purchase").hasAnyRole("BUYER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/reservations", "/api/reservations/**").authenticated()
                 // Public READ access to content
                 .requestMatchers(HttpMethod.GET, "/api/gems", "/api/gems/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/auctions", "/api/auctions/**").permitAll()

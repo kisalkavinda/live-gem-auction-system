@@ -27,11 +27,19 @@ public class GemstoneService {
                 gems = gemstoneRepository.findAll();
             }
         } else {
-            Gemstone.GemStatus gemStatus = Gemstone.GemStatus.valueOf(status.toUpperCase());
-            if (type != null && !type.isBlank()) {
-                gems = gemstoneRepository.findByStatusAndType(gemStatus, type);
-            } else {
-                gems = gemstoneRepository.findByStatus(gemStatus);
+            try {
+                Gemstone.GemStatus gemStatus = Gemstone.GemStatus.valueOf(status.toUpperCase());
+                if (type != null && !type.isBlank()) {
+                    gems = gemstoneRepository.findByStatusAndType(gemStatus, type);
+                } else {
+                    gems = gemstoneRepository.findByStatus(gemStatus);
+                }
+            } catch (Exception e) {
+                if (type != null && !type.isBlank()) {
+                    gems = gemstoneRepository.findByType(type);
+                } else {
+                    gems = gemstoneRepository.findAll();
+                }
             }
         }
 

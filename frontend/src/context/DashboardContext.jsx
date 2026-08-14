@@ -11,6 +11,7 @@ export function DashboardProvider({ children }) {
   const [lands, setLands] = useState([]);
   const [buyers, setBuyers] = useState([]);
   const [bookings, setBookings] = useState([]);
+  const [reservations, setReservations] = useState([]);
   const [stats, setStats] = useState(null);
   const [recentActivity, setRecentActivity] = useState([]);
   
@@ -53,6 +54,10 @@ export function DashboardProvider({ children }) {
 
       apiClient.get('/land/bookings')
         .then(res => setBookings(Array.isArray(res?.data) ? res.data : []))
+        .catch(console.error);
+
+      apiClient.get('/admin/reservations')
+        .then(res => setReservations(Array.isArray(res?.data) ? res.data : []))
         .catch(console.error);
 
       apiClient.get('/admin/buyers')
@@ -150,6 +155,7 @@ export function DashboardProvider({ children }) {
 
   const updateBuyerStatusState = (id, status) => setBuyers(prev => prev.map(b => b.id === id ? { ...b, status } : b));
   const updateBookingStatusState = (id, status) => setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+  const updateReservationStatusState = (id, status) => setReservations(prev => prev.map(r => r.id === id ? { ...r, status } : r));
 
   return (
     <DashboardContext.Provider value={{
@@ -158,6 +164,7 @@ export function DashboardProvider({ children }) {
       lands, addLandState, deleteLandState,
       buyers, updateBuyerStatusState,
       bookings, updateBookingStatusState,
+      reservations, updateReservationStatusState,
       stats, recentActivity
     }}>
       {children}

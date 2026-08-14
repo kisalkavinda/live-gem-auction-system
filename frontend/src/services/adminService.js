@@ -170,3 +170,25 @@ export async function updateBookingStatus(bookingId, status) {
   }
 }
 
+export async function getReservations(status) {
+  try {
+    const params = status ? { status } : {};
+    const response = await apiClient.get('/admin/reservations', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching reservations:', error);
+    throw error;
+  }
+}
+
+export async function updateReservationStatus(id, status) {
+  try {
+    const response = await apiClient.put(`/admin/reservations/${id}/status`, { status });
+    return { success: true, reservation: response.data };
+  } catch (error) {
+    console.error(`Error updating reservation ${id} status:`, error);
+    throw error;
+  }
+}
+
+

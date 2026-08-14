@@ -5,11 +5,14 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "gemstones")
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class Gemstone {
 
     @Id
@@ -68,15 +71,16 @@ public class Gemstone {
     /**
      * Unified gem lifecycle status.
      * DB column name kept as "reservation_status" to avoid schema migration.
-     * DRAFT     — not yet available for auction
+     * DRAFT — not yet available for auction
      * PUBLISHED — available to be listed in an auction
-     * RESERVED  — currently in an active/scheduled auction
-     * SOLD      — auction closed with a winner; awaiting offline payment & collection
+     * RESERVED — currently in an active/scheduled auction
+     * SOLD — auction closed with a winner; awaiting offline payment & collection
      */
     @Enumerated(EnumType.STRING)
     @Column(name = "reservation_status", length = 50)
     private GemStatus status = GemStatus.DRAFT;
 
+    @JsonIgnoreProperties({ "passwordHash", "hibernateLazyInitializer", "handler" })
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
@@ -88,60 +92,148 @@ public class Gemstone {
         DRAFT, PUBLISHED, RESERVED, SOLD
     }
 
-    public Gemstone() {}
+    public Gemstone() {
+    }
 
     // ─── Getters & Setters ────────────────────────────────────────────────────
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getType() { return type; }
-    public void setType(String type) { this.type = type; }
+    public String getName() {
+        return name;
+    }
 
-    public BigDecimal getCaratWeight() { return caratWeight; }
-    public void setCaratWeight(BigDecimal caratWeight) { this.caratWeight = caratWeight; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getCut() { return cut; }
-    public void setCut(String cut) { this.cut = cut; }
+    public String getType() {
+        return type;
+    }
 
-    public String getColor() { return color; }
-    public void setColor(String color) { this.color = color; }
+    public void setType(String type) {
+        this.type = type;
+    }
 
-    public String getColorName() { return colorName; }
-    public void setColorName(String colorName) { this.colorName = colorName; }
+    public BigDecimal getCaratWeight() {
+        return caratWeight;
+    }
 
-    public String getClarity() { return clarity; }
-    public void setClarity(String clarity) { this.clarity = clarity; }
+    public void setCaratWeight(BigDecimal caratWeight) {
+        this.caratWeight = caratWeight;
+    }
 
-    public String getOrigin() { return origin; }
-    public void setOrigin(String origin) { this.origin = origin; }
+    public String getCut() {
+        return cut;
+    }
 
-    public String getCertNumber() { return certNumber; }
-    public void setCertNumber(String certNumber) { this.certNumber = certNumber; }
+    public void setCut(String cut) {
+        this.cut = cut;
+    }
 
-    public String getCertAuthority() { return certAuthority; }
-    public void setCertAuthority(String certAuthority) { this.certAuthority = certAuthority; }
+    public String getColor() {
+        return color;
+    }
 
-    public String getCertificationPdfUrl() { return certificationPdfUrl; }
-    public void setCertificationPdfUrl(String certificationPdfUrl) { this.certificationPdfUrl = certificationPdfUrl; }
+    public void setColor(String color) {
+        this.color = color;
+    }
 
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
+    public String getColorName() {
+        return colorName;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public void setColorName(String colorName) {
+        this.colorName = colorName;
+    }
 
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
+    public String getClarity() {
+        return clarity;
+    }
 
-    public GemStatus getStatus() { return status; }
-    public void setStatus(GemStatus status) { this.status = status; }
+    public void setClarity(String clarity) {
+        this.clarity = clarity;
+    }
 
-    public User getOwner() { return owner; }
-    public void setOwner(User owner) { this.owner = owner; }
+    public String getOrigin() {
+        return origin;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getCertNumber() {
+        return certNumber;
+    }
+
+    public void setCertNumber(String certNumber) {
+        this.certNumber = certNumber;
+    }
+
+    public String getCertAuthority() {
+        return certAuthority;
+    }
+
+    public void setCertAuthority(String certAuthority) {
+        this.certAuthority = certAuthority;
+    }
+
+    public String getCertificationPdfUrl() {
+        return certificationPdfUrl;
+    }
+
+    public void setCertificationPdfUrl(String certificationPdfUrl) {
+        this.certificationPdfUrl = certificationPdfUrl;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public GemStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(GemStatus status) {
+        this.status = status;
+    }
+
+    public User getOwner() {
+        return owner;
+    }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

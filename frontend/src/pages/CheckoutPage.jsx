@@ -6,6 +6,7 @@ import Footer from '../components/Footer'
 
 import { useCart } from '../context/CartContext'
 import { useAlert } from '../context/AlertContext'
+import apiClient from '../services/apiClient'
 
 import {
   PROVINCES,
@@ -468,6 +469,23 @@ showAlert({
           orderData
         )
 
+        for (const item of checkoutItems) {
+          const gemId = item.gemId || item.id
+          if (gemId) {
+            await apiClient.post('/reservations', {
+              gemId: gemId,
+              customerName: fullName.trim(),
+              customerPhone: phone.trim(),
+              customerAddress: address.trim(),
+              city: city.trim(),
+              province,
+              district,
+              postalCode: postalCode.trim(),
+              totalAmount: Number(item.price || subtotal),
+              paymentMethod: 'IN_STORE_PICKUP'
+            })
+          }
+        }
 
         showAlert({
           type: 'success',
