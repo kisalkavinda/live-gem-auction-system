@@ -19,41 +19,75 @@ export function DashboardProvider({ children }) {
   const subscriptions = useRef({});
 
   useEffect(() => {
-    fetchGems({ status: 'ALL' }).then(data => setGems(data));
-    
+    fetchGems({ status: 'ALL' })
+      .then(data => setGems(Array.isArray(data) ? data : []))
+      .catch(err => console.error('Error fetching gems:', err));
+
     // Fetch auctions and lands for everyone
-    apiClient.get('/land').then(res => setLands(res.data)).catch(console.error);
-    apiClient.get('/auctions').then(res => setAuctions(res.data)).catch(console.error);
+    apiClient.get('/land')
+      .then(res => setLands(Array.isArray(res?.data) ? res.data : []))
+      .catch(console.error);
+
+    apiClient.get('/auctions')
+      .then(res => setAuctions(Array.isArray(res?.data) ? res.data : []))
+      .catch(console.error);
 
     // Only fetch admin-specific data if the user is an ADMIN
-    const userStr = localStorage.getItem('user');
-    const user = userStr ? JSON.parse(userStr) : null;
+    let user = null;
+    try {
+      const userStr = localStorage.getItem('user');
+      user = userStr ? JSON.parse(userStr) : null;
+    } catch (e) {
+      console.warn('Failed to parse cached user:', e);
+    }
     const isAdmin = user && user.role === 'ADMIN';
 
     if (isAdmin) {
-      apiClient.get('/admin/stats/overview').then(res => setStats(res.data)).catch(console.error);
-      apiClient.get('/admin/activity').then(res => setRecentActivity(res.data)).catch(console.error);
-      apiClient.get('/land/bookings').then(res => setBookings(res.data)).catch(console.error);
-      apiClient.get('/admin/buyers').then(res => {
-        const mapped = res.data.map(b => ({
-          ...b,
-          name: b.fullName,
-          joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
-        }));
-        setBuyers(mapped);
-      }).catch(console.error);
+      apiClient.get('/admin/stats/overview')
+        .then(res => setStats(res?.data || null))
+        .catch(console.error);
+
+      apiClient.get('/admin/activity')
+        .then(res => setRecentActivity(Array.isArray(res?.data) ? res.data : []))
+        .catch(console.error);
+
+      apiClient.get('/land/bookings')
+        .then(res => setBookings(Array.isArray(res?.data) ? res.data : []))
+        .catch(console.error);
+
+      apiClient.get('/admin/buyers')
+        .then(res => {
+          if (Array.isArray(res?.data)) {
+            const mapped = res.data.map(b => ({
+              ...b,
+              name: b.fullName || b.name || 'Buyer',
+              joinDate: b.joinDate ? new Date(b.joinDate).toLocaleDateString() : 'N/A'
+            }));
+            setBuyers(mapped);
+          } else {
+            setBuyers([]);
+          }
+        })
+        .catch(console.error);
 
       // Connect STOMP for live auction updates
       const token = localStorage.getItem('token') || '';
       const baseUrl = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
-      
+
       Promise.all([
         import('@stomp/stompjs'),
         import('sockjs-client')
-      ]).then(([stompjs, sockjs]) => {
+      ]).then(([stompjs, sockjsModule]) => {
+        const SockJS = sockjsModule.default || sockjsModule;
         const client = new stompjs.Client({
-          webSocketFactory: () => new sockjs.default(`${baseUrl}/ws?token=${token}`),
+          webSocketFactory: () => new SockJS(`${baseUrl}/ws?token=${token}`),
           reconnectDelay: 5000,
+          onStompError: (frame) => {
+            console.warn('STOMP Error:', frame);
+          },
+          onWebSocketError: (evt) => {
+            console.warn('WebSocket Error:', evt);
+          }
         });
 
         client.onConnect = () => {
@@ -67,8 +101,8 @@ export function DashboardProvider({ children }) {
         };
 
         client.activate();
-      });
-      
+      }).catch(err => console.warn('Failed to load WebSocket client:', err));
+
       return () => {
         if (stompClient.current) {
           stompClient.current.deactivate();

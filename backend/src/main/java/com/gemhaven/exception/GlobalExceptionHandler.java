@@ -49,6 +49,21 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.FORBIDDEN, "Access denied.");
     }
 
+    /** Deserialization / JSON format failures (invalid enum, malformed payload) — 400 */
+    @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+    public ResponseEntity<Map<String, Object>> handleHttpMessageNotReadable(org.springframework.http.converter.HttpMessageNotReadableException ex) {
+        return error(HttpStatus.BAD_REQUEST, "Malformed JSON request or invalid field value: " + ex.getMostSpecificCause().getMessage());
+    }
+
+    /** JPA constraint violations — 400 */
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolation(jakarta.validation.ConstraintViolationException ex) {
+        String details = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        return error(HttpStatus.BAD_REQUEST, details);
+    }
+
     /** Catch-all — 500 */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneric(Exception ex) {
