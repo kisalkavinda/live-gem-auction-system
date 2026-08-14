@@ -30,6 +30,8 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [serverError, setServerError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     if (isLoggedIn()) {
@@ -178,19 +180,45 @@ export default function RegisterPage() {
                 <span>Password</span>
                 <span style={{ color: passStrength.color, textTransform: 'none', letterSpacing: 'normal' }}>{passStrength.text}</span>
               </label>
-              <input
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                style={{
-                  width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '2px', padding: '0.75rem', color: '#fff', fontSize: '0.9rem',
-                  transition: 'border-color 0.3s', outline: 'none'
-                }}
-                onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={handleChange}
+                  style={{
+                    width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '2px', padding: '0.75rem 3rem 0.75rem 0.75rem', color: '#fff', fontSize: '0.9rem',
+                    transition: 'border-color 0.3s', outline: 'none'
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: 'rgba(255,255,255,0.4)',
+                    cursor: 'pointer',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    padding: '4px',
+                    transition: 'color 0.2s',
+                    fontWeight: 600,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {errors.password && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.password}</div>}
             </div>
 
@@ -198,19 +226,45 @@ export default function RegisterPage() {
               <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>
                 Confirm Password
               </label>
-              <input
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                style={{
-                  width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
-                  borderRadius: '2px', padding: '0.75rem', color: '#fff', fontSize: '0.9rem',
-                  transition: 'border-color 0.3s', outline: 'none'
-                }}
-                onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
-                onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  style={{
+                    width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '2px', padding: '0.75rem 3rem 0.75rem 0.75rem', color: '#fff', fontSize: '0.9rem',
+                    transition: 'border-color 0.3s', outline: 'none'
+                  }}
+                  onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.6)'}
+                  onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    position: 'absolute',
+                    right: '0.75rem',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    color: 'rgba(255,255,255,0.4)',
+                    cursor: 'pointer',
+                    fontSize: '0.62rem',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    padding: '4px',
+                    transition: 'color 0.2s',
+                    fontWeight: 600,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
+                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
+                >
+                  {showConfirmPassword ? 'Hide' : 'Show'}
+                </button>
+              </div>
               {errors.confirmPassword && <div style={{ color: '#EF4444', fontSize: '0.7rem', marginTop: '0.25rem' }}>{errors.confirmPassword}</div>}
             </div>
 
