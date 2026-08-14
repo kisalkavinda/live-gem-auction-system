@@ -32,8 +32,9 @@ export function DashboardProvider({ children }) {
     apiClient.get('/auctions')
       .then(res => setAuctions(Array.isArray(res?.data) ? res.data : []))
       .catch(console.error);
+  }, []);
 
-    // Only fetch admin-specific data if the user is an ADMIN
+  const fetchAdminData = () => {
     let user = null;
     try {
       const userStr = localStorage.getItem('user');
@@ -107,13 +108,22 @@ export function DashboardProvider({ children }) {
 
         client.activate();
       }).catch(err => console.warn('Failed to load WebSocket client:', err));
-
-      return () => {
-        if (stompClient.current) {
-          stompClient.current.deactivate();
-        }
-      };
     }
+  };
+
+  useEffect(() => {
+    // Initial fetch
+    fetchAdminData();
+
+    // Listen for auth changes (e.g. login/logout)
+    window.addEventListener('gemhaven-auth-updated', fetchAdminData);
+
+    return () => {
+      window.removeEventListener('gemhaven-auth-updated', fetchAdminData);
+      if (stompClient.current) {
+        stompClient.current.deactivate();
+      }
+    };
   }, []);
 
   // Dynamically subscribe to any auction that is LIVE

@@ -9,7 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+import org.springframework.core.annotation.Order;
+
 @Component
+@Order(1)
 public class AdminSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
