@@ -161,7 +161,10 @@ export function DashboardProvider({ children }) {
   const updateAuctionState = (id, updatedAuction) => setAuctions(prev => prev.map(a => a.id === id ? updatedAuction : a));
 
   const addLandState = (land) => setLands(prev => [land, ...prev]);
-  const deleteLandState = (id) => setLands(prev => prev.filter(l => l.id !== id));
+  const deleteLandState = (id) => {
+    setLands(prev => prev.filter(l => l.id !== id));
+    setBookings(prev => prev.filter(b => b.landPlot?.id !== id && b.landPlotId !== id));
+  };
 
   const updateBuyerStatusState = (id, status) => setBuyers(prev => prev.map(b => b.id === id ? { ...b, status } : b));
   const updateBookingStatusState = (id, status) => setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));

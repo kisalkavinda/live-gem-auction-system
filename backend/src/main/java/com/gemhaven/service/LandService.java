@@ -86,10 +86,12 @@ public class LandService {
         return miningPlotRepository.save(existing);
     }
 
+    @Transactional
     public void delete(Long id) {
-        miningPlotRepository.findById(id)
+        MiningPlot plot = miningPlotRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Land plot not found: " + id));
-        miningPlotRepository.deleteById(id);
+        bookingRepository.deleteByLandPlot_Id(id);
+        miningPlotRepository.delete(plot);
     }
 
     // ─── Bookings ─────────────────────────────────────────────────────────────

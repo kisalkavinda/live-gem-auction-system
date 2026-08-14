@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                 // WebSocket endpoint — public (auth handled inside STOMP headers)
                 .requestMatchers("/ws", "/ws/**").permitAll()
+                // Static uploaded images & assets — public
+                .requestMatchers("/uploads/**").permitAll()
                 // Auth endpoints — all public
                 .requestMatchers("/api/auth/**").permitAll()
                 // Specific user actions (MUST come before generic wildcard /api/land/** and /api/gems/** matchers)
