@@ -1,12 +1,25 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { gsap } from '../utils/gsap'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
+import AlertModal from '../components/AlertModal'
 import './ContactPage.css'
 
 export default function ContactPage() {
   const headerRef = useRef(null)
   const cardsRef = useRef([])
+
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    message: ''
+  })
+  const [statusMessage, setStatusMessage] = useState('')
+  const [alertModal, setAlertModal] = useState({
+    open: false,
+    title: '',
+    message: ''
+  })
   
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -29,6 +42,29 @@ export default function ContactPage() {
     )
   }, [])
   
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    setStatusMessage('Message sent')
+    setAlertModal({
+      open: true,
+      title: '',
+      message: 'Message sent'
+    })
+    setFormData({
+      fullName: '',
+      email: '',
+      message: ''
+    })
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    if (statusMessage) {
+      setStatusMessage('')
+    }
+  }
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar visible={true} />
@@ -88,20 +124,65 @@ export default function ContactPage() {
             >
               <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2.4rem', color: 'var(--gold-light)', marginBottom: '3rem', fontWeight: 300 }}>Send a Message</h3>
               
-              <form onSubmit={e => e.preventDefault()} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              {statusMessage && (
+                <div 
+                  style={{ 
+                    padding: '0.9rem 1.25rem', 
+                    background: 'rgba(16, 185, 129, 0.12)', 
+                    border: '1px solid rgba(16, 185, 129, 0.35)', 
+                    borderRadius: '8px', 
+                    color: '#10B981', 
+                    fontSize: '0.95rem', 
+                    fontWeight: 600, 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    gap: '0.6rem', 
+                    marginBottom: '1.5rem' 
+                  }}
+                >
+                  <span style={{ fontSize: '1.1rem' }}>✓</span> {statusMessage}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
                 <div>
                   <label style={{ display: 'block', color: 'rgba(232,224,208,0.7)', fontSize: '0.75rem', marginBottom: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Full Name</label>
-                  <input type="text" className="contact-input" placeholder="John Doe" />
+                  <input 
+                    type="text" 
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="contact-input" 
+                    placeholder="John Doe" 
+                    required 
+                  />
                 </div>
                 
                 <div>
                   <label style={{ display: 'block', color: 'rgba(232,224,208,0.7)', fontSize: '0.75rem', marginBottom: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Email Address</label>
-                  <input type="email" className="contact-input" placeholder="john@example.com" />
+                  <input 
+                    type="email" 
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="contact-input" 
+                    placeholder="john@example.com" 
+                    required 
+                  />
                 </div>
                 
                 <div>
                   <label style={{ display: 'block', color: 'rgba(232,224,208,0.7)', fontSize: '0.75rem', marginBottom: '0.8rem', letterSpacing: '0.15em', textTransform: 'uppercase', fontWeight: 600 }}>Message</label>
-                  <textarea rows="4" className="contact-input" style={{ resize: 'vertical' }} placeholder="How can we help you?"></textarea>
+                  <textarea 
+                    rows="4" 
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    className="contact-input" 
+                    style={{ resize: 'vertical' }} 
+                    placeholder="How can we help you?"
+                    required 
+                  ></textarea>
                 </div>
                 
                 <button type="submit" className="contact-btn">
@@ -114,7 +195,16 @@ export default function ContactPage() {
         </div>
       </main>
       
+      <AlertModal 
+        open={alertModal.open} 
+        type="success" 
+        title={alertModal.title} 
+        message={alertModal.message} 
+        onClose={() => setAlertModal(prev => ({ ...prev, open: false }))} 
+      />
+
       <Footer />
     </div>
   )
 }
+

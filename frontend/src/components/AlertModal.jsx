@@ -126,26 +126,43 @@ export default function AlertModal({
               {iconMap[type] || iconMap.info}
             </div>
             <div>
-              <div
-                style={{
-                  fontSize: '1.1rem',
-                  fontWeight: 700,
-                  letterSpacing: '0.02em',
-                  color: '#FFFFFF',
-                }}
-              >
-                {title || (type === 'login' ? 'Login Required' : type.charAt(0).toUpperCase() + type.slice(1))}
-              </div>
-              <p
-                style={{
-                  marginTop: '0.35rem',
-                  fontSize: '0.92rem',
-                  lineHeight: 1.6,
-                  color: 'rgba(255,255,255,0.75)',
-                }}
-              >
-                {message}
-              </p>
+              {title ? (
+                <div
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  {title}
+                </div>
+              ) : null}
+              {message ? (
+                <p
+                  style={{
+                    marginTop: title ? '0.35rem' : '0',
+                    fontSize: title ? '0.92rem' : '1.05rem',
+                    fontWeight: title ? 400 : 600,
+                    lineHeight: 1.6,
+                    color: title ? 'rgba(255,255,255,0.75)' : '#FFFFFF',
+                  }}
+                >
+                  {message}
+                </p>
+              ) : null}
+              {!title && !message && (
+                <div
+                  style={{
+                    fontSize: '1.1rem',
+                    fontWeight: 700,
+                    letterSpacing: '0.02em',
+                    color: '#FFFFFF',
+                  }}
+                >
+                  {type === 'login' ? 'Login Required' : type.charAt(0).toUpperCase() + type.slice(1)}
+                </div>
+              )}
             </div>
           </div>
           {canClose && (
