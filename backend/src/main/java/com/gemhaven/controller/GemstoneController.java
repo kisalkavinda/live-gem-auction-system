@@ -3,6 +3,7 @@ package com.gemhaven.controller;
 import com.gemhaven.model.Gemstone;
 import com.gemhaven.model.User;
 import com.gemhaven.service.GemstoneService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -40,13 +41,13 @@ public class GemstoneController {
 
     /** POST /api/gems — ADMIN only (enforced by SecurityConfig) */
     @PostMapping
-    public ResponseEntity<Gemstone> create(@RequestBody Gemstone gemstone) {
+    public ResponseEntity<Gemstone> create(@Valid @RequestBody Gemstone gemstone) {
         return ResponseEntity.status(HttpStatus.CREATED).body(gemstoneService.create(gemstone));
     }
 
     /** PUT /api/gems/{id} — ADMIN only */
     @PutMapping("/{id}")
-    public ResponseEntity<Gemstone> update(@PathVariable Long id, @RequestBody Gemstone gemstone) {
+    public ResponseEntity<Gemstone> update(@PathVariable Long id, @Valid @RequestBody Gemstone gemstone) {
         return ResponseEntity.ok(gemstoneService.update(id, gemstone));
     }
 

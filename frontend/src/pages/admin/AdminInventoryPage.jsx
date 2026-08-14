@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
-import { addGem, updateGem, deleteGem, uploadImage } from '../../services/adminService'
+import { addGem, updateGem, deleteGem, publishGem, uploadImage } from '../../services/adminService'
 
 export default function AdminInventoryPage() {
   const { gems, addGemState, updateGemState, deleteGemState } = useDashboard()
@@ -19,7 +19,7 @@ export default function AdminInventoryPage() {
     name: '', type: 'Sapphire', carat: '', price: '', 
     cut: '', colorName: '', color: '#1D4ED8',
     clarity: 'VS1', origin: '', certAuthority: 'GIA', certNumber: '', 
-    imageUrl: '', description: '', status: 'Draft'
+    imageUrl: '', description: '', status: 'Published'
   }
   const [formData, setFormData] = useState(initialFormState)
   const [imageFile, setImageFile] = useState(null)
@@ -61,10 +61,12 @@ export default function AdminInventoryPage() {
         finalImageUrl = uploadRes.url;
       }
 
+      const rawStatus = formData.status ? String(formData.status).toUpperCase() : 'DRAFT';
       const payload = {
         ...formData,
-        caratWeight: Number(formData.carat || 0),
-        reservationStatus: formData.status ? formData.status.toUpperCase() : 'DRAFT',
+        caratWeight: Number(formData.caratWeight || formData.carat || 0),
+        price: Number(formData.price || 0),
+        status: rawStatus,
         cut: formData.cut || 'Oval',
         color: formData.color || '#1D4ED8',
         colorName: formData.colorName || 'Blue',
@@ -75,6 +77,8 @@ export default function AdminInventoryPage() {
         imageUrl: finalImageUrl,
         description: formData.description || '',
       };
+      delete payload.carat;
+      delete payload.reservationStatus;
 
       if (activeGem) {
         const res = await updateGem(activeGem.id, payload)
@@ -101,6 +105,15 @@ export default function AdminInventoryPage() {
       console.error(error)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handlePublish = async (id) => {
+    try {
+      const res = await publishGem(id)
+      updateGemState(id, res.gem)
+    } catch (error) {
+      console.error("Failed to publish gem:", error)
     }
   }
 
@@ -212,6 +225,17 @@ export default function AdminInventoryPage() {
               <div>${gem.price?.toLocaleString()}</div>
               <div>{getStatusBadge(gem.reservationStatus || gem.status || 'Draft')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                {(gem.status !== 'PUBLISHED' && gem.status !== 'Published') && (
+                  <button
+                    onClick={() => handlePublish(gem.id)}
+                    style={{
+                      background: 'rgba(34, 197, 94, 0.1)', border: '1px solid rgba(34, 197, 94, 0.4)', borderRadius: '2px', color: '#22C55E',
+                      padding: '0.4rem 0.8rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
+                    }}
+                  >
+                    Publish
+                  </button>
+                )}
                 <button
                   onClick={() => openEditModal(gem)}
                   style={{
@@ -347,8 +371,10 @@ export default function AdminInventoryPage() {
               </div>              <div>
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Status</label>
                 <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }}>
-                  <option style={{ background: '#050508' }}>Draft</option>
                   <option style={{ background: '#050508' }}>Published</option>
+                  <option style={{ background: '#050508' }}>Draft</option>
+                  <option style={{ background: '#050508' }}>Reserved</option>
+                  <option style={{ background: '#050508' }}>Sold</option>
                 </select>
               </div>
 

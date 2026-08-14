@@ -54,6 +54,16 @@ export async function deleteGem(id) {
   }
 }
 
+export async function publishGem(id) {
+  try {
+    const response = await apiClient.post(`/gems/${id}/publish`);
+    return { success: true, gem: response.data };
+  } catch (error) {
+    console.error(`Error publishing gem ${id}:`, error);
+    throw error;
+  }
+}
+
 export async function createAuction(auctionData) {
   try {
     const response = await apiClient.post('/auctions', auctionData);

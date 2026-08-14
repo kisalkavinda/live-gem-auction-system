@@ -100,8 +100,8 @@ public class GemstoneService {
     public Gemstone publish(Long id) {
         Gemstone gem = gemstoneRepository.findByIdWithPessimisticLock(id)
                 .orElseThrow(() -> new IllegalArgumentException("Gemstone not found: " + id));
-        if (gem.getStatus() != Gemstone.GemStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT gems can be published.");
+        if (gem.getStatus() == Gemstone.GemStatus.SOLD) {
+            throw new IllegalStateException("Sold gems cannot be published.");
         }
         gem.setStatus(Gemstone.GemStatus.PUBLISHED);
         return gemstoneRepository.save(gem);
