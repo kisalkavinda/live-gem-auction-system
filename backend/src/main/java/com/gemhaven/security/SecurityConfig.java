@@ -54,7 +54,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/auctions", "/api/auctions/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/land", "/api/land/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/articles", "/api/articles/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/uploads", "/uploads/**").permitAll()
                 // Admin-only — full management
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/upload").hasRole("ADMIN")
