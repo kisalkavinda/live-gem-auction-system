@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
 import { fetchLandPlotById, submitSiteVisitBooking } from '../services/landService'
+import { isLoggedIn } from '../services/authService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 import { useAlert } from '../context/AlertContext'
@@ -28,11 +29,11 @@ const errorStyle = {
 export default function LandDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
-  
+
   const [plot, setPlot] = useState(null)
   const [loading, setLoading] = useState(true)
   const [activeImage, setActiveImage] = useState(0)
-  
+
   // Booking Form State
   const [formData, setFormData] = useState({
     name: '', email: '', phone: '', date: '', visitors: 1, notes: ''
@@ -45,6 +46,23 @@ export default function LandDetailPage() {
 
   const contentRef = useRef(null)
   const formRef = useRef(null)
+
+  // Pre-fill user data if logged in
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem('user')
+      if (storedUser) {
+        const user = JSON.parse(storedUser)
+        setFormData(prev => ({
+          ...prev,
+          name: user.fullName || user.name || prev.name || '',
+          email: user.email || prev.email || '',
+        }))
+      }
+    } catch (err) {
+      console.error('Failed to parse logged in user data:', err)
+    }
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -87,7 +105,7 @@ export default function LandDetailPage() {
       errors.date = 'Date must be in the future'
     }
     if (formData.visitors < 1) errors.visitors = 'At least 1 visitor required'
-    
+
     setFormErrors(errors)
     return Object.keys(errors).length === 0
   }
@@ -95,7 +113,17 @@ export default function LandDetailPage() {
   const handleBookingSubmit = async (e) => {
     e.preventDefault()
     if (!validateForm()) return
-    
+
+    if (!isLoggedIn()) {
+      showAlert({
+        type: 'warning',
+        title: 'Login Required',
+        message: 'Please log in to your account to reserve a land site visit.',
+      })
+      navigate('/login', { state: { from: `/land/${id}` } })
+      return
+    }
+
     setBookingStatus('submitting')
     try {
       const res = await submitSiteVisitBooking({ ...formData, plotId: plot.id })
@@ -107,7 +135,7 @@ export default function LandDetailPage() {
       showAlert({
         type: 'error',
         title: 'Booking failed',
-        message: 'Failed to submit booking. Please check your connection or log in.',
+        message: err?.response?.data?.message || 'Failed to submit booking. Please check your connection or log in.',
       })
     }
   }
@@ -137,7 +165,7 @@ export default function LandDetailPage() {
   }
 
   const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
       case 'Available': return '#10B981';
       case 'Reserved': return '#C9A84C';
       case 'Under Survey': return '#3B82F6';
@@ -151,7 +179,7 @@ export default function LandDetailPage() {
       <Navbar visible={true} />
 
       <main ref={contentRef} style={{ maxWidth: '1200px', margin: '0 auto', padding: '10rem 6vw 6rem', opacity: 1 }}>
-        
+
         {/* Back Link */}
         <div style={{ marginBottom: '3rem' }}>
           <button
@@ -170,7 +198,7 @@ export default function LandDetailPage() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '4rem' }}>
-          
+
           {/* Left Col: Images */}
           <div>
             <div style={{
@@ -189,7 +217,7 @@ export default function LandDetailPage() {
                   No Image Available
                 </div>
               )}
-              
+
               <div style={{
                 position: 'absolute', top: '1rem', left: '1rem',
                 padding: '0.35rem 0.65rem',
@@ -318,7 +346,7 @@ export default function LandDetailPage() {
       {/* Booking Form Section */}
       <section ref={formRef} style={{ background: '#07070A', padding: '6rem 6vw', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          
+
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
             <span style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.3em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.5rem' }}>
               Schedule Inspection
@@ -352,11 +380,11 @@ export default function LandDetailPage() {
             <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               <div>
                 <label style={labelStyle}>Full Name</label>
-                <input 
-                  type="text" 
-                  value={formData.name} 
-                  onChange={e => setFormData({...formData, name: e.target.value})} 
-                  style={{ ...inputStyle, borderColor: formErrors.name ? '#EF4444' : 'rgba(255,255,255,0.1)' }} 
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  style={{ ...inputStyle, borderColor: formErrors.name ? '#EF4444' : 'rgba(255,255,255,0.1)' }}
                   onFocus={e => !formErrors.name && (e.target.style.borderColor = 'rgba(201,168,76,0.45)')}
                   onBlur={e => !formErrors.name && (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                 />
@@ -366,11 +394,11 @@ export default function LandDetailPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
                 <div>
                   <label style={labelStyle}>Email Address</label>
-                  <input 
-                    type="email" 
-                    value={formData.email} 
-                    onChange={e => setFormData({...formData, email: e.target.value})} 
-                    style={{ ...inputStyle, borderColor: formErrors.email ? '#EF4444' : 'rgba(255,255,255,0.1)' }} 
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    style={{ ...inputStyle, borderColor: formErrors.email ? '#EF4444' : 'rgba(255,255,255,0.1)' }}
                     onFocus={e => !formErrors.email && (e.target.style.borderColor = 'rgba(201,168,76,0.45)')}
                     onBlur={e => !formErrors.email && (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
@@ -378,11 +406,11 @@ export default function LandDetailPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Phone Number (Optional)</label>
-                  <input 
-                    type="tel" 
-                    value={formData.phone} 
-                    onChange={e => setFormData({...formData, phone: e.target.value})} 
-                    style={inputStyle} 
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    style={inputStyle}
                     onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.45)'}
                     onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                   />
@@ -394,15 +422,15 @@ export default function LandDetailPage() {
                 <div>
                   <label style={labelStyle}>Preferred Date</label>
                   {/* Defaulting to a simple HTML date input styled to match */}
-                  <input 
-                    type="date" 
-                    value={formData.date} 
-                    onChange={e => setFormData({...formData, date: e.target.value})} 
-                    style={{ 
-                      ...inputStyle, 
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={e => setFormData({ ...formData, date: e.target.value })}
+                    style={{
+                      ...inputStyle,
                       colorScheme: 'dark', // Helps render calendar icon well in dark mode on some browsers
-                      borderColor: formErrors.date ? '#EF4444' : 'rgba(255,255,255,0.1)' 
-                    }} 
+                      borderColor: formErrors.date ? '#EF4444' : 'rgba(255,255,255,0.1)'
+                    }}
                     onFocus={e => !formErrors.date && (e.target.style.borderColor = 'rgba(201,168,76,0.45)')}
                     onBlur={e => !formErrors.date && (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
@@ -410,12 +438,12 @@ export default function LandDetailPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Number of Visitors</label>
-                  <input 
-                    type="number" 
+                  <input
+                    type="number"
                     min="1"
-                    value={formData.visitors} 
-                    onChange={e => setFormData({...formData, visitors: parseInt(e.target.value) || ''})} 
-                    style={{ ...inputStyle, borderColor: formErrors.visitors ? '#EF4444' : 'rgba(255,255,255,0.1)' }} 
+                    value={formData.visitors}
+                    onChange={e => setFormData({ ...formData, visitors: parseInt(e.target.value) || '' })}
+                    style={{ ...inputStyle, borderColor: formErrors.visitors ? '#EF4444' : 'rgba(255,255,255,0.1)' }}
                     onFocus={e => !formErrors.visitors && (e.target.style.borderColor = 'rgba(201,168,76,0.45)')}
                     onBlur={e => !formErrors.visitors && (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                   />
@@ -425,11 +453,11 @@ export default function LandDetailPage() {
 
               <div>
                 <label style={labelStyle}>Notes / Requirements (Optional)</label>
-                <textarea 
+                <textarea
                   rows="4"
-                  value={formData.notes} 
-                  onChange={e => setFormData({...formData, notes: e.target.value})} 
-                  style={{ ...inputStyle, resize: 'vertical' }} 
+                  value={formData.notes}
+                  onChange={e => setFormData({ ...formData, notes: e.target.value })}
+                  style={{ ...inputStyle, resize: 'vertical' }}
                   onFocus={e => e.target.style.borderColor = 'rgba(201,168,76,0.45)'}
                   onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
                 ></textarea>
@@ -446,8 +474,8 @@ export default function LandDetailPage() {
                   transition: 'opacity 0.2s', marginTop: '1rem',
                   opacity: bookingStatus === 'submitting' ? 0.7 : 1
                 }}
-                onMouseEnter={e => { if(bookingStatus !== 'submitting') e.currentTarget.style.opacity = 0.9 }}
-                onMouseLeave={e => { if(bookingStatus !== 'submitting') e.currentTarget.style.opacity = 1 }}
+                onMouseEnter={e => { if (bookingStatus !== 'submitting') e.currentTarget.style.opacity = 0.9 }}
+                onMouseLeave={e => { if (bookingStatus !== 'submitting') e.currentTarget.style.opacity = 1 }}
               >
                 {bookingStatus === 'submitting' ? 'Submitting...' : 'Confirm Request'}
               </button>

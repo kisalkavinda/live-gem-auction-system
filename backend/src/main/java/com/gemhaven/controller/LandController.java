@@ -67,6 +67,9 @@ public class LandController {
             @RequestBody Booking booking,
             @AuthenticationPrincipal User authenticatedUser
     ) {
+        if (authenticatedUser == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(landService.submitBooking(id, booking, authenticatedUser));
     }
