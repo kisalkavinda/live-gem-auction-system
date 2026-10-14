@@ -112,6 +112,37 @@ class BiddingServiceTest {
         verify(bidRepository, never()).save(any());
     }
 
+    // ─── Test 2b: First bid can start at base starting price ─────────────────
+
+    @Test
+    void testFirstBidStartingAtBasePriceIsAccepted() {
+        // No bids placed yet: currentBid is null, startingPrice = 90
+        auction.setCurrentBid(null);
+        when(auctionRepository.findByIdWithPessimisticLock(1L)).thenReturn(Optional.of(auction));
+
+        Bid result = biddingService.placeNewBid(bidderA, 1L, new BigDecimal("90"));
+
+        assertThat(result).isNotNull();
+        assertThat(auction.getCurrentBid()).isEqualByComparingTo("90");
+        assertThat(auction.getHighestBidderId()).isEqualTo(bidderA.getId());
+        verify(bidRepository).save(any(Bid.class));
+        verify(auctionRepository).save(auction);
+    }
+
+    @Test
+    void testFirstBidBelowStartingPriceIsRejected() {
+        // No bids placed yet: currentBid is null, startingPrice = 90, submitting 85
+        auction.setCurrentBid(null);
+        when(auctionRepository.findByIdWithPessimisticLock(1L)).thenReturn(Optional.of(auction));
+
+        assertThatThrownBy(() -> biddingService.placeNewBid(bidderA, 1L, new BigDecimal("85")))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("starting price");
+
+        assertThat(auction.getCurrentBid()).isNull();
+        verify(bidRepository, never()).save(any());
+    }
+
     // ─── Test 3: Bid on non-LIVE auction is rejected ──────────────────────────
 
     @Test

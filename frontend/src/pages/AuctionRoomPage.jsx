@@ -36,6 +36,7 @@ export default function AuctionRoomPage() {
   const {
     auction,
     currentBid,
+    hasBids,
     bidHistory,
     timeRemaining,
     connectionStatus,
@@ -178,7 +179,7 @@ export default function AuctionRoomPage() {
     </div>
   );
 
-  const minNextBid = currentBid + auction.minIncrement;
+  const minNextBid = hasBids ? (currentBid + auction.minIncrement) : auction.startingPrice;
   const status = getAuctionStatus(auction);
   const isUpcoming = status === 'UPCOMING';
   const isLive = status === 'LIVE';
@@ -413,7 +414,7 @@ export default function AuctionRoomPage() {
             {/* Current Bid Display */}
             <div className="detail-row" style={{ padding: '1.5rem 0', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
               <div style={{ fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>
-                {isFinished ? 'Winning Bid' : 'Current Highest Bid'}
+                {isFinished ? 'Winning Bid' : (hasBids ? 'Current Highest Bid' : 'Starting Price')}
               </div>
               <div style={{
                 fontFamily: "'Cormorant Garamond', serif",
@@ -528,7 +529,7 @@ export default function AuctionRoomPage() {
                           key={inc}
                           type="button"
                           onClick={() => {
-                            const base = parseInt(bidAmountStr, 10) || currentBid;
+                            const base = parseInt(bidAmountStr, 10) || minNextBid;
                             setBidAmountStr(String(base + inc));
                           }}
                           style={{
@@ -569,7 +570,7 @@ export default function AuctionRoomPage() {
                     </div>
 
                     <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', marginTop: '0.75rem', letterSpacing: '0.05em' }}>
-                      Minimum next bid: <span style={{ color: '#C9A84C' }}>{LKR(minNextBid)}</span>
+                      {hasBids ? 'Minimum next bid: ' : 'Minimum starting bid: '}<span style={{ color: '#C9A84C' }}>{LKR(minNextBid)}</span>
                     </div>
                   </div>
                 </form>

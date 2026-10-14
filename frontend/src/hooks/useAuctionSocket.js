@@ -6,6 +6,7 @@ import apiClient from '../services/apiClient';
 export function useAuctionSocket(auctionId) {
   const [auction, setAuction] = useState(null);
   const [currentBid, setCurrentBid] = useState(0);
+  const [hasBids, setHasBids] = useState(false);
   const [bidHistory, setBidHistory] = useState([]);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState('CONNECTING');
@@ -47,6 +48,8 @@ export function useAuctionSocket(auctionId) {
         if (!isMounted) return;
         
         const bids = historyRes.data.content || [];
+        const hasExistingBids = Boolean(data.currentBid != null || bids.length > 0);
+        setHasBids(hasExistingBids);
         
         const mappedHistory = bids.map(b => ({
           id: b.id?.toString() || Math.random().toString(36).substr(2, 9),
@@ -125,6 +128,7 @@ export function useAuctionSocket(auctionId) {
           if (update.type === 'BID_PLACED') {
              latestBidderName.current = update.bidder || 'Bidder';
              setCurrentBid(update.currentBid);
+             setHasBids(true);
              
              // If endTime was extended, update the local auction state
              if (update.endTime) {
@@ -231,8 +235,17 @@ export function useAuctionSocket(auctionId) {
       return { success: false, message: 'Auction is not active or connection lost.' };
     }
     
-    if (amount < currentBid + (auction?.minIncrement || 0)) {
-      return { success: false, message: `Bid must be at least LKR ${(currentBid + (auction?.minIncrement || 0)).toLocaleString('en-LK')}` };
+    const minRequired = hasBids 
+      ? (currentBid + (auction?.minIncrement || 0)) 
+      : (auction?.startingPrice || 0);
+
+    if (amount < minRequired) {
+      return { 
+        success: false, 
+        message: hasBids 
+          ? `Bid must be at least LKR ${minRequired.toLocaleString('en-LK')}` 
+          : `Starting bid must be at least LKR ${minRequired.toLocaleString('en-LK')}` 
+      };
     }
 
     // Send bid to backend via STOMP
@@ -242,11 +255,12 @@ export function useAuctionSocket(auctionId) {
     });
     
     return { success: true };
-  }, [auctionId, currentBid, auction, connectionStatus]);
+  }, [auctionId, currentBid, auction, connectionStatus, hasBids]);
 
   return {
     auction,
     currentBid,
+    hasBids,
     bidHistory,
     timeRemaining,
     connectionStatus,

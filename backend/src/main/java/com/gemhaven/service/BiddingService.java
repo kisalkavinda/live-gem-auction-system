@@ -74,7 +74,7 @@ public class BiddingService {
      * Flow:
      * 1. Acquire lock
      * 2. Validate status == LIVE
-     * 3. Validate bid >= currentBid (or startingPrice if no bids) + minIncrement
+     * 3. Validate bid >= startingPrice (if no bids) or currentBid + minIncrement (for subsequent bids)
      * 4. Store previousHighestBidderId
      * 5. Update auction.currentBid + highestBidderId
      * 6. Save Bid row
@@ -83,7 +83,7 @@ public class BiddingService {
      * 9. Publish after-commit event (broadcast happens outside transaction)
      *
      * @throws IllegalStateException   if the auction is not LIVE
-     * @throws IllegalArgumentException if the bid does not meet the minimum increment
+     * @throws IllegalArgumentException if the bid does not meet the minimum increment or starting price
      */
     @Transactional
     public Bid placeNewBid(User user, Long auctionId, BigDecimal bidAmount) {
@@ -95,14 +95,17 @@ public class BiddingService {
             throw new IllegalStateException("Auction is not live");
         }
 
-        // Step 3 — validate minimum increment
-        BigDecimal baseline = auction.getCurrentBid() != null
-                ? auction.getCurrentBid()
-                : auction.getStartingPrice();
-        BigDecimal minRequired = baseline.add(auction.getMinIncrement());
-
-        if (bidAmount.compareTo(minRequired) < 0) {
-            throw new IllegalArgumentException("Bid does not meet minimum increment");
+        // Step 3 — validate minimum required bid
+        if (auction.getCurrentBid() != null) {
+            BigDecimal minRequired = auction.getCurrentBid().add(auction.getMinIncrement());
+            if (bidAmount.compareTo(minRequired) < 0) {
+                throw new IllegalArgumentException("Bid does not meet minimum increment");
+            }
+        } else {
+            BigDecimal minRequired = auction.getStartingPrice();
+            if (bidAmount.compareTo(minRequired) < 0) {
+                throw new IllegalArgumentException("Bid must be at least the starting price");
+            }
         }
 
         // Step 4 — remember previous highest bidder before overwriting
