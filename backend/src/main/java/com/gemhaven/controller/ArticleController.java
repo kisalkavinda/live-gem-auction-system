@@ -19,13 +19,20 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
-    /** GET /api/articles?category=&featured= */
+    /** GET /api/articles?category=&featured=&search= */
     @GetMapping
     public ResponseEntity<List<Article>> getAll(
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) Boolean featured
+            @RequestParam(required = false) Boolean featured,
+            @RequestParam(required = false) String search
     ) {
-        return ResponseEntity.ok(articleService.getAll(category, featured));
+        return ResponseEntity.ok(articleService.getAll(category, featured, search));
+    }
+
+    /** GET /api/articles/id/{id} */
+    @GetMapping("/id/{id}")
+    public ResponseEntity<Article> getById(@PathVariable Long id) {
+        return ResponseEntity.ok(articleService.getById(id));
     }
 
     /** GET /api/articles/{slug} */

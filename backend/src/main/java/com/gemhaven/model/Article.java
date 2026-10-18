@@ -95,5 +95,41 @@ public class Article {
     public String getContentBlocks() { return contentBlocks; }
     public void setContentBlocks(String contentBlocks) { this.contentBlocks = contentBlocks; }
 
+    @Transient
+    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
+    @com.fasterxml.jackson.annotation.JsonProperty("content")
+    public Object getContent() {
+        if (contentBlocks == null || contentBlocks.isBlank()) {
+            return java.util.Collections.emptyList();
+        }
+        try {
+            return MAPPER.readTree(contentBlocks);
+        } catch (Exception e) {
+            throw new IllegalStateException("Stored article content is invalid JSON.", e);
+        }
+    }
+
+    public void setContent(Object content) {
+        if (content != null) {
+            try {
+                if (content instanceof String str) {
+                    this.contentBlocks = str;
+                } else {
+                    this.contentBlocks = MAPPER.writeValueAsString(content);
+                }
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Article content must be valid JSON.", e);
+            }
+        }
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        if (publishedDate == null) {
+            publishedDate = LocalDate.now();
+        }
+    }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
 }
