@@ -192,7 +192,7 @@ export default function CartPage() {
                   <div
                     style={{
                       height: 120,
-                      background: `radial-gradient(ellipse at center, ${item.color}30, rgba(5,5,8,0.95))`,
+                      background: 'radial-gradient(ellipse at center, rgba(201,168,76,0.12), rgba(5,5,8,0.95))',
                       overflow: 'hidden',
                       display: 'flex',
                       alignItems: 'center',
@@ -214,7 +214,7 @@ export default function CartPage() {
                         style={{
                           width: 60,
                           height: 60,
-                          background: `linear-gradient(135deg, ${item.color}CC, ${item.color}44)`,
+                          background: 'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.35))',
                           clipPath:
                             'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
                         }}
@@ -225,7 +225,7 @@ export default function CartPage() {
                   <div>
                     <div
                       style={{
-                        color: item.color,
+                        color: '#C9A84C',
                         fontSize: '0.58rem',
                         letterSpacing: '0.18em',
                         textTransform: 'uppercase',

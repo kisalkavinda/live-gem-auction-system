@@ -19,7 +19,6 @@ import {
 import Preloader from './components/Preloader'
 import Navbar from './components/Navbar'
 import TunnelScrollHero from './components/TunnelScrollHero'
-import GemHistory from './components/GemHistory'
 import FeaturesSection from './components/FeaturesSection'
 import AuctionsSection from './components/AuctionsSection'
 import HowItWorks from './components/HowItWorks'
@@ -104,8 +103,6 @@ function LandingPage() {
         />
 
         <TunnelScrollHero />
-
-        <GemHistory />
 
         <FeaturesSection />
 

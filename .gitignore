@@ -13,3 +13,5 @@ backend/.mvn/
 .DS_Store
 node_modules/
 frontend/public/tunnel-frames
+*.sqlite
+git_script.ps1

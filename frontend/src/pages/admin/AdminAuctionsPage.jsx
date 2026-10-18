@@ -219,7 +219,7 @@ export default function AdminAuctionsPage() {
           auctions.map(auction => (
             <div key={auction.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 2fr 1.5fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
               <div style={{ color: '#fff', fontWeight: 500 }}>{auction.gemstone?.name || 'Unknown Gem'}</div>
-              <div>${(auction.currentBid || auction.startingPrice)?.toLocaleString()}</div>
+              <div>LKR {(auction.currentBid || auction.startingPrice)?.toLocaleString('en-LK')}</div>
               <div>
                 {getStatusBadge(auction.status?.charAt(0).toUpperCase() + auction.status?.slice(1).toLowerCase())}
                 {auction.status?.toUpperCase() === 'ENDED' && auction.highestBidderId && (
@@ -315,7 +315,7 @@ export default function AdminAuctionsPage() {
                 <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Select Gemstone</label>
                 <select required disabled={!!editingAuctionId} value={formData.gemId} onChange={e => setFormData({...formData, gemId: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px', opacity: editingAuctionId ? 0.6 : 1 }}>
                   {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED' || g.id === Number(formData.gemId)).map(g => (
-                    <option key={g.id} value={g.id} style={{ background: '#050508' }}>{g.name} - ${g.price?.toLocaleString()}</option>
+                    <option key={g.id} value={g.id} style={{ background: '#050508' }}>{g.name} - LKR {g.price?.toLocaleString('en-LK')}</option>
                   ))}
                   {gems.filter(g => g.status?.toUpperCase() === 'PUBLISHED' || g.id === Number(formData.gemId)).length === 0 && (
                     <option value="" disabled style={{ background: '#050508' }}>No available gems.</option>
@@ -325,11 +325,11 @@ export default function AdminAuctionsPage() {
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Starting Bid ($)</label>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Starting Bid (LKR)</label>
                   <input required type="number" value={formData.startingBid} onChange={e => setFormData({...formData, startingBid: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Min Increment ($)</label>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Min Increment (LKR)</label>
                   <input required type="number" value={formData.minIncrement} onChange={e => setFormData({...formData, minIncrement: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
                 </div>
               </div>

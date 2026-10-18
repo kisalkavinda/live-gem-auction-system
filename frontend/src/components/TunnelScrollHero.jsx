@@ -2,13 +2,13 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap, ScrollTrigger } from '../utils/gsap'
 
-const TOTAL_FRAMES = 120
-const INITIAL_BATCH = 20
+const TOTAL_FRAMES = 70
+const INITIAL_BATCH = 18
 const CURTAIN_END = 0.20
 
 const STATS = [
   { num: '1,240+', label: 'Gems Auctioned' },
-  { num: '$4.2M',  label: 'Total Volume' },
+  { num: 'LKR 4.2M', label: 'Total Volume' },
   { num: '380+',   label: 'Verified Buyers' },
   { num: '100%',   label: 'GIA Certified' },
 ]
@@ -40,7 +40,6 @@ export default function TunnelScrollHero() {
   const scrollCueWrapRef = useRef(null)
 
   const tunnelWrapRef  = useRef(null)
-  const overlayRef     = useRef(null)
   const bridgeTextRef  = useRef(null)
   const scrollHintRef  = useRef(null)
 
@@ -269,16 +268,13 @@ export default function TunnelScrollHero() {
       // TUNNEL: welcome text — emerges from tunnel depth (z-approach, no y shift)
       gsap.set(bridgeTextRef.current, { transformOrigin: '50% 50%' })
       tl.fromTo(bridgeTextRef.current,
-        { opacity: 0, scale: 0.06, filter: 'blur(12px)' },
-        { opacity: 1, scale: 1,    filter: 'blur(0px)',  duration: 0.22, ease: 'power2.out' },
+        { opacity: 0, scale: 0.08, filter: 'blur(10px)' },
+        { opacity: 1, scale: 1,    filter: 'blur(0px)',  duration: 0.35, ease: 'power2.out' },
         0.24)
-      // exit: user walks past — text blooms huge and fades (passed through it)
+      // exit: user walks past as you arrive in the mine — text zooms past and smoothly dissolves right as the next section enters
       tl.to(bridgeTextRef.current,
-        { opacity: 0, scale: 2.4, filter: 'blur(10px)', duration: 0.14, ease: 'power2.in' },
-        0.58)
-
-      // Exit fade to black
-      tl.to(overlayRef.current, { opacity: 0.9, duration: 0.15 }, 0.85)
+        { opacity: 0, scale: 2.2, filter: 'blur(8px)', duration: 0.25, ease: 'power2.in' },
+        0.75)
 
       ScrollTrigger.create({
         trigger: pin,
@@ -291,7 +287,7 @@ export default function TunnelScrollHero() {
   }, [])
 
   return (
-    <div ref={containerRef} style={{ position: 'relative', height: '700vh' }}>
+    <div ref={containerRef} style={{ position: 'relative', height: '220vh' }}>
       <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden' }}>
 
         {/* ── ATMOSPHERIC BACKGROUND ── */}
@@ -343,12 +339,6 @@ export default function TunnelScrollHero() {
           }} />
         </div>
 
-        {/* Exit overlay */}
-        <div ref={overlayRef} style={{
-          position: 'absolute', inset: 0,
-          background: '#040110', opacity: 0,
-          pointerEvents: 'none', zIndex: 8,
-        }} />
 
         {/* Bridge text — Welcome reveal */}
         <div ref={bridgeTextRef} style={{

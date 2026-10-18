@@ -98,7 +98,7 @@ function GemCard({ gem, index }) {
         transition: 'border-color 0.3s',
       }}
       onMouseEnter={e => {
-        e.currentTarget.style.borderColor = `${gem.color}60`
+        e.currentTarget.style.borderColor = 'rgba(201, 168, 76, 0.45)'
         const img = e.currentTarget.querySelector('.gem-card-bg-img')
         if (img) img.style.transform = 'scale(1.1)'
       }}
@@ -111,12 +111,12 @@ function GemCard({ gem, index }) {
       {/* Gem visual */}
       <div style={{
         height: '220px',
-        background: `radial-gradient(ellipse at 50% 50%, ${gem.color}15, rgba(5,5,8,1))`,
+        background: 'radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.1), rgba(5,5,8,1))',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        borderBottom: `1px solid ${gem.color}20`,
+        borderBottom: '1px solid rgba(201,168,76,0.15)',
         overflow: 'hidden'
       }}>
         {/* Gem Image or Fallback */}
@@ -149,9 +149,9 @@ function GemCard({ gem, index }) {
           <div style={{
             width: 80,
             height: 80,
-            background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}44)`,
+            background: 'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.35))',
             clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-            boxShadow: `0 0 40px ${gem.color}60, inset 0 0 20px rgba(255,255,255,0.1)`,
+            boxShadow: '0 0 36px rgba(201,168,76,0.3), inset 0 0 18px rgba(255,255,255,0.15)',
             animation: 'gemFloat 3s ease-in-out infinite',
             animationDelay: `${index * 0.5}s`,
           }} />
@@ -211,7 +211,7 @@ function GemCard({ gem, index }) {
           fontSize: '0.6rem',
           letterSpacing: '0.2em',
           textTransform: 'uppercase',
-          color: gem.color,
+          color: '#C9A84C',
           marginBottom: '0.4rem',
         }}>
           {gem.colorName}
@@ -258,7 +258,7 @@ function GemCard({ gem, index }) {
                 color: '#fff',
                 fontWeight: 600,
               }}>
-                ${gem.currentBid.toLocaleString()}
+                LKR {gem.currentBid.toLocaleString('en-LK')}
               </div>
             </div>
           </div>
@@ -274,19 +274,39 @@ function GemCard({ gem, index }) {
         style={{
           width: '100%',
           padding: '0.7rem',
-          background: isLive ? `linear-gradient(135deg, ${gem.color}CC, ${gem.color}88)` : 'rgba(255,255,255,0.05)',
-          border: `1px solid ${isLive ? gem.color + '60' : 'rgba(255,255,255,0.1)'}`,
+          background: isLive
+            ? 'linear-gradient(135deg, #C9A84C, #A68329)'
+            : 'linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04))',
+          border: `1px solid ${isLive ? '#C9A84C' : 'rgba(201,168,76,0.3)'}`,
           borderRadius: '2px',
-          color: '#fff',
+          color: isLive ? '#0A0A0D' : '#E8D5A3',
           fontSize: '0.7rem',
           letterSpacing: '0.12em',
           textTransform: 'uppercase',
           cursor: 'pointer',
-          fontWeight: 600,
-          transition: 'opacity 0.3s',
+          fontWeight: 700,
+          transition: 'all 0.25s',
         }}
-        onMouseEnter={e => e.currentTarget.style.opacity = '0.75'}
-        onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        onMouseEnter={e => {
+          if (isLive) {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #E8D5A3, #C9A84C)';
+            e.currentTarget.style.transform = 'translateY(-1px)';
+          } else {
+            e.currentTarget.style.borderColor = '#C9A84C';
+            e.currentTarget.style.background = 'rgba(201,168,76,0.18)';
+            e.currentTarget.style.color = '#fff';
+          }
+        }}
+        onMouseLeave={e => {
+          if (isLive) {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #C9A84C, #A68329)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          } else {
+            e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)';
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04))';
+            e.currentTarget.style.color = '#E8D5A3';
+          }
+        }}
         >
           {isLive ? 'Place Bid' : 'View Details'}
         </button>

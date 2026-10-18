@@ -183,9 +183,7 @@ export default function AdminReservationsPage() {
             {filteredReservations.length > 0 ? (
               filteredReservations.map(res => {
                 const badge = getStatusBadgeStyle(res.status)
-                const formattedPrice = res.totalAmount
-                  ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(res.totalAmount)
-                  : '$' + (res.gemstone?.price || 0).toLocaleString()
+                const formattedPrice = 'LKR ' + Number(res.totalAmount || res.gemstone?.price || 0).toLocaleString('en-LK')
 
                 return (
                   <tr key={res.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.2s' }}>
@@ -367,9 +365,7 @@ export default function AdminReservationsPage() {
               <div>
                 <div style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Total Reservation Amount</div>
                 <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', color: '#C9A84C', fontWeight: 600 }}>
-                  {selectedReservation.totalAmount
-                    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(selectedReservation.totalAmount)
-                    : '$' + (selectedReservation.gemstone?.price || 0).toLocaleString()}
+                  {'LKR ' + Number(selectedReservation.totalAmount || selectedReservation.gemstone?.price || 0).toLocaleString('en-LK')}
                 </div>
               </div>
 

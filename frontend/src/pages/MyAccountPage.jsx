@@ -142,7 +142,7 @@ export default function MyAccountPage() {
                   <div key={bid.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
                     <div style={{ color: '#fff', fontWeight: 500 }}>{bid.gemName}</div>
                     <div>{bid.date}</div>
-                    <div>${bid.amount.toLocaleString()}</div>
+                    <div>LKR {bid.amount.toLocaleString('en-LK')}</div>
                     <div style={{ textAlign: 'right' }}>{getStatusBadge(bid.status)}</div>
                   </div>
                 ))}
@@ -163,7 +163,7 @@ export default function MyAccountPage() {
                   <div key={purchase.id} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr', padding: '1rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: '0.85rem', color: 'rgba(255,255,255,0.65)', alignItems: 'center' }}>
                     <div style={{ color: '#fff', fontWeight: 500 }}>{purchase.gemName}</div>
                     <div>{purchase.date}</div>
-                    <div>${purchase.amount.toLocaleString()}</div>
+                    <div>LKR {purchase.amount.toLocaleString('en-LK')}</div>
                     <div style={{ textAlign: 'right' }}>{getStatusBadge(purchase.status)}</div>
                   </div>
                 ))}

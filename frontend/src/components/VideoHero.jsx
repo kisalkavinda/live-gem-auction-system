@@ -222,7 +222,7 @@ export default function VideoHero({ videoRef }) {
           }}>
             {[
               { num: '1,240+', label: 'Gems Auctioned' },
-              { num: '$4.2M', label: 'Total Volume' },
+              { num: 'LKR 4.2M', label: 'Total Volume' },
               { num: '380+', label: 'Verified Buyers' },
               { num: '100%', label: 'GIA Certified' },
             ].map(({ num, label }) => (

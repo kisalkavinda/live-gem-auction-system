@@ -169,7 +169,7 @@ function GemCard({ gem, index }) {
         transition: 'border-color 0.3s',
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = `${gem.color}60`
+        e.currentTarget.style.borderColor = 'rgba(201, 168, 76, 0.45)'
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor =
@@ -180,12 +180,12 @@ function GemCard({ gem, index }) {
       <div
         style={{
           height: 180,
-          background: `radial-gradient(ellipse at 38% 38%, ${gem.color}35, rgba(5,5,8,0.92))`,
+          background: 'radial-gradient(ellipse at 50% 40%, rgba(201, 168, 76, 0.12) 0%, rgba(5, 5, 8, 0.95) 75%)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           position: 'relative',
-          borderBottom: `1px solid ${gem.color}20`,
+          borderBottom: '1px solid rgba(201, 168, 76, 0.15)',
         }}
       >
         {/* Gem Image */}
@@ -207,10 +207,10 @@ function GemCard({ gem, index }) {
             style={{
               width: 76,
               height: 76,
-              background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}44)`,
+              background: 'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.35))',
               clipPath:
                 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-              boxShadow: `0 0 36px ${gem.color}55, inset 0 0 18px rgba(255,255,255,0.1)`,
+              boxShadow: '0 0 32px rgba(201,168,76,0.3), inset 0 0 16px rgba(255,255,255,0.2)',
               animation: 'gemFloat 3s ease-in-out infinite',
               animationDelay: `${index * 0.4}s`,
             }}
@@ -224,8 +224,8 @@ function GemCard({ gem, index }) {
             top: '0.75rem',
             left: '0.75rem',
             padding: '0.25rem 0.55rem',
-            background: `${gem.color}18`,
-            border: `1px solid ${gem.color}40`,
+            background: 'rgba(201, 168, 76, 0.08)',
+            border: '1px solid rgba(201, 168, 76, 0.25)',
             borderRadius: '2px',
             backdropFilter: 'blur(8px)',
           }}
@@ -235,7 +235,7 @@ function GemCard({ gem, index }) {
               fontSize: '0.58rem',
               letterSpacing: '0.18em',
               textTransform: 'uppercase',
-              color: gem.color,
+              color: '#C9A84C',
             }}
           >
             {gem.type}
@@ -275,7 +275,7 @@ function GemCard({ gem, index }) {
             fontSize: '0.58rem',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            color: gem.color,
+            color: '#C9A84C',
             marginBottom: '0.35rem',
           }}
         >
@@ -369,23 +369,27 @@ function GemCard({ gem, index }) {
           style={{
             width: '100%',
             padding: '0.65rem',
-            background: `linear-gradient(135deg, ${gem.color}CC, ${gem.color}77)`,
-            border: `1px solid ${gem.color}55`,
+            background: 'linear-gradient(135deg, rgba(201, 168, 76, 0.16), rgba(201, 168, 76, 0.05))',
+            border: '1px solid rgba(201, 168, 76, 0.4)',
             borderRadius: '2px',
-            color: '#fff',
+            color: '#E8D5A3',
             fontSize: '0.65rem',
             letterSpacing: '0.12em',
             textTransform: 'uppercase',
             cursor: 'pointer',
             fontWeight: 600,
-            transition: 'opacity 0.25s, transform 0.25s',
+            transition: 'all 0.25s',
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.opacity = '0.75'
+            e.currentTarget.style.background = 'linear-gradient(135deg, #C9A84C, #E8D5A3)'
+            e.currentTarget.style.color = '#0A0A0D'
+            e.currentTarget.style.borderColor = '#C9A84C'
             e.currentTarget.style.transform = 'translateY(-1px)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.opacity = '1'
+            e.currentTarget.style.background = 'linear-gradient(135deg, rgba(201, 168, 76, 0.16), rgba(201, 168, 76, 0.05))'
+            e.currentTarget.style.color = '#E8D5A3'
+            e.currentTarget.style.borderColor = 'rgba(201, 168, 76, 0.4)'
             e.currentTarget.style.transform = 'translateY(0)'
           }}
         >

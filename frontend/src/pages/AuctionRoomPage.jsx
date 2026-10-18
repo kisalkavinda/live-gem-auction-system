@@ -254,8 +254,8 @@ export default function AuctionRoomPage() {
           <div ref={gemVisualRef}>
             {/* Main gem display */}
             <div style={{
-              background: `radial-gradient(ellipse at 38% 35%, ${auction.color}30, rgba(5,5,8,0.95))`,
-              border: `1px solid ${auction.color}25`,
+              background: 'radial-gradient(ellipse at 50% 35%, rgba(201,168,76,0.12) 0%, rgba(5,5,8,0.95) 75%)',
+              border: '1px solid rgba(201,168,76,0.2)',
               borderRadius: '4px',
               aspectRatio: '1',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -265,7 +265,7 @@ export default function AuctionRoomPage() {
             }}>
               <div style={{
                 position: 'absolute', inset: 0,
-                background: `radial-gradient(ellipse at 40% 40%, ${auction.color}15 0%, transparent 65%)`,
+                background: 'radial-gradient(ellipse at 40% 40%, rgba(201,168,76,0.06) 0%, transparent 65%)',
                 pointerEvents: 'none',
               }} />
 
@@ -284,9 +284,9 @@ export default function AuctionRoomPage() {
                 <div style={{
                   position: 'relative', zIndex: 1,
                   width: 200, height: 200,
-                  background: `linear-gradient(135deg, ${auction.color}DD, ${auction.color}55)`,
+                  background: 'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.4))',
                   clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-                  boxShadow: `0 0 80px ${auction.color}55, 0 0 160px ${auction.color}22, inset 0 0 40px rgba(255,255,255,0.12)`,
+                  boxShadow: '0 0 80px rgba(201,168,76,0.35), inset 0 0 30px rgba(255,255,255,0.15)',
                   animation: 'gemFloat 4s ease-in-out infinite',
                 }} />
               )}
@@ -306,11 +306,11 @@ export default function AuctionRoomPage() {
               <div style={{
                 position: 'absolute', top: '1rem', left: '1rem',
                 padding: '0.35rem 0.7rem',
-                background: `${auction.color}18`,
-                border: `1px solid ${auction.color}40`,
+                background: 'rgba(201,168,76,0.08)',
+                border: '1px solid rgba(201,168,76,0.25)',
                 borderRadius: '2px', backdropFilter: 'blur(12px)',
               }}>
-                <span style={{ fontSize: '0.58rem', letterSpacing: '0.15em', color: auction.color }}>
+                <span style={{ fontSize: '0.58rem', letterSpacing: '0.15em', color: '#C9A84C' }}>
                   {auction.type}
                 </span>
               </div>
@@ -320,7 +320,7 @@ export default function AuctionRoomPage() {
             <div style={{ marginBottom: '2rem' }}>
               <div style={{
                 fontSize: '0.6rem', letterSpacing: '0.25em', textTransform: 'uppercase',
-                color: auction.color, marginBottom: '0.5rem'
+                color: '#C9A84C', marginBottom: '0.5rem'
               }}>
                 {auction.colorName}
               </div>

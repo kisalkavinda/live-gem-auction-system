@@ -11,8 +11,8 @@ export default function AdminOverviewPage() {
   const totalBuyers = stats?.totalBuyers !== undefined ? stats.totalBuyers : buyers.length
   
   const formattedRevenue = stats?.revenueThisMonth 
-    ? new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(stats.revenueThisMonth)
-    : '$0'
+    ? 'LKR ' + Number(stats.revenueThisMonth).toLocaleString('en-LK')
+    : 'LKR 0'
 
   return (
     <DashboardLayout role="admin">
@@ -96,7 +96,7 @@ export default function AdminOverviewPage() {
                 <div>{new Date(activity.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</div>
                 
                 {activity.type === 'BID' ? (
-                  <div>New bid placed: <span style={{ color: '#fff' }}>${activity.amount}</span> on Auction #{activity.auctionId}</div>
+                  <div>New bid placed: <span style={{ color: '#fff' }}>LKR {Number(activity.amount || 0).toLocaleString('en-LK')}</span> on Auction #{activity.auctionId}</div>
                 ) : (
                   <div>{activity.type}</div>
                 )}

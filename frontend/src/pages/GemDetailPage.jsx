@@ -478,10 +478,9 @@ export default function GemDetailPage() {
           >
             <div
               style={{
-                background: `radial-gradient(ellipse at 38% 35%, ${
-                  gem.color
-                }30, rgba(5,5,8,0.95))`,
-                border: `1px solid ${gem.color}25`,
+                background:
+                  'radial-gradient(ellipse at 50% 35%, rgba(201,168,76,0.12) 0%, rgba(5,5,8,0.95) 75%)',
+                border: '1px solid rgba(201,168,76,0.2)',
                 borderRadius: '4px',
                 aspectRatio: '1',
                 display: 'flex',
@@ -497,7 +496,8 @@ export default function GemDetailPage() {
                   position:
                     'absolute',
                   inset: 0,
-                  background: `radial-gradient(ellipse at 40% 40%, ${gem.color}15 0%, transparent 65%)`,
+                  background:
+                    'radial-gradient(ellipse at 40% 40%, rgba(201,168,76,0.06) 0%, transparent 65%)',
                   pointerEvents:
                     'none',
                 }}
@@ -525,10 +525,11 @@ export default function GemDetailPage() {
                     zIndex: 1,
                     width: 200,
                     height: 200,
-                    background: `linear-gradient(135deg, ${gem.color}DD, ${gem.color}55)`,
+                    background:
+                      'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.4))',
                     clipPath:
                       'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-                    boxShadow: `0 0 80px ${gem.color}55`,
+                    boxShadow: '0 0 80px rgba(201,168,76,0.35)',
                     animation:
                       'gemFloat 4s ease-in-out infinite',
                   }}
@@ -575,8 +576,8 @@ export default function GemDetailPage() {
                   left: '1rem',
                   padding:
                     '0.35rem 0.7rem',
-                  background: `${gem.color}18`,
-                  border: `1px solid ${gem.color}40`,
+                  background: 'rgba(201,168,76,0.08)',
+                  border: '1px solid rgba(201,168,76,0.25)',
                   borderRadius: '2px',
                   backdropFilter:
                     'blur(12px)',
@@ -589,8 +590,7 @@ export default function GemDetailPage() {
                       '0.58rem',
                     letterSpacing:
                       '0.15em',
-                    color:
-                      gem.color,
+                    color: '#C9A84C',
                   }}
                 >
                   {gem.type}
@@ -666,8 +666,7 @@ export default function GemDetailPage() {
                     '0.25em',
                   textTransform:
                     'uppercase',
-                  color:
-                    gem.color,
+                  color: '#C9A84C',
                 }}
               >
                 {gem.colorName}

@@ -118,16 +118,16 @@ function AuctionCard({ auction, index }) {
         display: 'flex',
         flexDirection: 'column'
       }}
-      onMouseEnter={e => e.currentTarget.style.borderColor = `${auction.color}60`}
+      onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(201, 168, 76, 0.45)'}
       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}
     >
       {/* Gem visual */}
       <div style={{
         height: 180,
-        background: `radial-gradient(ellipse at 38% 38%, ${auction.color}35, rgba(5,5,8,0.92))`,
+        background: 'radial-gradient(ellipse at 50% 40%, rgba(201, 168, 76, 0.12) 0%, rgba(5, 5, 8, 0.95) 75%)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative',
-        borderBottom: `1px solid ${auction.color}20`,
+        borderBottom: '1px solid rgba(201, 168, 76, 0.15)',
       }}>
         {auction.imageUrl ? (
           <img
@@ -143,9 +143,9 @@ function AuctionCard({ auction, index }) {
         ) : (
           <div style={{
             width: 76, height: 76,
-            background: `linear-gradient(135deg, ${auction.color}CC, ${auction.color}44)`,
+            background: 'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.35))',
             clipPath: 'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
-            boxShadow: `0 0 36px ${auction.color}55, inset 0 0 18px rgba(255,255,255,0.1)`,
+            boxShadow: '0 0 36px rgba(201,168,76,0.3), inset 0 0 18px rgba(255,255,255,0.15)',
             animation: 'gemFloat 3s ease-in-out infinite',
             animationDelay: `${index * 0.4}s`,
           }} />
@@ -171,7 +171,7 @@ function AuctionCard({ auction, index }) {
 
       {/* Info */}
       <div style={{ padding: '1.25rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: auction.color, marginBottom: '0.35rem' }}>
+        <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#C9A84C', marginBottom: '0.35rem' }}>
           {auction.colorName}
         </div>
         <h3 style={{
@@ -207,26 +207,33 @@ function AuctionCard({ auction, index }) {
             onClick={e => { e.stopPropagation(); navigate(`/auctions/${auction.id}`); }}
             style={{
               width: '100%', padding: '0.75rem',
-              background: auction.status === 'LIVE' ? `linear-gradient(135deg, ${auction.color}CC, ${auction.color}77)` : 'transparent',
-              border: `1px solid ${auction.status === 'LIVE' ? `${auction.color}55` : 'rgba(255,255,255,0.15)'}`,
-              borderRadius: '2px', color: '#fff',
+              background: auction.status === 'LIVE'
+                ? 'linear-gradient(135deg, #C9A84C, #A68329)'
+                : 'linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04))',
+              border: `1px solid ${auction.status === 'LIVE' ? '#C9A84C' : 'rgba(201,168,76,0.3)'}`,
+              borderRadius: '2px',
+              color: auction.status === 'LIVE' ? '#0A0A0D' : '#E8D5A3',
               fontSize: '0.65rem', letterSpacing: '0.12em', textTransform: 'uppercase',
               cursor: 'pointer', fontWeight: 700, transition: 'all 0.25s',
             }}
             onMouseEnter={e => {
               if (auction.status === 'LIVE') {
-                e.currentTarget.style.opacity = '0.75';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #E8D5A3, #C9A84C)';
+                e.currentTarget.style.transform = 'translateY(-1px)';
               } else {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.4)';
-                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.borderColor = '#C9A84C';
+                e.currentTarget.style.background = 'rgba(201,168,76,0.18)';
+                e.currentTarget.style.color = '#fff';
               }
             }}
             onMouseLeave={e => {
               if (auction.status === 'LIVE') {
-                e.currentTarget.style.opacity = '1';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #C9A84C, #A68329)';
+                e.currentTarget.style.transform = 'translateY(0)';
               } else {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
-                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(201,168,76,0.3)';
+                e.currentTarget.style.background = 'linear-gradient(135deg, rgba(201, 168, 76, 0.12), rgba(201, 168, 76, 0.04))';
+                e.currentTarget.style.color = '#E8D5A3';
               }
             }}
               >

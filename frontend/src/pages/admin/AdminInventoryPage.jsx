@@ -222,7 +222,7 @@ export default function AdminInventoryPage() {
               <div style={{ color: '#fff', fontWeight: 500 }}>{gem.name}</div>
               <div>{gem.type}</div>
               <div>{gem.caratWeight || gem.carat} ct</div>
-              <div>${gem.price?.toLocaleString()}</div>
+              <div>LKR {gem.price?.toLocaleString('en-LK')}</div>
               <div>{getStatusBadge(gem.reservationStatus || gem.status || 'Draft')}</div>
               <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
                 {(gem.status !== 'PUBLISHED' && gem.status !== 'Published') && (
@@ -293,7 +293,7 @@ export default function AdminInventoryPage() {
                   <input required type="number" step="0.01" value={formData.carat} onChange={e => setFormData({...formData, carat: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
                 </div>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Price ($)</label>
+                  <label style={{ display: 'block', fontSize: '0.6rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '0.5rem' }}>Price (LKR)</label>
                   <input required type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255,255,255,0.1)', padding: '0.75rem', color: '#fff', borderRadius: '2px' }} />
                 </div>
               </div>

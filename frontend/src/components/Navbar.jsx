@@ -251,34 +251,80 @@ export default function Navbar({ visible }) {
         <div
           style={{
             display: 'flex',
-            gap: '1.5rem',
+            gap: '0.45rem',
             alignItems: 'center',
           }}
         >
-          {NAV_LINKS.map(item => (
-            <MagneticItem
-              key={item.label}
-              range={35}
-              strength={10}
-            >
-              <Link
-                to={item.to}
-                style={{
-                  display: 'inline-block',
-                  color:
-                    'rgba(232,224,208,0.65)',
-                  textDecoration: 'none',
-                  fontWeight: 500,
-                  fontSize: '0.7rem',
-                  letterSpacing: '0.08em',
-                  textTransform: 'uppercase',
-                  padding: '6px 4px',
-                }}
+          {NAV_LINKS.map(item => {
+            const isActive =
+              item.to === '/'
+                ? location.pathname === '/'
+                : location.pathname.startsWith(item.to)
+
+            return (
+              <MagneticItem
+                key={item.label}
+                range={35}
+                strength={10}
               >
-                {item.label}
-              </Link>
-            </MagneticItem>
-          ))}
+                <Link
+                  to={item.to}
+                  style={{
+                    position: 'relative',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                    color: isActive ? '#F3E5AB' : 'rgba(232,224,208,0.65)',
+                    background: isActive
+                      ? 'linear-gradient(135deg, rgba(201,168,76,0.18), rgba(201,168,76,0.06))'
+                      : 'transparent',
+                    border: isActive
+                      ? '1px solid rgba(201,168,76,0.38)'
+                      : '1px solid transparent',
+                    borderRadius: '100px',
+                    textDecoration: 'none',
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: '0.7rem',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    padding: '0.35rem 0.85rem',
+                    boxShadow: isActive
+                      ? '0 0 16px rgba(201,168,76,0.16), inset 0 0 8px rgba(201,168,76,0.08)'
+                      : 'none',
+                    transition: 'all 0.25s ease',
+                  }}
+                  onMouseEnter={e => {
+                    if (!isActive) {
+                      e.currentTarget.style.color = '#fff'
+                      e.currentTarget.style.background = 'rgba(255,255,255,0.06)'
+                      e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                    }
+                  }}
+                  onMouseLeave={e => {
+                    if (!isActive) {
+                      e.currentTarget.style.color = 'rgba(232,224,208,0.65)'
+                      e.currentTarget.style.background = 'transparent'
+                      e.currentTarget.style.borderColor = 'transparent'
+                    }
+                  }}
+                >
+                  {isActive && (
+                    <span
+                      style={{
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: '50%',
+                        background: '#C9A84C',
+                        boxShadow: '0 0 6px #C9A84C',
+                        display: 'inline-block',
+                      }}
+                    />
+                  )}
+                  {item.label}
+                </Link>
+              </MagneticItem>
+            )
+          })}
         </div>
 
         <div
@@ -290,89 +336,118 @@ export default function Navbar({ visible }) {
           }}
         >
           {/* CART */}
-          <MagneticItem
-            range={38}
-            strength={11}
-          >
-            <button
-              onClick={() => navigate('/cart')}
-              style={{
-                position: 'relative',
-                padding: '0.45rem 0.75rem',
-                border:
-                  '1px solid rgba(201,168,76,0.4)',
-                borderRadius: '100px',
-                background: 'transparent',
-                color: '#fff',
-                fontSize: '0.68rem',
-                letterSpacing: '0.08em',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              🛒 Cart
-
-              {cartCount > 0 && (
-                <span
-                  style={{
-                    position: 'absolute',
-                    top: '-8px',
-                    right: '-5px',
-                    minWidth: 18,
-                    height: 18,
-                    padding: '0 4px',
-                    borderRadius: '50%',
-                    background: '#C9A84C',
-                    color: '#0A0A0D',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '0.55rem',
-                    fontWeight: 800,
-                  }}
-                >
-                  {cartCount}
-                </span>
-              )}
-            </button>
-          </MagneticItem>
-
-          {user ? (
-            <>
+          {(() => {
+            const isCartActive = location.pathname === '/cart'
+            return (
               <MagneticItem
                 range={38}
                 strength={11}
               >
                 <button
-                  onClick={() =>
-                    navigate(
-                      user.role === 'ADMIN'
-                        ? '/admin'
-                        : '/account'
-                    )
-                  }
+                  onClick={() => navigate('/cart')}
                   style={{
-                    padding:
-                      '0.45rem 0.9rem',
-                    border:
-                      '1px solid rgba(201,168,76,0.4)',
+                    position: 'relative',
+                    padding: '0.45rem 0.85rem',
+                    border: isCartActive
+                      ? '1px solid #C9A84C'
+                      : '1px solid rgba(201,168,76,0.4)',
                     borderRadius: '100px',
-                    background: 'transparent',
-                    color:
-                      'rgba(255,255,255,0.75)',
-                    fontSize: '0.65rem',
+                    background: isCartActive
+                      ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))'
+                      : 'transparent',
+                    color: isCartActive ? '#F3E5AB' : '#fff',
+                    boxShadow: isCartActive
+                      ? '0 0 16px rgba(201,168,76,0.2)'
+                      : 'none',
+                    fontWeight: isCartActive ? 700 : 500,
+                    fontSize: '0.68rem',
                     letterSpacing: '0.08em',
-                    textTransform:
-                      'uppercase',
                     cursor: 'pointer',
                     whiteSpace: 'nowrap',
+                    transition: 'all 0.25s ease',
                   }}
                 >
-                  {user.role === 'ADMIN'
-                    ? 'Dashboard'
-                    : 'My Account'}
+                  🛒 Cart
+
+                  {cartCount > 0 && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-8px',
+                        right: '-5px',
+                        minWidth: 18,
+                        height: 18,
+                        padding: '0 4px',
+                        borderRadius: '50%',
+                        background: '#C9A84C',
+                        color: '#0A0A0D',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '0.55rem',
+                        fontWeight: 800,
+                      }}
+                    >
+                      {cartCount}
+                    </span>
+                  )}
                 </button>
               </MagneticItem>
+            )
+          })()}
+
+          {user ? (
+            <>
+              {(() => {
+                const isAccountActive =
+                  location.pathname.startsWith('/admin') ||
+                  location.pathname.startsWith('/account')
+                return (
+                  <MagneticItem
+                    range={38}
+                    strength={11}
+                  >
+                    <button
+                      onClick={() =>
+                        navigate(
+                          user.role === 'ADMIN'
+                            ? '/admin'
+                            : '/account'
+                        )
+                      }
+                      style={{
+                        padding:
+                          '0.45rem 0.9rem',
+                        border: isAccountActive
+                          ? '1px solid #C9A84C'
+                          : '1px solid rgba(201,168,76,0.4)',
+                        borderRadius: '100px',
+                        background: isAccountActive
+                          ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))'
+                          : 'transparent',
+                        color: isAccountActive
+                          ? '#F3E5AB'
+                          : 'rgba(255,255,255,0.75)',
+                        boxShadow: isAccountActive
+                          ? '0 0 16px rgba(201,168,76,0.2)'
+                          : 'none',
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.08em',
+                        textTransform:
+                          'uppercase',
+                        fontWeight: isAccountActive ? 700 : 500,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        transition: 'all 0.25s ease',
+                      }}
+                    >
+                      {user.role === 'ADMIN'
+                        ? 'Dashboard'
+                        : 'My Account'}
+                    </button>
+                  </MagneticItem>
+                )
+              })()}
 
               <MagneticItem
                 range={38}
@@ -403,33 +478,47 @@ export default function Navbar({ visible }) {
             </>
           ) : (
             <>
-              <MagneticItem
-                range={38}
-                strength={11}
-              >
-                <button
-                  onClick={() =>
-                    navigate('/login')
-                  }
-                  style={{
-                    padding:
-                      '0.45rem 0.9rem',
-                    border:
-                      '1px solid rgba(201,168,76,0.4)',
-                    borderRadius: '100px',
-                    background: 'transparent',
-                    color:
-                      'rgba(255,255,255,0.75)',
-                    fontSize: '0.65rem',
-                    letterSpacing: '0.08em',
-                    textTransform:
-                      'uppercase',
-                    cursor: 'pointer',
-                  }}
-                >
-                  Log In
-                </button>
-              </MagneticItem>
+              {(() => {
+                const isLoginActive = location.pathname === '/login'
+                return (
+                  <MagneticItem
+                    range={38}
+                    strength={11}
+                  >
+                    <button
+                      onClick={() =>
+                        navigate('/login')
+                      }
+                      style={{
+                        padding:
+                          '0.45rem 0.9rem',
+                        border: isLoginActive
+                          ? '1px solid #C9A84C'
+                          : '1px solid rgba(201,168,76,0.4)',
+                        borderRadius: '100px',
+                        background: isLoginActive
+                          ? 'linear-gradient(135deg, rgba(201,168,76,0.22), rgba(201,168,76,0.08))'
+                          : 'transparent',
+                        color: isLoginActive
+                          ? '#F3E5AB'
+                          : 'rgba(255,255,255,0.75)',
+                        boxShadow: isLoginActive
+                          ? '0 0 16px rgba(201,168,76,0.2)'
+                          : 'none',
+                        fontSize: '0.65rem',
+                        letterSpacing: '0.08em',
+                        textTransform:
+                          'uppercase',
+                        fontWeight: isLoginActive ? 700 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.25s ease',
+                      }}
+                    >
+                      Log In
+                    </button>
+                  </MagneticItem>
+                )
+              })()}
 
               <MagneticItem
                 range={38}

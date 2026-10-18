@@ -810,13 +810,7 @@ showAlert({
                                 width: 48,
                                 height: 48,
                                 background:
-                                  `linear-gradient(135deg, ${
-                                    item.color ||
-                                    '#C9A84C'
-                                  }CC, ${
-                                    item.color ||
-                                    '#C9A84C'
-                                  }44)`,
+                                  'linear-gradient(135deg, rgba(201,168,76,0.9), rgba(201,168,76,0.35))',
                                 clipPath:
                                   'polygon(50% 0%, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 15% 85%, 0% 50%, 15% 15%)',
                               }}
