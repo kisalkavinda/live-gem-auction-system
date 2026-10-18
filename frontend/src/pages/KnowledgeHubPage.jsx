@@ -348,6 +348,11 @@ export default function KnowledgeHubPage() {
   const [showSavedOnly, setShowSavedOnly] = useState(false)
   const [loadError, setLoadError] = useState('')
 
+  const handleCategoryClick = (cat) => {
+    setCategoryFilter(cat)
+    setShowSavedOnly(false)
+  }
+
   const load = useCallback(async () => {
     setLoading(true)
     setLoadError('')
@@ -356,25 +361,20 @@ export default function KnowledgeHubPage() {
         category: !showSavedOnly && categoryFilter !== 'All' ? categoryFilter : undefined,
       }
       const data = await fetchArticles(filters)
-      setArticles(showSavedOnly
-        ? data.filter(article => savedIds.includes(String(article.id)))
-        : data)
+      setArticles(data)
     } catch (error) {
       console.error('Failed to load Knowledge Hub articles:', error)
       setLoadError('Articles are temporarily unavailable. Please try again.')
     } finally {
       setLoading(false)
     }
-  }, [categoryFilter, savedIds, showSavedOnly])
+  }, [categoryFilter, showSavedOnly])
 
   useEffect(() => { load() }, [load])
 
   const handleToggleSave = (id) => {
     const nextIds = toggleSavedArticle(id)
     setSavedIds(nextIds)
-    if (showSavedOnly && !nextIds.includes(String(id))) {
-      setArticles(current => current.filter(article => String(article.id) !== String(id)))
-    }
   }
 
   useEffect(() => {
@@ -385,8 +385,16 @@ export default function KnowledgeHubPage() {
     )
   }, [])
 
-  const featuredArticle = categoryFilter === 'All' ? articles.find(a => a.featured) : null
-  const standardArticles = featuredArticle ? articles.filter(a => a.id !== featuredArticle.id) : articles
+  const displayedArticles = showSavedOnly
+    ? articles.filter(article => savedIds.includes(String(article.id)))
+    : articles
+
+  const featuredArticle = (!showSavedOnly && categoryFilter === 'All')
+    ? displayedArticles.find(a => a.featured)
+    : null
+  const standardArticles = featuredArticle
+    ? displayedArticles.filter(a => a.id !== featuredArticle.id)
+    : displayedArticles
 
   return (
     <div style={{ background: '#050508', minHeight: '100vh', color: '#fff' }}>
@@ -433,11 +441,11 @@ export default function KnowledgeHubPage() {
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: '2rem', overflowX: 'auto', padding: '1.25rem 0', scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch' }}>
             {CATEGORIES.map(cat => {
-              const active = categoryFilter === cat
+              const active = !showSavedOnly && categoryFilter === cat
               return (
                 <button
                   key={cat}
-                  onClick={() => setCategoryFilter(cat)}
+                  onClick={() => handleCategoryClick(cat)}
                   style={{
                     background: 'transparent', border: 'none', padding: 0,
                     fontSize: '0.65rem', letterSpacing: '0.15em', textTransform: 'uppercase',
@@ -461,7 +469,7 @@ export default function KnowledgeHubPage() {
             <button
               type="button"
               aria-pressed={showSavedOnly}
-              onClick={() => setShowSavedOnly(current => !current)}
+              onClick={() => setShowSavedOnly(prev => !prev)}
               style={{
                 background: 'transparent',
                 border: 'none',
@@ -472,9 +480,20 @@ export default function KnowledgeHubPage() {
                 color: showSavedOnly ? '#C9A84C' : 'rgba(255,255,255,0.4)',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
+                position: 'relative',
+                transition: 'color 0.2s',
+                fontWeight: showSavedOnly ? 600 : 400,
               }}
+              onMouseEnter={e => { if (!showSavedOnly) e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { if (!showSavedOnly) e.currentTarget.style.color = 'rgba(255,255,255,0.4)' }}
             >
               Saved ({savedIds.length})
+              {showSavedOnly && (
+                <div style={{
+                  position: 'absolute', bottom: '-1.3rem', left: 0, right: 0,
+                  height: '2px', background: '#C9A84C'
+                }} />
+              )}
             </button>
           </div>
         </div>
@@ -508,7 +527,7 @@ export default function KnowledgeHubPage() {
                   Retry
                 </button>
               </div>
-            ) : articles.length === 0 ? (
+            ) : displayedArticles.length === 0 ? (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 0' }}>
                 <div style={{ fontSize: '2rem', marginBottom: '1rem', opacity: 0.18 }}>◆</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontWeight: 300, color: 'rgba(255,255,255,0.3)' }}>
