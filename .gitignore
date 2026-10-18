@@ -8,8 +8,8 @@ backend/.mvn/
 *.class
 
 # IDEs & System
-.vscode/
 .idea/
 .DS_Store
 node_modules/
 frontend/public/tunnel-frames
+config.bat

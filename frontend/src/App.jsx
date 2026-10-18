@@ -63,6 +63,7 @@ import AdminAuctionsPage from './pages/admin/AdminAuctionsPage'
 import AdminLandPage from './pages/admin/AdminLandPage'
 import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 import AdminReservationsPage from './pages/admin/AdminReservationsPage'
+import AdminArticlesPage from './pages/admin/AdminArticlesPage'
 
 
 import ProtectedRoute from './components/ProtectedRoute'
@@ -363,6 +364,15 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdminReservationsPage />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/articles"
+        element={
+          <ProtectedRoute>
+            <AdminArticlesPage />
           </ProtectedRoute>
         }
       />
