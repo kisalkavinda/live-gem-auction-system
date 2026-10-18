@@ -30,7 +30,6 @@ import static org.mockito.Mockito.*;
  * Uses Mockito — no Spring context loaded, no real DB.
  */
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("null")
 class BiddingServiceTest {
 
     @Mock private BidRepository bidRepository;
@@ -128,7 +127,7 @@ class BiddingServiceTest {
 
     @Test
     void testBidOnClosedAuctionIsRejected() {
-        auction.setStatus(Auction.AuctionStatus.ENDED);
+        auction.setStatus(Auction.AuctionStatus.CLOSED);
         when(auctionRepository.findByIdWithPessimisticLock(1L)).thenReturn(Optional.of(auction));
 
         assertThatThrownBy(() -> biddingService.placeNewBid(bidderA, 1L, new BigDecimal("110")))

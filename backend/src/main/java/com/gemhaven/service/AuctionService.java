@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.nio.charset.StandardCharsets;
 
 @Service
 @SuppressWarnings("null")
@@ -73,8 +72,8 @@ public class AuctionService {
         LocalDateTime now = LocalDateTime.now();
 
         // Validate startTime
-        if (req.getStartTime().isBefore(now.minusMinutes(30))) {
-            throw new IllegalArgumentException("startTime must be in the future (or now, up to 30 mins ago)");
+        if (req.getStartTime().isBefore(now.minusSeconds(5))) {
+            throw new IllegalArgumentException("startTime must be in the future (or now)");
         }
 
         // Validate endTime > startTime
@@ -143,7 +142,7 @@ public class AuctionService {
     }
 
     /**
-     * Deletes an auction. Allowed for SCHEDULED or ENDED auctions.
+     * Deletes an auction. Only allowed while status = SCHEDULED.
      * Reverts gemstone.status back to PUBLISHED so it can be relisted.
      */
     @Transactional
@@ -151,12 +150,9 @@ public class AuctionService {
         Auction auction = auctionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + id));
 
-        if (auction.getStatus() == Auction.AuctionStatus.LIVE) {
-            throw new IllegalStateException("LIVE auctions cannot be deleted. End them early instead.");
+        if (auction.getStatus() != Auction.AuctionStatus.SCHEDULED) {
+            throw new IllegalStateException("Only SCHEDULED auctions can be deleted.");
         }
-
-        // Delete all bids for this auction first to prevent foreign key constraint violations
-        bidRepository.deleteByAuctionId(id);
 
         // Revert gem back to PUBLISHED so it can be relisted
         Gemstone gem = auction.getGemstone();
@@ -221,36 +217,5 @@ public class AuctionService {
                 auction.getHighestBidderId(),
                 message
         );
-    }
-
-    /**
-     * Generates a CSV log of an auction and all its bids.
-     */
-    public byte[] exportAuctionLog(Long auctionId) {
-        Auction auction = auctionRepository.findById(auctionId)
-                .orElseThrow(() -> new IllegalArgumentException("Auction not found: " + auctionId));
-
-        List<Bid> bids = bidRepository.findByAuction_IdOrderByTimestampDesc(auctionId, Pageable.unpaged()).getContent();
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Auction ID,").append(auction.getId()).append("\n");
-        sb.append("Gemstone,").append(auction.getGemstone().getName().replace(",", " ")).append("\n");
-        sb.append("Status,").append(auction.getStatus()).append("\n");
-        sb.append("Start Time,").append(auction.getStartTime()).append("\n");
-        sb.append("End Time,").append(auction.getEndTime()).append("\n");
-        sb.append("Winning Bid,").append(auction.getCurrentBid() != null ? auction.getCurrentBid() : "None").append("\n");
-        sb.append("Winner ID,").append(auction.getHighestBidderId() != null ? auction.getHighestBidderId() : "None").append("\n");
-        sb.append("\n");
-
-        sb.append("Bid ID,User ID,User Email,Amount,Timestamp\n");
-        for (Bid b : bids) {
-            sb.append(b.getId()).append(",")
-              .append(b.getUser().getId()).append(",")
-              .append(b.getUser().getEmail()).append(",")
-              .append(b.getAmount()).append(",")
-              .append(b.getTimestamp() != null ? b.getTimestamp() : "N/A").append("\n");
-        }
-
-        return sb.toString().getBytes(StandardCharsets.UTF_8);
     }
 }

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import DashboardLayout from '../../components/DashboardLayout'
 import { useDashboard } from '../../context/DashboardContext'
 import { useAlert } from '../../context/AlertContext'
-import { createAuction, deleteAuction, endAuctionEarly, updateAuction, exportAuctionLog } from '../../services/adminService'
+import { createAuction, deleteAuction, endAuctionEarly, updateAuction } from '../../services/adminService'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import ConfirmModal from '../../components/ConfirmModal'
@@ -95,7 +95,7 @@ export default function AdminAuctionsPage() {
       showAlert({
         type: 'error',
         title: 'Validation Error',
-        message: err.response?.data?.message || `Error details: ${err.message}. Response: ${JSON.stringify(err.response?.data || {})}`
+        message: err.response?.data?.message || 'Failed to create auction. Please check your inputs.'
       })
     } finally {
       setIsSubmitting(false)
@@ -242,24 +242,6 @@ export default function AdminAuctionsPage() {
                 >
                   View Room
                 </button>
-                {auction.status?.toUpperCase() === 'ENDED' && (
-                  <button
-                    onClick={async () => {
-                      try {
-                        await exportAuctionLog(auction.id);
-                        showAlert({ type: 'success', title: 'Success', message: 'Auction log downloaded.' });
-                      } catch (err) {
-                        showAlert({ type: 'error', title: 'Error', message: 'Failed to download auction log.' });
-                      }
-                    }}
-                    style={{
-                      background: 'transparent', border: '1px solid rgba(255,255,255,0.3)', borderRadius: '2px', color: '#fff',
-                      padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
-                    }}
-                  >
-                    Download Log
-                  </button>
-                )}
                 {auction.status?.toUpperCase() === 'SCHEDULED' && (
                   <button
                     onClick={() => openEditModal(auction)}
@@ -282,17 +264,15 @@ export default function AdminAuctionsPage() {
                     End Early
                   </button>
                 )}
-                {auction.status?.toUpperCase() === 'SCHEDULED' && (
-                  <button
-                    onClick={() => handleDeleteClick(auction)}
-                    style={{
-                      background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '2px', color: '#EF4444',
-                      padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
-                    }}
-                  >
-                    Delete
-                  </button>
-                )}
+                <button
+                  onClick={() => handleDeleteClick(auction)}
+                  style={{
+                    background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '2px', color: '#EF4444',
+                    padding: '0.4rem 0.75rem', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer',
+                  }}
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))
@@ -347,7 +327,6 @@ export default function AdminAuctionsPage() {
                     dateFormat="MMMM d, yyyy h:mm aa"
                     className="custom-datepicker"
                     required
-                    minDate={new Date()}
                     placeholderText="Select start date & time"
                   />
                 </div>
@@ -363,7 +342,6 @@ export default function AdminAuctionsPage() {
                     dateFormat="MMMM d, yyyy h:mm aa"
                     className="custom-datepicker"
                     required
-                    minDate={new Date()}
                     placeholderText="Select end date & time"
                   />
                 </div>

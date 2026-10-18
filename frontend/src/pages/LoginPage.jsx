@@ -45,11 +45,6 @@ export default function LoginPage() {
   ] = useState(false)
 
   const [
-    showPassword,
-    setShowPassword,
-  ] = useState(false)
-
-  const [
     error,
     setError,
   ] = useState('')
@@ -63,6 +58,7 @@ export default function LoginPage() {
       e.preventDefault()
 
       setError('')
+
       if (!email.trim()) {
         setError(
           'Please enter your email.'
@@ -251,7 +247,7 @@ export default function LoginPage() {
                   '0.7rem',
               }}
             >
-              ◆ THENNAKOON GEMS
+              ◆ GemHaven
             </div>
 
             <h1
@@ -392,65 +388,39 @@ export default function LoginPage() {
                 Password
               </span>
 
-              <div style={{ position: 'relative' }}>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={
-                    password
-                  }
-                  onChange={e =>
-                    setPassword(
-                      e.target.value
-                    )
-                  }
-                  placeholder="Enter your password"
-                  autoComplete="current-password"
-                  style={{
-                    width:
-                      '100%',
-                    boxSizing:
-                      'border-box',
-                    padding:
-                      '0.85rem 3rem 0.85rem 0.85rem',
-                    background:
-                      'rgba(255,255,255,0.025)',
-                    border:
-                      '1px solid rgba(255,255,255,0.1)',
-                    color:
-                      '#fff',
-                    outline:
-                      'none',
-                    borderRadius:
-                      '2px',
-                    fontSize:
-                      '0.75rem',
-                  }}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  style={{
-                    position: 'absolute',
-                    right: '1rem',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    background: 'none',
-                    border: 'none',
-                    color: 'rgba(255,255,255,0.4)',
-                    cursor: 'pointer',
-                    fontSize: '0.62rem',
-                    letterSpacing: '0.12em',
-                    textTransform: 'uppercase',
-                    padding: '4px',
-                    transition: 'color 0.2s',
-                    fontWeight: 600,
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.color = '#C9A84C'}
-                  onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.4)'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
+              <input
+                type="password"
+                value={
+                  password
+                }
+                onChange={e =>
+                  setPassword(
+                    e.target.value
+                  )
+                }
+                placeholder="Enter your password"
+                autoComplete="current-password"
+                style={{
+                  width:
+                    '100%',
+                  boxSizing:
+                    'border-box',
+                  padding:
+                    '0.85rem',
+                  background:
+                    'rgba(255,255,255,0.025)',
+                  border:
+                    '1px solid rgba(255,255,255,0.1)',
+                  color:
+                    '#fff',
+                  outline:
+                    'none',
+                  borderRadius:
+                    '2px',
+                  fontSize:
+                    '0.75rem',
+                }}
+              />
             </label>
 
             {/* ERROR */}
