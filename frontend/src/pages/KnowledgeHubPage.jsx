@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchArticles } from '../data/mockArticles'
+import {
+  fetchArticles,
+  getSavedArticleIds,
+  toggleSavedArticle
+} from '../services/articleService'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -36,7 +40,7 @@ function SkeletonCard({ spanTwo = false }) {
 }
 
 // ─── Article card ────────────────────────────────────────────────────────────────
-function ArticleCard({ article, index, spanTwo = false }) {
+function ArticleCard({ article, index, spanTwo = false, isSaved = false, onToggleSave }) {
   const cardRef = useRef(null)
   const glowRef = useRef(null)
   const imgRef = useRef(null)
@@ -207,6 +211,32 @@ function ArticleCard({ article, index, spanTwo = false }) {
         }}
       />
 
+      <button
+        type="button"
+        aria-label={isSaved ? `Remove ${article.title} from saved articles` : `Save ${article.title} for later`}
+        aria-pressed={isSaved}
+        onClick={event => {
+          event.stopPropagation()
+          onToggleSave(article.id)
+        }}
+        style={{
+          position: 'absolute',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 5,
+          width: '2.4rem',
+          height: '2.4rem',
+          borderRadius: '50%',
+          border: '1px solid rgba(201,168,76,0.6)',
+          color: isSaved ? '#050508' : '#E8D5A3',
+          background: isSaved ? '#C9A84C' : 'rgba(5,5,8,0.78)',
+          cursor: 'pointer',
+          fontSize: '1rem',
+        }}
+      >
+        {isSaved ? '◆' : '◇'}
+      </button>
+
       {/* Visual */}
       <div style={{
         height: spanTwo ? 'auto' : 180,
@@ -314,18 +344,38 @@ export default function KnowledgeHubPage() {
   const [articles, setArticles] = useState([])
   const [loading, setLoading] = useState(true)
   const [categoryFilter, setCategoryFilter] = useState('All')
+  const [savedIds, setSavedIds] = useState(getSavedArticleIds)
+  const [showSavedOnly, setShowSavedOnly] = useState(false)
+  const [loadError, setLoadError] = useState('')
 
   const load = useCallback(async () => {
     setLoading(true)
-    const filters = {
-      category: categoryFilter !== 'All' ? categoryFilter : undefined,
+    setLoadError('')
+    try {
+      const filters = {
+        category: !showSavedOnly && categoryFilter !== 'All' ? categoryFilter : undefined,
+      }
+      const data = await fetchArticles(filters)
+      setArticles(showSavedOnly
+        ? data.filter(article => savedIds.includes(String(article.id)))
+        : data)
+    } catch (error) {
+      console.error('Failed to load Knowledge Hub articles:', error)
+      setLoadError('Articles are temporarily unavailable. Please try again.')
+    } finally {
+      setLoading(false)
     }
-    const data = await fetchArticles(filters)
-    setArticles(data)
-    setLoading(false)
-  }, [categoryFilter])
+  }, [categoryFilter, savedIds, showSavedOnly])
 
   useEffect(() => { load() }, [load])
+
+  const handleToggleSave = (id) => {
+    const nextIds = toggleSavedArticle(id)
+    setSavedIds(nextIds)
+    if (showSavedOnly && !nextIds.includes(String(id))) {
+      setArticles(current => current.filter(article => String(article.id) !== String(id)))
+    }
+  }
 
   useEffect(() => {
     if (!headingRef.current) return
@@ -408,6 +458,24 @@ export default function KnowledgeHubPage() {
                 </button>
               )
             })}
+            <button
+              type="button"
+              aria-pressed={showSavedOnly}
+              onClick={() => setShowSavedOnly(current => !current)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                padding: 0,
+                fontSize: '0.65rem',
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                color: showSavedOnly ? '#C9A84C' : 'rgba(255,255,255,0.4)',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Saved ({savedIds.length})
+            </button>
           </div>
         </div>
       </section>
@@ -429,20 +497,44 @@ export default function KnowledgeHubPage() {
                 {categoryFilter === 'All' && <SkeletonCard spanTwo={true} />}
                 {Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
               </>
+            ) : loadError ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 0' }}>
+                <p style={{ color: 'rgba(255,255,255,0.55)' }}>{loadError}</p>
+                <button
+                  type="button"
+                  onClick={load}
+                  style={{ background: 'transparent', border: '1px solid #C9A84C', color: '#C9A84C', padding: '0.65rem 1rem', cursor: 'pointer' }}
+                >
+                  Retry
+                </button>
+              </div>
             ) : articles.length === 0 ? (
               <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '6rem 0' }}>
                 <div style={{ fontSize: '2rem', marginBottom: '1rem', opacity: 0.18 }}>◆</div>
                 <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.5rem', fontWeight: 300, color: 'rgba(255,255,255,0.3)' }}>
-                  No articles found for this category
+                  {showSavedOnly ? 'No saved articles yet' : 'No articles found for this category'}
                 </p>
               </div>
             ) : (
               <>
                 {featuredArticle && (
-                  <ArticleCard key={featuredArticle.id} article={featuredArticle} index={0} spanTwo={true} />
+                  <ArticleCard
+                    key={featuredArticle.id}
+                    article={featuredArticle}
+                    index={0}
+                    spanTwo={true}
+                    isSaved={savedIds.includes(String(featuredArticle.id))}
+                    onToggleSave={handleToggleSave}
+                  />
                 )}
                 {standardArticles.map((article, i) => (
-                  <ArticleCard key={article.id} article={article} index={featuredArticle ? i + 1 : i} />
+                  <ArticleCard
+                    key={article.id}
+                    article={article}
+                    index={featuredArticle ? i + 1 : i}
+                    isSaved={savedIds.includes(String(article.id))}
+                    onToggleSave={handleToggleSave}
+                  />
                 ))}
               </>
             )}

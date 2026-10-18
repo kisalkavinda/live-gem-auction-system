@@ -191,4 +191,44 @@ export async function updateReservationStatus(id, status) {
   }
 }
 
+export async function getArticles(params = {}) {
+  try {
+    const response = await apiClient.get('/articles', { params });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching admin articles:', error);
+    throw error;
+  }
+}
+
+export async function createArticle(articleData) {
+  try {
+    const response = await apiClient.post('/articles', articleData);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating article:', error);
+    throw error;
+  }
+}
+
+export async function updateArticle(id, articleData) {
+  try {
+    const response = await apiClient.put(`/articles/${id}`, articleData);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating article ${id}:`, error);
+    throw error;
+  }
+}
+
+export async function deleteArticle(id) {
+  try {
+    const response = await apiClient.delete(`/articles/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting article ${id}:`, error);
+    throw error;
+  }
+}
+
 

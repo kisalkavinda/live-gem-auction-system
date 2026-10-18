@@ -8,7 +8,8 @@ const ADMIN_LINKS = [
   { label: 'Auctions', to: '/admin/auctions' },
   { label: 'Land Listings', to: '/admin/land' },
   { label: 'Buyers', to: '/admin/buyers' },
-  { label: 'Reservations', to: '/admin/reservations' }
+  { label: 'Reservations', to: '/admin/reservations' },
+  { label: 'Articles', to: '/admin/articles' }
 ];
 
 export default function DashboardLayout({ children }) {

@@ -1,7 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { gsap } from '../utils/gsap'
-import { fetchArticleBySlug, fetchArticles } from '../data/mockArticles'
+import {
+  fetchArticleBySlug,
+  fetchArticles,
+  getSavedArticleIds,
+  toggleSavedArticle
+} from '../services/articleService'
+import { useAlert } from '../context/AlertContext'
 import Navbar from '../components/Navbar'
 import Footer from '../components/Footer'
 
@@ -90,30 +96,94 @@ function RelatedArticleCard({ article, index }) {
 export default function ArticleDetailPage() {
   const { slug } = useParams()
   const navigate = useNavigate()
+  const { showAlert } = useAlert()
   
   const [article, setArticle] = useState(null)
   const [related, setRelated] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+  const [relatedError, setRelatedError] = useState(false)
+  const [savedIds, setSavedIds] = useState(getSavedArticleIds)
+  const [progress, setProgress] = useState(0)
+  const [toastMessage, setToastMessage] = useState('')
+  const [retryCount, setRetryCount] = useState(0)
   const contentRef = useRef(null)
+  const toastTimerRef = useRef(null)
 
   useEffect(() => {
+    let active = true
     async function load() {
       setLoading(true)
-      const data = await fetchArticleBySlug(slug)
-      if (data) {
+      setLoadError('')
+      setRelatedError(false)
+      setRelated([])
+      try {
+        const data = await fetchArticleBySlug(slug)
+        if (!active) return
         setArticle(data)
-        const allArticles = await fetchArticles()
-        // Get 3 articles from the same category (or random) excluding current
-        let rel = allArticles.filter(a => a.id !== data.id && a.category === data.category)
-        if (rel.length < 3) {
-          rel = [...rel, ...allArticles.filter(a => a.id !== data.id && a.category !== data.category)]
+        setLoading(false)
+        if (data) {
+          try {
+            const allArticles = await fetchArticles()
+            if (!active) return
+            let rel = allArticles.filter(a => a.id !== data.id && a.category === data.category)
+            if (rel.length < 3) {
+              rel = [...rel, ...allArticles.filter(a => a.id !== data.id && a.category !== data.category)]
+            }
+            setRelated(rel.slice(0, 3))
+          } catch (error) {
+            console.error('Failed to load related articles:', error)
+            if (active) setRelatedError(true)
+          }
         }
-        setRelated(rel.slice(0, 3))
+      } catch (error) {
+        console.error(`Failed to load article "${slug}":`, error)
+        if (active) setLoadError('This article could not be loaded. Please try again.')
+      } finally {
+        if (active) setLoading(false)
       }
-      setLoading(false)
     }
     load()
-  }, [slug])
+    return () => { active = false }
+  }, [slug, retryCount])
+
+  useEffect(() => {
+    const updateProgress = () => {
+      const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight
+      setProgress(scrollableHeight > 0
+        ? Math.min(100, Math.max(0, (window.scrollY / scrollableHeight) * 100))
+        : 0)
+    }
+    window.addEventListener('scroll', updateProgress, { passive: true })
+    updateProgress()
+    return () => window.removeEventListener('scroll', updateProgress)
+  }, [article])
+
+  useEffect(() => () => window.clearTimeout(toastTimerRef.current), [])
+
+  const showToast = (message) => {
+    window.clearTimeout(toastTimerRef.current)
+    setToastMessage(message)
+    toastTimerRef.current = window.setTimeout(() => setToastMessage(''), 2400)
+  }
+
+  const handleToggleSave = () => {
+    const nextIds = toggleSavedArticle(article.id)
+    setSavedIds(nextIds)
+    showToast(
+      nextIds.includes(String(article.id)) ? 'Article saved for later' : 'Article removed from saved articles',
+    )
+  }
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href)
+      showToast('Article link copied to clipboard')
+    } catch (error) {
+      console.error('Could not copy the article link:', error)
+      showAlert('Could not copy the article link', 'error')
+    }
+  }
 
   useEffect(() => {
     if (!loading && article && contentRef.current) {
@@ -129,6 +199,24 @@ export default function ArticleDetailPage() {
       <div style={{ background: '#050508', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ color: 'rgba(255,255,255,0.2)', letterSpacing: '0.2em', fontSize: '0.8rem', textTransform: 'uppercase' }}>
           Loading Article...
+        </div>
+      </div>
+    )
+  }
+
+  if (loadError) {
+    return (
+      <div style={{ background: '#050508', minHeight: '100vh', color: '#fff' }}>
+        <Navbar visible={true} />
+        <div style={{ padding: '12rem 6vw', textAlign: 'center' }}>
+          <p style={{ color: 'rgba(255,255,255,0.55)' }}>{loadError}</p>
+          <button
+            type="button"
+            onClick={() => setRetryCount(value => value + 1)}
+            style={{ background: 'transparent', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.5)', padding: '0.75rem 1.25rem', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
         </div>
       </div>
     )
@@ -150,6 +238,22 @@ export default function ArticleDetailPage() {
 
   return (
     <div style={{ background: '#050508', minHeight: '100vh', color: '#fff' }}>
+      {toastMessage && (
+        <div
+          role="status"
+          style={{ position: 'fixed', right: '1.5rem', bottom: '1.5rem', zIndex: 1300, background: '#11110f', border: '1px solid rgba(201,168,76,0.55)', color: '#E8D5A3', padding: '0.85rem 1.2rem', boxShadow: '0 8px 30px rgba(0,0,0,0.45)', fontSize: '0.75rem', letterSpacing: '0.04em' }}
+        >
+          {toastMessage}
+        </div>
+      )}
+      <div
+        role="progressbar"
+        aria-label="Reading progress"
+        aria-valuenow={Math.round(progress)}
+        aria-valuemin="0"
+        aria-valuemax="100"
+        style={{ position: 'fixed', top: 0, left: 0, width: `${progress}%`, height: '3px', background: '#C9A84C', zIndex: 1200, transition: 'width 0.1s linear' }}
+      />
       <Navbar visible={true} />
 
       <main style={{ padding: '10rem 6vw 6rem' }}>
@@ -203,6 +307,23 @@ export default function ArticleDetailPage() {
               <span>·</span>
               <span>{article.readTime}</span>
             </div>
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={handleToggleSave}
+                aria-pressed={savedIds.includes(String(article.id))}
+                style={{ background: 'transparent', border: '1px solid rgba(201,168,76,0.45)', color: '#E8D5A3', padding: '0.6rem 0.9rem', cursor: 'pointer', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              >
+                {savedIds.includes(String(article.id)) ? '◆ Saved' : '◇ Save for Later'}
+              </button>
+              <button
+                type="button"
+                onClick={handleShare}
+                style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.18)', color: 'rgba(255,255,255,0.7)', padding: '0.6rem 0.9rem', cursor: 'pointer', fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}
+              >
+                Copy Link
+              </button>
+            </div>
           </header>
 
           {/* Cover Image */}
@@ -216,7 +337,7 @@ export default function ArticleDetailPage() {
 
           {/* Article Body */}
           <article style={{ display: 'flex', flexDirection: 'column', gap: '2rem', marginBottom: '6rem' }}>
-            {article.content.map((block, idx) => {
+            {(article.content || []).map((block, idx) => {
               switch (block.type) {
                 case 'paragraph':
                   return (
@@ -309,6 +430,11 @@ export default function ArticleDetailPage() {
             </div>
           </div>
         </section>
+      )}
+      {relatedError && (
+        <p style={{ background: '#07070A', margin: 0, padding: '0 6vw 2rem', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: '0.8rem' }}>
+          Related articles could not be loaded.
+        </p>
       )}
 
       <Footer />
