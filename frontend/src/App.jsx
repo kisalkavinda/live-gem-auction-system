@@ -37,7 +37,6 @@ import LandListingPage from './pages/LandListingPage'
 import LandDetailPage from './pages/LandDetailPage'
 import KnowledgeHubPage from './pages/KnowledgeHubPage'
 import ArticleDetailPage from './pages/ArticleDetailPage'
-import ContactPage from './pages/ContactPage'
 
 import RegisterPage from './pages/RegisterPage'
 import LoginPage from './pages/LoginPage'
@@ -64,20 +63,18 @@ import AdminLandPage from './pages/admin/AdminLandPage'
 import AdminBuyersPage from './pages/admin/AdminBuyersPage'
 
 
-import ProtectedRoute from './components/ProtectedRoute'
-
-
 function LandingPage() {
-  const [ready, setReady] = useState(() => {
-    return sessionStorage.getItem('gemhaven_preloader_done') === 'true'
-  })
+  const [
+    ready,
+    setReady,
+  ] = useState(false)
 
   useLenis()
 
-  const handlePreloaderDone = useCallback(() => {
-    sessionStorage.setItem('gemhaven_preloader_done', 'true')
-    setReady(true)
-  }, [])
+  const handlePreloaderDone =
+    useCallback(() => {
+      setReady(true)
+    }, [])
 
   return (
     <>
@@ -169,18 +166,14 @@ function AppRoutes() {
       <Route
         path="/shop"
         element={
-          <ProtectedRoute>
-            <ShopPage />
-          </ProtectedRoute>
+          <ShopPage />
         }
       />
 
       <Route
         path="/shop/:id"
         element={
-          <ProtectedRoute>
-            <GemDetailPage />
-          </ProtectedRoute>
+          <GemDetailPage />
         }
       />
 
@@ -189,9 +182,7 @@ function AppRoutes() {
       <Route
         path="/cart"
         element={
-          <ProtectedRoute>
-            <CartPage />
-          </ProtectedRoute>
+          <CartPage />
         }
       />
 
@@ -200,9 +191,7 @@ function AppRoutes() {
       <Route
         path="/checkout"
         element={
-          <ProtectedRoute>
-            <CheckoutPage />
-          </ProtectedRoute>
+          <CheckoutPage />
         }
       />
 
@@ -211,18 +200,14 @@ function AppRoutes() {
       <Route
         path="/auctions"
         element={
-          <ProtectedRoute>
-            <AuctionListPage />
-          </ProtectedRoute>
+          <AuctionListPage />
         }
       />
 
       <Route
         path="/auctions/:id"
         element={
-          <ProtectedRoute>
-            <AuctionRoomPage />
-          </ProtectedRoute>
+          <AuctionRoomPage />
         }
       />
 
@@ -231,18 +216,14 @@ function AppRoutes() {
       <Route
         path="/land"
         element={
-          <ProtectedRoute>
-            <LandListingPage />
-          </ProtectedRoute>
+          <LandListingPage />
         }
       />
 
       <Route
         path="/land/:id"
         element={
-          <ProtectedRoute>
-            <LandDetailPage />
-          </ProtectedRoute>
+          <LandDetailPage />
         }
       />
 
@@ -259,15 +240,6 @@ function AppRoutes() {
         path="/knowledge-hub/:slug"
         element={
           <ArticleDetailPage />
-        }
-      />
-
-      {/* CONTACT */}
-
-      <Route
-        path="/contact"
-        element={
-          <ContactPage />
         }
       />
 
@@ -304,9 +276,7 @@ function AppRoutes() {
       <Route
         path="/account"
         element={
-          <ProtectedRoute>
-            <MyAccountPage />
-          </ProtectedRoute>
+          <MyAccountPage />
         }
       />
 
@@ -315,45 +285,35 @@ function AppRoutes() {
       <Route
         path="/admin"
         element={
-          <ProtectedRoute>
-            <AdminOverviewPage />
-          </ProtectedRoute>
+          <AdminOverviewPage />
         }
       />
 
       <Route
         path="/admin/inventory"
         element={
-          <ProtectedRoute>
-            <AdminInventoryPage />
-          </ProtectedRoute>
+          <AdminInventoryPage />
         }
       />
 
       <Route
         path="/admin/auctions"
         element={
-          <ProtectedRoute>
-            <AdminAuctionsPage />
-          </ProtectedRoute>
+          <AdminAuctionsPage />
         }
       />
 
       <Route
         path="/admin/land"
         element={
-          <ProtectedRoute>
-            <AdminLandPage />
-          </ProtectedRoute>
+          <AdminLandPage />
         }
       />
 
       <Route
         path="/admin/buyers"
         element={
-          <ProtectedRoute>
-            <AdminBuyersPage />
-          </ProtectedRoute>
+          <AdminBuyersPage />
         }
       />
 
